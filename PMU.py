@@ -128,7 +128,7 @@ def dashboard(user):
             completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp.workstreams)
             report_data.append({"Employee": emp.name, "Workstreams": total_ws, "Workplans": total_wp, "Completed": completed_wp})
         df = pd.DataFrame(report_data)
-        st.dataframe(df.style.background_gradient(cmap="PuBu"))
+        st.dataframe(df)
         st.bar_chart(df.set_index("Employee")[["Workplans", "Completed"]])
 
     with tabs[3]:
