@@ -130,11 +130,11 @@ def main():
             submitted = st.form_submit_button(option)
 
             if submitted:
-                if option == "Login":
-                    if login(email, password):
-                        st.session_state.just_logged_in = True
-                        st.success("Welcome back!")
-                        st.stop()
+                if login(email, password):
+                   st.success("Welcome back!")
+                   st.experimental_set_query_params(logged_in="1")
+                   st.stop()
+
                     else:
                         st.error("Invalid credentials")
                 else:
@@ -146,9 +146,10 @@ def main():
 
     st.sidebar.title(f"Hello {user.name} 👋")
     if st.sidebar.button("Logout"):
-        st.session_state.user = None
-        st.session_state.just_logged_out = True
-        st.stop()
+      st.session_state.user = None
+      st.experimental_set_query_params(logged_out="1")
+      st.stop()
+
 
     st.subheader("📋 Add Workstream")
     with st.form("add_ws"):
