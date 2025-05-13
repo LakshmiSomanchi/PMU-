@@ -45,8 +45,8 @@ if "user" not in st.session_state:
 
 preloaded_users = [
     ("Somanchi", "rsomanchi@tns.org"),
-    ("Ranu", "rladdha@tns.org"),
-    ("Pari", "paris@tns.org"),
+    ("Ranu", "Rladdha@tns.org"),
+    ("Pari", "Paris@tns.org"),
     ("Muskan", "mkaushal@tns.org"),
     ("Rupesh", "rmukherjee@tns.org"),
     ("Shifali", "shifalis@tns.org"),
@@ -65,11 +65,11 @@ def preload_users():
 
 def dashboard(user):
     db = get_db()
-    st.markdown("<h1 style='text-align:center; color:#2e7bcf;'>🌐 Project Management & Milestone Tracker</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
 
-    st.sidebar.image("https://cdn.pixabay.com/photo/2015/01/08/18/29/startup-593341_1280.jpg", use_column_width=True)
-    st.sidebar.title(f"🎮 Welcome, {user.name}")
-    if st.sidebar.button("Logout"):
+    st.sidebar.markdown("### Logged in as")
+    st.sidebar.success(user.name)
+    if st.sidebar.button("🔓 Logout"):
         st.session_state.user = None
         st.experimental_rerun()
 
@@ -106,7 +106,8 @@ def dashboard(user):
             st.markdown(f"### 🎯 {ws.title}")
             st.markdown(f"_Description_: {ws.description}")
             for wp in ws.workplans:
-                st.markdown(f"- **{wp.title}** | 📆 {wp.deadline} | 🛠️ {wp.status}<br>{wp.details}", unsafe_allow_html=True)
+                badge = "✅" if wp.status == "Completed" else ("🟡" if wp.status == "In Progress" else "⚪")
+                st.markdown(f"- {badge} **{wp.title}** | 📆 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
 
     with tabs[1]:
         st.subheader("🌐 Team Workstreams and Plans")
@@ -175,13 +176,12 @@ def main():
     """, unsafe_allow_html=True)
 
     if not st.session_state.user:
-        st.image("https://cdn.pixabay.com/photo/2017/09/05/20/47/launch-2714291_1280.jpg", use_column_width=True)
         st.title("🔐 Login")
         db = get_db()
         all_users = db.query(Employee).all()
         emails = [u.email for u in all_users]
-        selected = st.selectbox("Select your email", emails)
-        if st.button("Continue"):
+        selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
+        if selected != "Select...":
             user = db.query(Employee).filter_by(email=selected).first()
             st.session_state.user = user
             st.experimental_rerun()
