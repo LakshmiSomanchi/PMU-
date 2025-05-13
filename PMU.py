@@ -93,8 +93,10 @@ def main():
 
     st.sidebar.title(f"Hello {user.name} 👋")
     if st.sidebar.button("Logout"):
-        st.session_state.user = None
-        st.experimental_rerun()
+      st.session_state.user = None
+      st.session_state["just_logged_out"] = True
+      st.stop()
+
 
     st.subheader("📋 Add Workstream")
     with st.form("add_ws"):
