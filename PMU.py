@@ -110,13 +110,6 @@ def main():
         </style>
     """, unsafe_allow_html=True)
 
-    if st.session_state.get("just_logged_in"):
-        st.session_state.just_logged_in = False
-        st.experimental_rerun()
-    if st.session_state.get("just_logged_out"):
-        st.session_state.just_logged_out = False
-        st.experimental_rerun()
-
     st.title("🛠️ Team Workstream & Workplan Tracker")
 
     if not st.session_state.user:
@@ -130,11 +123,10 @@ def main():
             submitted = st.form_submit_button(option)
 
             if submitted:
-                if login(email, password):
-                   st.success("Welcome back!")
-                   st.experimental_set_query_params(logged_in="1")
-                   st.stop()
-
+                if option == "Login":
+                    if login(email, password):
+                        st.success("Welcome back!")
+                        st.stop()
                     else:
                         st.error("Invalid credentials")
                 else:
@@ -146,10 +138,8 @@ def main():
 
     st.sidebar.title(f"Hello {user.name} 👋")
     if st.sidebar.button("Logout"):
-      st.session_state.user = None
-      st.experimental_set_query_params(logged_out="1")
-      st.stop()
-
+        st.session_state.user = None
+        st.stop()
 
     st.subheader("📋 Add Workstream")
     with st.form("add_ws"):
@@ -188,7 +178,7 @@ def main():
                 db.delete(ws)
                 db.commit()
                 st.success("Deleted")
-                st.experimental_rerun()
+                st.stop()
 
 if __name__ == "__main__":
     main()
