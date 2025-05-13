@@ -64,38 +64,17 @@ def register(name, email, password):
     db.commit()
     st.success("Registered successfully. You can login now.")
 
-def main():
-    st.title("🛠️ Team Workstream & Workplan Tracker")
-    
-    if not st.session_state.user:
-        st.subheader("Login or Register")
-        option = st.selectbox("Choose", ["Login", "Register"])
-
-        with st.form(key="auth"):
-            name = st.text_input("Name (register only)") if option == "Register" else ""
-            email = st.text_input("Email")
-            password = st.text_input("Password", type="password")
-            submitted = st.form_submit_button(option)
-
-            if submitted:
-                if option == "Login":
-                    if login(email, password):
-                        st.success(f"Welcome back!")
-                        st.experimental_rerun()
-                    else:
-                        st.error("Invalid credentials")
-                else:
-                    register(name, email, password)
-        return
-
-    user = st.session_state.user
-    db = get_db()
+if login(email, password):
+    st.session_state.just_logged_in = True
+    st.success("Welcome back!")
+    st.stop()
 
     st.sidebar.title(f"Hello {user.name} 👋")
     if st.sidebar.button("Logout"):
-      st.session_state.user = None
-      st.session_state["just_logged_out"] = True
-      st.stop()
+       st.session_state.user = None
+       st.session_state.just_logged_out = True
+       st.stop()
+
 
 
     st.subheader("📋 Add Workstream")
