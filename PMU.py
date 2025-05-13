@@ -2,6 +2,7 @@ import streamlit as st
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 
@@ -45,8 +46,8 @@ if "user" not in st.session_state:
 
 preloaded_users = [
     ("Somanchi", "rsomanchi@tns.org"),
-    ("Ranu", "Rladdha@tns.org"),
-    ("Pari", "Paris@tns.org"),
+    ("Ranu", "rladdha@tns.org"),
+    ("Pari", "paris@tns.org"),
     ("Muskan", "mkaushal@tns.org"),
     ("Rupesh", "rmukherjee@tns.org"),
     ("Shifali", "shifalis@tns.org"),
@@ -59,9 +60,11 @@ def get_db():
 def preload_users():
     db = get_db()
     for name, email in preloaded_users:
-        if not db.query(Employee).filter_by(email=email).first():
+        try:
             db.add(Employee(name=name, email=email))
-    db.commit()
+            db.commit()
+        except IntegrityError:
+            db.rollback()
 
 def dashboard(user):
     db = get_db()
