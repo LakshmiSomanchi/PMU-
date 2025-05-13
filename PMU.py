@@ -68,7 +68,7 @@ def dashboard(user):
         st.experimental_rerun()
 
     st.title("🏆 Workstream Dashboard")
-    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "👥 User Management"])
+    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management"])
 
     with tabs[0]:
         st.subheader("🎯 Your Workstreams")
@@ -111,13 +111,25 @@ def dashboard(user):
         st.subheader("🌐 Team Workstreams and Plans")
         all_ws = db.query(WorkStream).all()
         for ws in all_ws:
-            st.markdown(f"<div style='background:#f9f9f9;padding:10px;border-left:5px solid #007acc;margin-bottom:10px;'>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:#f0f4ff;padding:10px;border-left:6px solid #1e88e5;margin-bottom:10px;'>", unsafe_allow_html=True)
             st.markdown(f"<strong>{ws.title}</strong> by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
             for wp in ws.workplans:
                 st.markdown(f"<li><b>{wp.title}</b>: {wp.details}</li>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
     with tabs[2]:
+        st.subheader("📊 Overall Progress Tracker")
+        employees = db.query(Employee).all()
+        report_data = []
+        for emp in employees:
+            total_ws = db.query(WorkStream).filter_by(employee_id=emp.id).count()
+            total_wp = sum(len(ws.workplans) for ws in emp.workstreams)
+            report_data.append({"Employee": emp.name, "Workstreams": total_ws, "Workplans": total_wp})
+        df = pd.DataFrame(report_data)
+        st.dataframe(df.style.background_gradient(cmap="Blues"))
+        st.bar_chart(df.set_index("Employee"))
+
+    with tabs[3]:
         st.subheader("👥 Admin - Manage Users")
         with st.form("add_user"):
             new_name = st.text_input("Name")
@@ -148,7 +160,7 @@ def main():
     }
     .stButton>button {
         border-radius: 8px;
-        background-color: #007acc;
+        background-color: #1e88e5;
         color: white;
         padding: 0.5rem 1.2rem;
         font-weight: bold;
