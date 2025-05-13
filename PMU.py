@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import pandas as pd
+from datetime import date
 
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
@@ -32,6 +33,8 @@ class WorkPlan(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     details = Column(Text)
+    deadline = Column(String)
+    status = Column(String, default="Not Started")
     workstream_id = Column(Integer, ForeignKey("workstreams.id"))
     workstream = relationship("WorkStream", back_populates="workplans")
 
@@ -42,8 +45,8 @@ if "user" not in st.session_state:
 
 preloaded_users = [
     ("Somanchi", "rsomanchi@tns.org"),
-    ("Ranu", "Rladdha@tns.org"),
-    ("Pari", "Paris@tns.org"),
+    ("Ranu", "rladdha@tns.org"),
+    ("Pari", "paris@tns.org"),
     ("Muskan", "mkaushal@tns.org"),
     ("Rupesh", "rmukherjee@tns.org"),
     ("Shifali", "shifalis@tns.org"),
@@ -62,16 +65,18 @@ def preload_users():
 
 def dashboard(user):
     db = get_db()
+    st.markdown("<h1 style='text-align:center; color:#2e7bcf;'>🌐 Project Management & Milestone Tracker</h1>", unsafe_allow_html=True)
+
+    st.sidebar.image("https://cdn.pixabay.com/photo/2015/01/08/18/29/startup-593341_1280.jpg", use_column_width=True)
     st.sidebar.title(f"🎮 Welcome, {user.name}")
     if st.sidebar.button("Logout"):
         st.session_state.user = None
         st.experimental_rerun()
 
-    st.title("🏆 Workstream Dashboard")
-    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "👥 User Management"])
+    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management"])
 
     with tabs[0]:
-        st.subheader("🎯 Your Workstreams")
+        st.subheader("📌 Your Activities, Targets & Progress")
         my_ws = db.query(WorkStream).filter_by(employee_id=user.id).all()
 
         with st.expander("➕ Add Workstream"):
@@ -83,95 +88,101 @@ def dashboard(user):
                     db.commit()
                     st.success("Workstream added")
 
-        with st.expander("➕ Add Workplan to Your Workstreams"):
+        with st.expander("➕ Add Workplan"):
             if my_ws:
                 ws_options = {f"{ws.title}": ws.id for ws in my_ws}
                 with st.form("add_wp"):
-                    selected_ws = st.selectbox("Select Workstream", list(ws_options.keys()))
-                    wp_title = st.text_input("Plan Title")
-                    wp_details = st.text_area("Plan Details")
-                    if st.form_submit_button("Add Plan"):
-                        db.add(WorkPlan(title=wp_title, details=wp_details, workstream_id=ws_options[selected_ws]))
+                    selected_ws = st.selectbox("Workstream", list(ws_options.keys()))
+                    wp_title = st.text_input("Title")
+                    wp_details = st.text_area("Details")
+                    wp_deadline = st.date_input("Deadline", date.today())
+                    wp_status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+                    if st.form_submit_button("Add Workplan"):
+                        db.add(WorkPlan(title=wp_title, details=wp_details, deadline=str(wp_deadline), status=wp_status, workstream_id=ws_options[selected_ws]))
                         db.commit()
                         st.success("Workplan added")
 
         for ws in my_ws:
-            st.markdown(f"#### ✅ {ws.title}")
-            st.markdown(f"{ws.description}")
+            st.markdown(f"### 🎯 {ws.title}")
+            st.markdown(f"_Description_: {ws.description}")
             for wp in ws.workplans:
-                st.markdown(f"- 🧩 **{wp.title}**: {wp.details}")
-            if st.button(f"🗑️ Delete '{ws.title}'", key=f"del-{ws.id}"):
-                db.query(WorkPlan).filter_by(workstream_id=ws.id).delete()
-                db.delete(ws)
-                db.commit()
-                st.warning("Deleted!")
-                st.stop()
+                st.markdown(f"- **{wp.title}** | 📆 {wp.deadline} | 🛠️ {wp.status}<br>{wp.details}", unsafe_allow_html=True)
 
     with tabs[1]:
         st.subheader("🌐 Team Workstreams and Plans")
         all_ws = db.query(WorkStream).all()
         for ws in all_ws:
-            st.markdown(f"<div style='background:#f9f9f9;padding:10px;border-left:5px solid #007acc;margin-bottom:10px;'>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:#f0f9ff;padding:10px;border-left:6px solid #1e88e5;margin-bottom:10px;'>", unsafe_allow_html=True)
             st.markdown(f"<strong>{ws.title}</strong> by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
             for wp in ws.workplans:
-                st.markdown(f"<li><b>{wp.title}</b>: {wp.details}</li>", unsafe_allow_html=True)
+                st.markdown(f"<li><b>{wp.title}</b> | {wp.deadline} | {wp.status}<br>{wp.details}</li>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
     with tabs[2]:
-        st.subheader("👥 Admin - Manage Users")
+        st.subheader("📊 Progress Tracker Report")
+        employees = db.query(Employee).all()
+        report_data = []
+        for emp in employees:
+            total_ws = db.query(WorkStream).filter_by(employee_id=emp.id).count()
+            total_wp = sum(len(ws.workplans) for ws in emp.workstreams)
+            completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp.workstreams)
+            report_data.append({"Employee": emp.name, "Workstreams": total_ws, "Workplans": total_wp, "Completed": completed_wp})
+        df = pd.DataFrame(report_data)
+        st.dataframe(df.style.background_gradient(cmap="PuBu"))
+        st.bar_chart(df.set_index("Employee")[["Workplans", "Completed"]])
+
+    with tabs[3]:
+        st.subheader("👥 Manage Users")
         with st.form("add_user"):
-            new_name = st.text_input("Name")
-            new_email = st.text_input("Email")
-            if st.form_submit_button("Add User"):
+            new_name = st.text_input("Full Name")
+            new_email = st.text_input("Email Address")
+            if st.form_submit_button("Add"):
                 db.add(Employee(name=new_name, email=new_email))
                 db.commit()
-                st.success("User added")
+                st.success("User added successfully")
 
         with st.form("remove_user"):
-            remove_email = st.text_input("User Email to Remove")
-            if st.form_submit_button("Delete User"):
+            remove_email = st.text_input("Email to Remove")
+            if st.form_submit_button("Delete"):
                 user = db.query(Employee).filter(Employee.email == remove_email).first()
                 if user:
                     db.delete(user)
                     db.commit()
                     st.success("User deleted")
                 else:
-                    st.warning("User not found")
+                    st.warning("Email not found")
 
 def main():
     preload_users()
-    st.set_page_config(page_title="Team Tracker", layout="wide")
+    st.set_page_config(page_title="PMU Tracker", layout="wide")
     st.markdown("""
     <style>
     .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem;
     }
     .stButton>button {
         border-radius: 8px;
         background-color: #007acc;
         color: white;
-        padding: 0.5rem 1.2rem;
+        padding: 0.4rem 1rem;
         font-weight: bold;
     }
-    .stTextInput>div>input, .stTextArea textarea {
+    .stTextInput>div>input, .stTextArea textarea, .stSelectbox>div>div {
         border-radius: 6px;
-        padding: 0.4rem;
         border: 1px solid #ccc;
-    }
-    .stSelectbox>div>div {
-        border-radius: 6px;
     }
     </style>
     """, unsafe_allow_html=True)
 
     if not st.session_state.user:
-        st.title("🧑 Select Your Email")
+        st.image("https://cdn.pixabay.com/photo/2017/09/05/20/47/launch-2714291_1280.jpg", use_column_width=True)
+        st.title("🔐 Login")
         db = get_db()
         all_users = db.query(Employee).all()
-        user_emails = [user.email for user in all_users]
-        selected_email = st.selectbox("Login as", user_emails)
+        emails = [u.email for u in all_users]
+        selected = st.selectbox("Select your email", emails)
         if st.button("Continue"):
-            user = db.query(Employee).filter_by(email=selected_email).first()
+            user = db.query(Employee).filter_by(email=selected).first()
             st.session_state.user = user
             st.experimental_rerun()
     else:
