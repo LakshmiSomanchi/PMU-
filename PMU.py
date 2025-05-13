@@ -68,51 +68,57 @@ def dashboard(user):
         st.experimental_rerun()
 
     st.title("🏆 Workstream Dashboard")
-    st.markdown("### 🎯 Your Workstreams")
-    my_ws = db.query(WorkStream).filter_by(employee_id=user.id).all()
+    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "👥 User Management"])
 
-    with st.expander("➕ Add Workstream"):
-        with st.form("add_ws"):
-            ws_title = st.text_input("Workstream Title")
-            ws_desc = st.text_area("Description")
-            if st.form_submit_button("Add"):
-                db.add(WorkStream(title=ws_title, description=ws_desc, employee_id=user.id))
-                db.commit()
-                st.success("Workstream added")
+    with tabs[0]:
+        st.subheader("🎯 Your Workstreams")
+        my_ws = db.query(WorkStream).filter_by(employee_id=user.id).all()
 
-    with st.expander("➕ Add Workplan to Your Workstreams"):
-        if my_ws:
-            ws_options = {f"{ws.title}": ws.id for ws in my_ws}
-            with st.form("add_wp"):
-                selected_ws = st.selectbox("Select Workstream", list(ws_options.keys()))
-                wp_title = st.text_input("Plan Title")
-                wp_details = st.text_area("Plan Details")
-                if st.form_submit_button("Add Plan"):
-                    db.add(WorkPlan(title=wp_title, details=wp_details, workstream_id=ws_options[selected_ws]))
+        with st.expander("➕ Add Workstream"):
+            with st.form("add_ws"):
+                ws_title = st.text_input("Workstream Title")
+                ws_desc = st.text_area("Description")
+                if st.form_submit_button("Add"):
+                    db.add(WorkStream(title=ws_title, description=ws_desc, employee_id=user.id))
                     db.commit()
-                    st.success("Workplan added")
+                    st.success("Workstream added")
 
-    for ws in my_ws:
-        st.markdown(f"#### ✅ {ws.title}")
-        st.markdown(f"{ws.description}")
-        for wp in ws.workplans:
-            st.markdown(f"- 🧩 **{wp.title}**: {wp.details}")
-        if st.button(f"🗑️ Delete '{ws.title}'", key=f"del-{ws.id}"):
-            db.query(WorkPlan).filter_by(workstream_id=ws.id).delete()
-            db.delete(ws)
-            db.commit()
-            st.warning("Deleted!")
-            st.stop()
+        with st.expander("➕ Add Workplan to Your Workstreams"):
+            if my_ws:
+                ws_options = {f"{ws.title}": ws.id for ws in my_ws}
+                with st.form("add_wp"):
+                    selected_ws = st.selectbox("Select Workstream", list(ws_options.keys()))
+                    wp_title = st.text_input("Plan Title")
+                    wp_details = st.text_area("Plan Details")
+                    if st.form_submit_button("Add Plan"):
+                        db.add(WorkPlan(title=wp_title, details=wp_details, workstream_id=ws_options[selected_ws]))
+                        db.commit()
+                        st.success("Workplan added")
 
-    st.markdown("---")
-    st.markdown("### 🌎 Team Overview")
-    all_ws = db.query(WorkStream).all()
-    for ws in all_ws:
-        st.markdown(f"#### 📌 {ws.title} ({ws.employee.name})")
-        for wp in ws.workplans:
-            st.markdown(f"- 📄 **{wp.title}**: {wp.details}")
+        for ws in my_ws:
+            st.markdown(f"#### ✅ {ws.title}")
+            st.markdown(f"{ws.description}")
+            for wp in ws.workplans:
+                st.markdown(f"- 🧩 **{wp.title}**: {wp.details}")
+            if st.button(f"🗑️ Delete '{ws.title}'", key=f"del-{ws.id}"):
+                db.query(WorkPlan).filter_by(workstream_id=ws.id).delete()
+                db.delete(ws)
+                db.commit()
+                st.warning("Deleted!")
+                st.stop()
 
-    with st.expander("👥 Admin - Manage Users"):
+    with tabs[1]:
+        st.subheader("🌐 Team Workstreams and Plans")
+        all_ws = db.query(WorkStream).all()
+        for ws in all_ws:
+            st.markdown(f"<div style='background:#f9f9f9;padding:10px;border-left:5px solid #007acc;margin-bottom:10px;'>", unsafe_allow_html=True)
+            st.markdown(f"<strong>{ws.title}</strong> by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
+            for wp in ws.workplans:
+                st.markdown(f"<li><b>{wp.title}</b>: {wp.details}</li>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    with tabs[2]:
+        st.subheader("👥 Admin - Manage Users")
         with st.form("add_user"):
             new_name = st.text_input("Name")
             new_email = st.text_input("Email")
@@ -135,6 +141,28 @@ def dashboard(user):
 def main():
     preload_users()
     st.set_page_config(page_title="Team Tracker", layout="wide")
+    st.markdown("""
+    <style>
+    .block-container {
+        padding-top: 2rem;
+    }
+    .stButton>button {
+        border-radius: 8px;
+        background-color: #007acc;
+        color: white;
+        padding: 0.5rem 1.2rem;
+        font-weight: bold;
+    }
+    .stTextInput>div>input, .stTextArea textarea {
+        border-radius: 6px;
+        padding: 0.4rem;
+        border: 1px solid #ccc;
+    }
+    .stSelectbox>div>div {
+        border-radius: 6px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
     if not st.session_state.user:
         st.title("🧑 Select Your Email")
