@@ -2,7 +2,6 @@ import streamlit as st
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from passlib.hash import bcrypt
 import pandas as pd
 
 # SQLite + SQLAlchemy setup
@@ -17,7 +16,6 @@ class Employee(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     email = Column(String, unique=True)
-    hashed_password = Column(String)
     workstreams = relationship("WorkStream", back_populates="employee")
 
 class WorkStream(Base):
@@ -39,7 +37,6 @@ class WorkPlan(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# Helpers
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -60,42 +57,15 @@ def preload_users():
     db = get_db()
     for name, email in preloaded_users:
         if not db.query(Employee).filter_by(email=email).first():
-            db.add(Employee(name=name, email=email, hashed_password=bcrypt.hash("password")))
+            db.add(Employee(name=name, email=email))
     db.commit()
-
-def login(email, password):
-    db = get_db()
-    user = db.query(Employee).filter(Employee.email == email).first()
-    if user and bcrypt.verify(password, user.hashed_password):
-        st.session_state.user = user
-        return True
-    return False
-
-def register(name, email, password):
-    db = get_db()
-    if db.query(Employee).filter(Employee.email == email).first():
-        st.error("Email already exists")
-        return
-    db.add(Employee(name=name, email=email, hashed_password=bcrypt.hash(password)))
-    db.commit()
-    st.success("User registered successfully")
-
-def delete_user(email):
-    db = get_db()
-    user = db.query(Employee).filter(Employee.email == email).first()
-    if user:
-        db.delete(user)
-        db.commit()
-        st.success("User deleted")
-    else:
-        st.warning("User not found")
 
 def dashboard(user):
     db = get_db()
     st.sidebar.title(f"🎮 Welcome, {user.name}")
     if st.sidebar.button("Logout"):
         st.session_state.user = None
-        st.stop()
+        st.experimental_rerun()
 
     st.title("🏆 Workstream Dashboard")
     st.markdown("### 🎯 Your Workstreams")
@@ -146,29 +116,36 @@ def dashboard(user):
         with st.form("add_user"):
             new_name = st.text_input("Name")
             new_email = st.text_input("Email")
-            new_pw = st.text_input("Password", type="password")
             if st.form_submit_button("Add User"):
-                register(new_name, new_email, new_pw)
+                db.add(Employee(name=new_name, email=new_email))
+                db.commit()
+                st.success("User added")
 
         with st.form("remove_user"):
             remove_email = st.text_input("User Email to Remove")
             if st.form_submit_button("Delete User"):
-                delete_user(remove_email)
+                user = db.query(Employee).filter(Employee.email == remove_email).first()
+                if user:
+                    db.delete(user)
+                    db.commit()
+                    st.success("User deleted")
+                else:
+                    st.warning("User not found")
 
 def main():
     preload_users()
     st.set_page_config(page_title="Team Tracker", layout="wide")
 
     if not st.session_state.user:
-        st.title("🔐 Login")
-        with st.form("login"):
-            email = st.text_input("Email")
-            password = st.text_input("Password", type="password")
-            if st.form_submit_button("Login"):
-                if login(email, password):
-                    st.experimental_rerun()
-                else:
-                    st.error("Invalid credentials")
+        st.title("🧑 Select Your Email")
+        db = get_db()
+        all_users = db.query(Employee).all()
+        user_emails = [user.email for user in all_users]
+        selected_email = st.selectbox("Login as", user_emails)
+        if st.button("Continue"):
+            user = db.query(Employee).filter_by(email=selected_email).first()
+            st.session_state.user = user
+            st.experimental_rerun()
     else:
         dashboard(st.session_state.user)
 
