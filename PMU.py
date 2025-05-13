@@ -40,8 +40,7 @@ class WorkPlan(Base):
 Base.metadata.create_all(bind=engine)
 
 # State init
-if "user" not in st.session_state:
-    st.session_state.user = None
+if "user" not in st.session_state or st.session_state.user is None:
 
 # Preload default users
 preloaded_users = [
