@@ -64,6 +64,9 @@ def register(name, email, password):
     db.commit()
     st.success("Registered successfully. You can login now.")
 
+email = st.text_input("Email")
+password = st.text_input("Password", type="password")
+
 if login(email, password):
     st.session_state.just_logged_in = True
     st.success("Welcome back!")
