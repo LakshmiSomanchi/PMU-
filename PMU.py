@@ -43,6 +43,25 @@ Base.metadata.create_all(bind=engine)
 if "user" not in st.session_state:
     st.session_state.user = None
 
+# Preload default users
+preloaded_users = [
+    ("Somanchi", "rsomanchi@tns.org"),
+    ("Ranu", "Rladdha@tns.org"),
+    ("Pari", "Paris@tns.org"),
+    ("Muskan", "mkaushal@tns.org"),
+    ("Rupesh", "rmukherjee@tns.org"),
+    ("Shifali", "shifalis@tns.org"),
+    ("Pragya Bharati", "pbharati@tns.org"),
+]
+
+def preload_users():
+    db = get_db()
+    for name, email in preloaded_users:
+        if not db.query(Employee).filter_by(email=email).first():
+            user = Employee(name=name, email=email, hashed_password=bcrypt.hash("password"))
+            db.add(user)
+    db.commit()
+
 def get_db():
     return SessionLocal()
 
@@ -64,21 +83,72 @@ def register(name, email, password):
     db.commit()
     st.success("Registered successfully. You can login now.")
 
-email = st.text_input("Email")
-password = st.text_input("Password", type="password")
+def main():
+    preload_users()
 
-if login(email, password):
-    st.session_state.just_logged_in = True
-    st.success("Welcome back!")
-    st.stop()
+    st.set_page_config(page_title="Team Tracker", layout="wide")
+    st.markdown("""
+        <style>
+        .block-container {
+            padding-top: 2rem;
+        }
+        .stButton>button {
+            border-radius: 8px;
+            background-color: #007acc;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            font-weight: bold;
+        }
+        .stTextInput>div>input, .stTextArea textarea {
+            border-radius: 6px;
+            padding: 0.4rem;
+            border: 1px solid #ccc;
+        }
+        .stSelectbox>div>div {
+            border-radius: 6px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    if st.session_state.get("just_logged_in"):
+        st.session_state.just_logged_in = False
+        st.experimental_rerun()
+    if st.session_state.get("just_logged_out"):
+        st.session_state.just_logged_out = False
+        st.experimental_rerun()
+
+    st.title("🛠️ Team Workstream & Workplan Tracker")
+
+    if not st.session_state.user:
+        st.subheader("Login or Register")
+        option = st.selectbox("Choose", ["Login", "Register"])
+
+        with st.form(key="auth"):
+            name = st.text_input("Name (register only)") if option == "Register" else ""
+            email = st.text_input("Email")
+            password = st.text_input("Password", type="password")
+            submitted = st.form_submit_button(option)
+
+            if submitted:
+                if option == "Login":
+                    if login(email, password):
+                        st.session_state.just_logged_in = True
+                        st.success("Welcome back!")
+                        st.stop()
+                    else:
+                        st.error("Invalid credentials")
+                else:
+                    register(name, email, password)
+        return
+
+    user = st.session_state.user
+    db = get_db()
 
     st.sidebar.title(f"Hello {user.name} 👋")
     if st.sidebar.button("Logout"):
-       st.session_state.user = None
-       st.session_state.just_logged_out = True
-       st.stop()
-
-
+        st.session_state.user = None
+        st.session_state.just_logged_out = True
+        st.stop()
 
     st.subheader("📋 Add Workstream")
     with st.form("add_ws"):
@@ -120,4 +190,4 @@ if login(email, password):
                 st.experimental_rerun()
 
 if __name__ == "__main__":
-main()
+    main()
