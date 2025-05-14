@@ -270,7 +270,7 @@ def dashboard(user):
                 db.commit()
                 st.success(f"Target '{target.description}' marked as completed.")
 
-  with tabs[5]:  # Programs tab
+    with tabs[5]:  # Programs tab
         st.subheader("📚 Manage Programs")
         
         # Initialize a session state list to hold multiple programs
