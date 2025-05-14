@@ -41,6 +41,7 @@ class WorkPlan(Base):
 
 Base.metadata.create_all(bind=engine)
 
+# Session state for user
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -68,8 +69,17 @@ def preload_users():
 
 def dashboard(user):
     db = get_db()
-    st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("""
+        <style>
+            .main { background-color: #f5f9ff; }
+            .stTabs [data-baseweb="tab"]:hover {
+                background-color: #e1f5fe;
+            }
+            h1, h2, h3, h4, h5, h6 { color: #0f4c75; }
+        </style>
+    """, unsafe_allow_html=True)
 
+    st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
     if st.sidebar.button("🔓 Logout"):
@@ -106,17 +116,17 @@ def dashboard(user):
                         st.success("Workplan added")
 
         for ws in my_ws:
-            st.markdown(f"### 🎯 {ws.title}")
+            st.markdown(f"### 🌟 {ws.title}")
             st.markdown(f"_Description_: {ws.description}")
             for wp in ws.workplans:
-                badge = "✅" if wp.status == "Completed" else ("🟡" if wp.status == "In Progress" else "⚪")
-                st.markdown(f"- {badge} **{wp.title}** | 📆 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
+                badge = "✅" if wp.status == "Completed" else ("🔹" if wp.status == "In Progress" else "⚪")
+                st.markdown(f"- {badge} **{wp.title}** | 🗖️ {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
 
     with tabs[1]:
         st.subheader("🌐 Team Workstreams and Plans")
         all_ws = db.query(WorkStream).all()
         for ws in all_ws:
-            st.markdown(f"<div style='background:#f0f9ff;padding:10px;border-left:6px solid #1e88e5;margin-bottom:10px;'>", unsafe_allow_html=True)
+            st.markdown(f"<div style='background:#e3f2fd;padding:10px;border-left:6px solid #42a5f5;margin-bottom:10px;'>", unsafe_allow_html=True)
             st.markdown(f"<strong>{ws.title}</strong> by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
             for wp in ws.workplans:
                 st.markdown(f"<li><b>{wp.title}</b> | {wp.deadline} | {wp.status}<br>{wp.details}</li>", unsafe_allow_html=True)
@@ -132,7 +142,7 @@ def dashboard(user):
             completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp.workstreams)
             report_data.append({"Employee": emp.name, "Workstreams": total_ws, "Workplans": total_wp, "Completed": completed_wp})
         df = pd.DataFrame(report_data)
-        st.dataframe(df)
+        st.dataframe(df, use_container_width=True)
         st.bar_chart(df.set_index("Employee")[["Workplans", "Completed"]])
 
     with tabs[3]:
@@ -141,16 +151,20 @@ def dashboard(user):
             new_name = st.text_input("Full Name")
             new_email = st.text_input("Email Address")
             if st.form_submit_button("Add"):
-                db.add(Employee(name=new_name, email=new_email))
-                db.commit()
-                st.success("User added successfully")
+                try:
+                    db.add(Employee(name=new_name, email=new_email))
+                    db.commit()
+                    st.success("User added successfully")
+                except IntegrityError:
+                    db.rollback()
+                    st.error("User already exists")
 
         with st.form("remove_user"):
             remove_email = st.text_input("Email to Remove")
             if st.form_submit_button("Delete"):
-                user = db.query(Employee).filter(Employee.email == remove_email).first()
-                if user:
-                    db.delete(user)
+                user_to_remove = db.query(Employee).filter(Employee.email == remove_email).first()
+                if user_to_remove:
+                    db.delete(user_to_remove)
                     db.commit()
                     st.success("User deleted")
                 else:
@@ -159,24 +173,6 @@ def dashboard(user):
 def main():
     preload_users()
     st.set_page_config(page_title="PMU Tracker", layout="wide")
-    st.markdown("""
-    <style>
-    .block-container {
-        padding-top: 1rem;
-    }
-    .stButton>button {
-        border-radius: 8px;
-        background-color: #007acc;
-        color: white;
-        padding: 0.4rem 1rem;
-        font-weight: bold;
-    }
-    .stTextInput>div>input, .stTextArea textarea, .stSelectbox>div>div {
-        border-radius: 6px;
-        border: 1px solid #ccc;
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
     if not st.session_state.user:
         st.title("🔐 Login")
