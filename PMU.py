@@ -104,35 +104,44 @@ def preload_users():
 
 def display_notice():
     st.markdown("""
-        <h2 style='text-align:center;'>NOTICE & PROTOCOL FOR WORKSTREAM TRACKING PLATFORM USAGE</h2>
-        <p>Welcome to the PMU Tracker – your central hub for tracking progress, setting targets, and streamlining team alignment.</p>
-        <p>To ensure effective and consistent usage, please review and adhere to the following protocol:</p>
-        <h3>Platform Purpose</h3>
-        <p>This platform serves as a shared space for all team members to:</p>
-        <ul>
-            <li>Submit and monitor their personal and team workplans</li>
-            <li>Record progress updates</li>
-            <li>Set and review short-term targets</li>
-            <li>Access meeting links related to performance check-ins and planning</li>
-        </ul>
-        <h3>Submission Window</h3>
-        <p>Each reporting cycle will open for 5 calendar days.</p>
-        <p>All entries (targets, updates, plans) must be completed within this timeframe.</p>
-        <p>Post-deadline, the platform will be locked for submissions, allowing only view access.</p>
-        <h3>Access Protocol</h3>
-        <p>Accessible to all relevant staff during the open window</p>
-        <p>Platform access will be managed and monitored for compliance and integrity</p>
-        <h3>Meeting Coordination</h3>
-        <p>Supervisors will upload relevant meeting links and schedules directly into the platform</p>
-        <p>Individuals are expected to join these sessions as per the calendar updates</p>
-        <p>Target-setting and progress meetings will be documented within the system</p>
-        <h3>Communication Guidelines</h3>
-        <p>Any technical issues or submission challenges should be reported within the window</p>
-        <p>Use official channels for queries to ensure swift response</p>
-        <p>We appreciate your cooperation in making this system a success. Let’s keep progress transparent, teamwork tight, and targets in sight.</p>
-        <p>For questions or support, please contact [Your Admin/Support Contact Info].</p>
-        <p>Let the tracking begin – elegantly, efficiently, and with a touch of excellence.</p>
-        <p>[Platform Admin / Supervisor Name] On behalf of the Coordination Team</p>
+        <style>
+            .notice {
+                background-color: #d4f3a7; /* HEX color for notice page */
+                padding: 20px;
+                border-radius: 10px;
+            }
+        </style>
+        <div class="notice">
+            <h2 style='text-align:center;'>NOTICE & PROTOCOL FOR WORKSTREAM TRACKING PLATFORM USAGE</h2>
+            <p>Welcome to the PMU Tracker – your central hub for tracking progress, setting targets, and streamlining team alignment.</p>
+            <p>To ensure effective and consistent usage, please review and adhere to the following protocol:</p>
+            <h3>Platform Purpose</h3>
+            <p>This platform serves as a shared space for all team members to:</p>
+            <ul>
+                <li>Submit and monitor their personal and team workplans</li>
+                <li>Record progress updates</li>
+                <li>Set and review short-term targets</li>
+                <li>Access meeting links related to performance check-ins and planning</li>
+            </ul>
+            <h3>Submission Window</h3>
+            <p>Each reporting cycle will open for 5 calendar days.</p>
+            <p>All entries (targets, updates, plans) must be completed within this timeframe.</p>
+            <p>Post-deadline, the platform will be locked for submissions, allowing only view access.</p>
+            <h3>Access Protocol</h3>
+            <p>Accessible to all relevant staff during the open window</p>
+            <p>Platform access will be managed and monitored for compliance and integrity</p>
+            <h3>Meeting Coordination</h3>
+            <p>Supervisors will upload relevant meeting links and schedules directly into the platform</p>
+            <p>Individuals are expected to join these sessions as per the calendar updates</p>
+            <p>Target-setting and progress meetings will be documented within the system</p>
+            <h3>Communication Guidelines</h3>
+            <p>Any technical issues or submission challenges should be reported within the window</p>
+            <p>Use official channels for queries to ensure swift response</p>
+            <p>We appreciate your cooperation in making this system a success. Let’s keep progress transparent, teamwork tight, and targets in sight.</p>
+            <p>For questions or support, please contact [Your Admin/Support Contact Info].</p>
+            <p>Let the tracking begin – elegantly, efficiently, and with a touch of excellence.</p>
+            <p>[Platform Admin / Supervisor Name] On behalf of the Coordination Team</p>
+        </div>
     """, unsafe_allow_html=True)
 
 def sidebar():
@@ -140,9 +149,10 @@ def sidebar():
     st.sidebar.markdown("""
         <style>
             .sidebar {
-                background-image: url('graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg');
+                background-image: url('graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg'); /* Update with your sidebar image path */
                 background-size: cover;
                 color: white;
+                padding: 20px;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -164,7 +174,6 @@ def dashboard(user):
     st.markdown("""
         <style>
             .main { 
-                background-color: #d4f3a7; 
                 position: relative; 
                 overflow: hidden; 
             }
