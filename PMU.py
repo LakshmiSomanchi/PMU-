@@ -137,7 +137,6 @@ def display_notice():
 
 def sidebar():
     st.sidebar.title("Navigation")
-    st.sidebar.image("assets/sidebar-logo-small.png", use_column_width=True)  # Update with your logo path
     menu_options = {
         "Dashboard": "dashboard",
         "Manage Programs": "manage_programs",
