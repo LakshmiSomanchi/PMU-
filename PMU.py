@@ -270,22 +270,44 @@ def dashboard(user):
                 db.commit()
                 st.success(f"Target '{target.description}' marked as completed.")
 
-    with tabs[5]:  # Programs tab
+     with tabs[5]:  # Programs tab
         st.subheader("📚 Manage Programs")
         
+        # Initialize a session state list to hold multiple programs
+        if "programs" not in st.session_state:
+            st.session_state.programs = []
+
         # Form to add a new program
-        with st.form("add_program"):
+     with st.form("add_program", clear_on_submit=True):
             new_program_name = st.text_input("Program Name")
             new_program_description = st.text_area("Program Description")
             new_program_status = st.selectbox("Program Status", ["Active", "Completed", "On Hold"])
             if st.form_submit_button("Add Program"):
+                if new_program_name:  # Ensure the program name is not empty
+                    # Append the new program details to the session state
+                    st.session_state.programs.append({
+                        "name": new_program_name,
+                        "description": new_program_description,
+                        "status": new_program_status
+                    })
+                    st.success(f"Program '{new_program_name}' added to the list.")
+
+        # Display the list of programs to be added
+        st.subheader("Programs to be Added")
+        for program in st.session_state.programs:
+            st.markdown(f"**{program['name']}** - {program['description']} | Status: {program['status']}")
+
+        # Button to save all programs to the database
+        if st.button("Save All Programs"):
+            for program in st.session_state.programs:
                 try:
-                    db.add(Program(name=new_program_name, description=new_program_description, status=new_program_status, employee_id=user.id))
+                    db.add(Program(name=program['name'], description=program['description'], status=program['status'], employee_id=user.id))
                     db.commit()
-                    st.success("Program added successfully")
                 except IntegrityError:
                     db.rollback()
-                    st.error("Program already exists")
+                    st.error(f"Program '{program['name']}' already exists.")
+            st.session_state.programs = []  # Clear the list after saving
+            st.success("All programs saved successfully.")
 
         # Display existing programs
         st.subheader("Existing Programs")
