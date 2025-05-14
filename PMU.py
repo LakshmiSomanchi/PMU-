@@ -53,6 +53,11 @@ class Target(Base):
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="targets")
 
+class Program(Base):
+    __tablename__ = "programs"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+
 Base.metadata.create_all(bind=engine)
 
 if "user" not in st.session_state:
@@ -80,6 +85,39 @@ def preload_users():
         except IntegrityError:
             db.rollback()
 
+def display_notice():
+    st.markdown("""
+        <h2 style='text-align:center;'>NOTICE & PROTOCOL FOR WORKSTREAM TRACKING PLATFORM USAGE</h2>
+        <p>Welcome to the [Platform Name] – your central hub for tracking progress, setting targets, and streamlining team alignment.</p>
+        <p>To ensure effective and consistent usage, please review and adhere to the following protocol:</p>
+        <h3>Platform Purpose</h3>
+        <p>This platform serves as a shared space for all team members to:</p>
+        <ul>
+            <li>Submit and monitor their personal and team workplans</li>
+            <li>Record progress updates</li>
+            <li>Set and review short-term targets</li>
+            <li>Access meeting links related to performance check-ins and planning</li>
+        </ul>
+        <h3>Submission Window</h3>
+        <p>Each reporting cycle will open for 5 calendar days.</p>
+        <p>All entries (targets, updates, plans) must be completed within this timeframe.</p>
+        <p>Post-deadline, the platform will be locked for submissions, allowing only view access.</p>
+        <h3>Access Protocol</h3>
+        <p>Accessible to all relevant staff during the open window</p>
+        <p>Platform access will be managed and monitored for compliance and integrity</p>
+        <h3>Meeting Coordination</h3>
+        <p>Supervisors will upload relevant meeting links and schedules directly into the platform</p>
+        <p>Individuals are expected to join these sessions as per the calendar updates</p>
+        <p>Target-setting and progress meetings will be documented within the system</p>
+        <h3>Communication Guidelines</h3>
+        <p>Any technical issues or submission challenges should be reported within the window</p>
+        <p>Use official channels for queries to ensure swift response</p>
+        <p>We appreciate your cooperation in making this system a success. Let’s keep progress transparent, teamwork tight, and targets in sight.</p>
+        <p>For questions or support, please contact [Your Admin/Support Contact Info].</p>
+        <p>Let the tracking begin – elegantly, efficiently, and with a touch of excellence.</p>
+        <p>[Platform Admin / Supervisor Name] On behalf of the Coordination Team</p>
+    """, unsafe_allow_html=True)
+
 def dashboard(user):
     db = get_db()
 
@@ -103,7 +141,7 @@ def dashboard(user):
         st.session_state.user = None
         st.experimental_rerun()
 
-    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management", "🎯 Target Management"])
+    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management", "🎯 Target Management", "📚 Programs"])
 
     with tabs[0]:
         st.subheader("📌 Your Activities, Targets & Progress")
@@ -225,11 +263,36 @@ def dashboard(user):
                 db.commit()
                 st.success(f"Target '{target.description}' marked as completed.")
 
+    with tabs[5]:
+        st.subheader("📚 Manage Programs")
+        with st.form("add_program"):
+            new_program = st.text_input("Program Name")
+            if st.form_submit_button("Add Program"):
+                try:
+                    db.add(Program(name=new_program))
+                    db.commit()
+                    st.success("Program added successfully")
+                except IntegrityError:
+                    db.rollback()
+                    st.error("Program already exists")
+
+        st.subheader("Existing Programs")
+        programs = db.query(Program).all()
+        for program in programs:
+            col1, col2 = st.columns([3, 1])
+            col1.markdown(f"**{program.name}**")
+            with col2:
+                if st.button(f"Delete {program.name}"):
+                    db.delete(program)
+                    db.commit()
+                    st.success(f"Program '{program.name}' deleted.")
+
 def main():
     preload_users()
     db = get_db()
     if not st.session_state.user:
         st.title("🔐 Login")
+        display_notice()
         all_users = db.query(Employee).all()
         emails = [u.email for u in all_users]
         selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
