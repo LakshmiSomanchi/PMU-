@@ -140,7 +140,7 @@ def sidebar():
     st.sidebar.markdown("""
         <style>
             .sidebar {
-                background-image: url('path_to_your_sidebar_background_image.jpg'); /* Update with your sidebar image path */
+                background-image: url('graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg');
                 background-size: cover;
                 color: white;
             }
@@ -164,7 +164,7 @@ def dashboard(user):
     st.markdown("""
         <style>
             .main { 
-                background-color: #f5f9ff; 
+                background-color: #d4f3a7; 
                 position: relative; 
                 overflow: hidden; 
             }
