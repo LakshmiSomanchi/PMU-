@@ -61,7 +61,9 @@ class Program(Base):
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="programs")
 
-Base.metadata.create_all(bind=engine)
+# Drop all tables and recreate them
+Base.metadata.drop_all(bind=engine)  # This will drop all tables
+Base.metadata.create_all(bind=engine)  # This will recreate the tables
 
 if "user" not in st.session_state:
     st.session_state.user = None
