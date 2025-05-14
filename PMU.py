@@ -82,7 +82,7 @@ def dashboard(user):
     st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
-    if st.sidebar.button("🔓 Logout"):
+if st.sidebar.button("🔓 Logout"):
        st.session_state.user = None
        st.session_state.logged_out = True
 
@@ -196,7 +196,7 @@ if "login_selected" in st.session_state and not st.session_state.user:
     st.experimental_rerun()
 
 else:
-        dashboard(st.session_state.user)
+    dashboard(st.session_state.user)
 
 if __name__ == "__main__":
     main()
