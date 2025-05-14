@@ -6,6 +6,9 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 
+# Set Streamlit page config (must be first)
+st.set_page_config(page_title="PMU Tracker", layout="wide")
+
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
 Base = declarative_base()
@@ -41,7 +44,6 @@ class WorkPlan(Base):
 
 Base.metadata.create_all(bind=engine)
 
-# Session state for user
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -69,6 +71,7 @@ def preload_users():
 
 def dashboard(user):
     db = get_db()
+
     st.markdown("""
         <style>
             .main { background-color: #f5f9ff; }
@@ -82,15 +85,9 @@ def dashboard(user):
     st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
-if st.sidebar.button("🔓 Logout"):
-       st.session_state.user = None
-       st.session_state.logged_out = True
-
-# Trigger rerun after state update
-if st.session_state.get("logged_out"):
-    del st.session_state["logged_out"]
-    st.experimental_rerun()
-
+    if st.sidebar.button("🔓 Logout"):
+        st.session_state.user = None
+        st.experimental_rerun()
 
     tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management"])
 
@@ -126,7 +123,7 @@ if st.session_state.get("logged_out"):
             st.markdown(f"_Description_: {ws.description}")
             for wp in ws.workplans:
                 badge = "✅" if wp.status == "Completed" else ("🔹" if wp.status == "In Progress" else "⚪")
-                st.markdown(f"- {badge} **{wp.title}** | 🗖️ {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
+                st.markdown(f"- {badge} **{wp.title}** | 📅 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
 
     with tabs[1]:
         st.subheader("🌐 Team Workstreams and Plans")
@@ -178,23 +175,19 @@ if st.session_state.get("logged_out"):
 
 def main():
     preload_users()
-    st.set_page_config(page_title="PMU Tracker", layout="wide")
-
-if not st.session_state.user:
-    st.title("🔐 Login")
     db = get_db()
-    all_users = db.query(Employee).all()
-    emails = [u.email for u in all_users]
-    selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
+    if not st.session_state.user:
+        st.title("🔐 Login")
+        all_users = db.query(Employee).all()
+        emails = [u.email for u in all_users]
+        selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
 
-    if selected != "Select...":
-        user = db.query(Employee).filter_by(email=selected).first()
-        st.session_state.user = user
-        st.experimental_rerun()
-
-else:
-    dashboard(st.session_state.user)
-
+        if selected != "Select...":
+            user = db.query(Employee).filter_by(email=selected).first()
+            st.session_state.user = user
+            st.experimental_rerun()
+    else:
+        dashboard(st.session_state.user)
 
 if __name__ == "__main__":
-  main()
+    main()
