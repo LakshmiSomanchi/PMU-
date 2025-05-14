@@ -180,23 +180,21 @@ def main():
     preload_users()
     st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-    if not st.session_state.user:
-        st.title("🔐 Login")
-        db = get_db()
-        all_users = db.query(Employee).all()
-        emails = [u.email for u in all_users]
-        selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
-    if selected != "Select...":
-        st.session_state.login_selected = selected
+if not st.session_state.user:
+    st.title("🔐 Login")
+    db = get_db()
+    all_users = db.query(Employee).all()
+    emails = [u.email for u in all_users]
+    selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
 
-if "login_selected" in st.session_state and not st.session_state.user:
-    user = db.query(Employee).filter_by(email=st.session_state.login_selected).first()
-    st.session_state.user = user
-    del st.session_state.login_selected
-    st.experimental_rerun()
+    if selected != "Select...":
+        user = db.query(Employee).filter_by(email=selected).first()
+        st.session_state.user = user
+        st.experimental_rerun()
 
 else:
     dashboard(st.session_state.user)
+
 
 if __name__ == "__main__":
     main()
