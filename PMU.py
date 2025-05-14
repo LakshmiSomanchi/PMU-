@@ -83,8 +83,14 @@ def dashboard(user):
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
     if st.sidebar.button("🔓 Logout"):
-        st.session_state.user = None
-        st.experimental_rerun()
+       st.session_state.user = None
+       st.session_state.logged_out = True
+
+# Trigger rerun after state update
+if st.session_state.get("logged_out"):
+    del st.session_state["logged_out"]
+    st.experimental_rerun()
+
 
     tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management"])
 
@@ -181,9 +187,14 @@ def main():
         emails = [u.email for u in all_users]
         selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
         if selected != "Select...":
-            user = db.query(Employee).filter_by(email=selected).first()
-            st.session_state.user = user
-            st.experimental_rerun()
+        st.session_state.login_selected = selected
+
+if "login_selected" in st.session_state and not st.session_state.user:
+    user = db.query(Employee).filter_by(email=st.session_state.login_selected).first()
+    st.session_state.user = user
+    del st.session_state.login_selected
+    st.experimental_rerun()
+
     else:
         dashboard(st.session_state.user)
 
