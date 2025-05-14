@@ -125,6 +125,19 @@ def display_notice():
         <p>[Platform Admin / Supervisor Name] On behalf of the Coordination Team</p>
     """, unsafe_allow_html=True)
 
+def sidebar():
+    st.sidebar.title("Navigation")
+    st.sidebar.image("assets/sidebar-logo-small.png", use_column_width=True)  # Update with your logo path
+    menu_options = {
+        "Dashboard": "dashboard",
+        "Manage Programs": "manage_programs",
+        "Reports": "reports",
+        "Settings": "settings",
+        "Logout": "logout"
+    }
+    selection = st.sidebar.radio("Go to", list(menu_options.keys()))
+    return menu_options[selection]
+
 def dashboard(user):
     db = get_db()
 
@@ -346,11 +359,24 @@ def main():
 
     # Display the dashboard if a user is logged in
     if st.session_state.user is not None:
-        dashboard(st.session_state.user)
-            # Logout button with a unique key
-    if st.sidebar.button("🔓 Logout", key="logout_button"):
-        st.session_state.user = None
-        st.success("You have been logged out.")
+        selected_tab = sidebar()
+        if selected_tab == "dashboard":
+            dashboard(st.session_state.user)
+        elif selected_tab == "manage_programs":
+            # Call the manage programs function here
+            st.subheader("Manage Programs")
+            # Add your manage programs code here
+        elif selected_tab == "reports":
+            # Call the reports function here
+            st.subheader("Reports")
+            # Add your reports code here
+        elif selected_tab == "settings":
+            # Call the settings function here
+            st.subheader("Settings")
+            # Add your settings code here
+        elif selected_tab == "logout":
+            st.session_state.user = None
+            st.success("You have been logged out.")
 
 if __name__ == "__main__":
     main()
