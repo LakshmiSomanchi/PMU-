@@ -22,6 +22,7 @@ class Employee(Base):
     name = Column(String, unique=True)
     email = Column(String, unique=True)
     workstreams = relationship("WorkStream", back_populates="employee")
+    targets = relationship("Target", back_populates="employee")
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
@@ -41,6 +42,15 @@ class WorkPlan(Base):
     status = Column(String, default="Not Started")
     workstream_id = Column(Integer, ForeignKey("workstreams.id"))
     workstream = relationship("WorkStream", back_populates="workplans")
+
+class Target(Base):
+    __tablename__ = "targets"
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    deadline = Column(String)
+    status = Column(String, default="Not Started")
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    employee = relationship("Employee", back_populates="targets")
 
 Base.metadata.create_all(bind=engine)
 
@@ -92,11 +102,12 @@ def dashboard(user):
         st.session_state.user = None
         st.experimental_rerun()
 
-    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management"])
+    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management", "🎯 Target Management"])
 
     with tabs[0]:
         st.subheader("📌 Your Activities, Targets & Progress")
         my_ws = db.query(WorkStream).filter_by(employee_id=user.id).all()
+        my_targets = db.query(Target).filter_by(employee_id=user.id).all()
 
         with st.expander("➕ Add Workstream"):
             with st.form("add_ws"):
@@ -121,6 +132,16 @@ def dashboard(user):
                         db.commit()
                         st.success("Workplan added")
 
+        with st.expander("➕ Add Target"):
+            with st.form("add_target"):
+                target_desc = st.text_input("Target Description")
+                target_deadline = st.date_input("Target Deadline", date.today())
+                target_status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+                if st.form_submit_button("Add Target"):
+                    db.add(Target(description=target_desc, deadline=str(target_deadline), status=target_status, employee_id=user.id))
+                    db.commit()
+                    st.success("Target added")
+
         for ws in my_ws:
             st.markdown(f"### 🌟 {ws.title}")
             st.markdown(f"_Description_: {ws.description}")
@@ -128,6 +149,12 @@ def dashboard(user):
                 badge = "✅" if wp.status == "Completed" else ("🔹" if wp.status == "In Progress" else "⚪")
                 badge_color = "badge-completed" if wp.status == "Completed" else ("badge-in-progress" if wp.status == "In Progress" else "badge-not-started")
                 st.markdown(f"<span class='{badge_color}'>{badge}</span> **{wp.title}** | 📅 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
+
+        st.subheader("🎯 Your Targets")
+        for target in my_targets:
+            badge = "✅" if target.status == "Completed" else ("🔹" if target.status == "In Progress" else "⚪")
+            badge_color = "badge-completed" if target.status == "Completed" else ("badge-in-progress" if target.status == "In Progress" else "badge-not-started")
+            st.markdown(f"<span class='{badge_color}'>{badge}</span> **{target.description}** | 📅 {target.deadline} | _{target.status}_", unsafe_allow_html=True)
 
     with tabs[1]:
         st.subheader("🌐 Team Workstreams and Plans")
@@ -147,10 +174,19 @@ def dashboard(user):
             total_ws = db.query(WorkStream).filter_by(employee_id=emp.id).count()
             total_wp = sum(len(ws.workplans) for ws in emp.workstreams)
             completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp.workstreams)
-            report_data.append({"Employee": emp.name, "Workstreams": total_ws, "Workplans": total_wp, "Completed": completed_wp})
+            total_targets = len(emp.targets)
+            completed_targets = sum(1 for target in emp.targets if target.status == "Completed")
+            report_data.append({
+                "Employee": emp.name,
+                "Workstreams": total_ws,
+                "Workplans": total_wp,
+                "Completed Workplans": completed_wp,
+                "Targets": total_targets,
+                "Completed Targets": completed_targets
+            })
         df = pd.DataFrame(report_data)
         st.dataframe(df, use_container_width=True)
-        st.bar_chart(df.set_index("Employee")[["Workplans", "Completed"]])
+        st.bar_chart(df.set_index("Employee")[["Workplans", "Completed Workplans", "Targets", "Completed Targets"]])
 
     with tabs[3]:
         st.subheader("👥 Manage Users")
@@ -176,6 +212,16 @@ def dashboard(user):
                     st.success("User deleted")
                 else:
                     st.warning("Email not found")
+
+    with tabs[4]:
+        st.subheader("🎯 Manage Targets")
+        all_targets = db.query(Target).all()
+        for target in all_targets:
+            st.markdown(f"**{target.description}** | 📅 {target.deadline} | _{target.status}_")
+            if st.button(f"Complete Target: {target.description}"):
+                target.status = "Completed"
+                db.commit()
+                st.success(f"Target '{target.description}' marked as completed.")
 
 def main():
     preload_users()
