@@ -137,6 +137,16 @@ def display_notice():
 
 def sidebar():
     st.sidebar.title("Navigation")
+    st.sidebar.markdown("""
+        <style>
+            .sidebar {
+                background-image: url('path_to_your_sidebar_background_image.jpg'); /* Update with your sidebar image path */
+                background-size: cover;
+                color: white;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+    
     menu_options = {
         "Dashboard": "dashboard",
         "Manage Programs": "manage_programs",
@@ -153,9 +163,19 @@ def dashboard(user):
 
     st.markdown("""
         <style>
-            .main { background-color: #f5f9ff; }
-            .stTabs [data-baseweb="tab"]:hover {
-                background-color: #e1f5fe;
+            .main { 
+                background-color: #f5f9ff; 
+                position: relative; 
+                overflow: hidden; 
+            }
+            .video-background {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1;
+                opacity: 0.5; /* Adjust opacity for visibility */
             }
             h1, h2, h3, h4, h5, h6 { color: #0f4c75; }
             .badge-completed { color: green; }
@@ -170,6 +190,14 @@ def dashboard(user):
     if st.sidebar.button("🔓 Logout"):
         st.session_state.user = None
         st.experimental_rerun()
+
+    # Video background
+    st.markdown("""
+        <video autoplay muted loop class="video-background">
+            <source src="path_to_your_video.mp4" type="video/mp4"> <!-- Update with your video path -->
+            Your browser does not support the video tag.
+        </video>
+    """, unsafe_allow_html=True)
 
     tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management", "🎯 Target Management", "📚 Programs"])
 
