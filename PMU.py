@@ -24,6 +24,7 @@ class Employee(Base):
     workstreams = relationship("WorkStream", back_populates="employee")
     targets = relationship("Target", back_populates="employee")
     programs = relationship("Program", back_populates="employee")
+    schedules = relationship("Schedule", back_populates="employee")
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
@@ -62,6 +63,15 @@ class Program(Base):
     status = Column(String, default="Active")  # New field for status
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="programs")
+
+class Schedule(Base):
+    __tablename__ = "schedules"
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    date = Column(String)
+    start_time = Column(String)
+    end_time = Column(String)
+    employee = relationship("Employee", back_populates="schedules")
 
 # Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)  # This will drop all tables
@@ -132,6 +142,7 @@ def sidebar():
         "Dashboard": "dashboard",
         "Manage Programs": "manage_programs",
         "Reports": "reports",
+        "Employee Scheduling": "scheduling",
         "Settings": "settings",
         "Logout": "logout"
     }
@@ -335,6 +346,24 @@ def dashboard(user):
                     db.commit()
                     st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
+def scheduling(user):
+    db = get_db()
+    st.subheader("🗓️ Employee Scheduling")
+
+    with st.form("add_schedule"):
+        schedule_date = st.date_input("Schedule Date", date.today())
+        start_time = st.time_input("Start Time")
+        end_time = st.time_input("End Time")
+        if st.form_submit_button("Add Schedule"):
+            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
+            db.commit()
+            st.success("Schedule added successfully!")
+
+    st.subheader("Your Schedules")
+    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+    for schedule in schedules:
+        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+
 def main():
     preload_users()
     db = get_db()
@@ -362,6 +391,8 @@ def main():
         selected_tab = sidebar()
         if selected_tab == "dashboard":
             dashboard(st.session_state.user)
+        elif selected_tab == "scheduling":
+            scheduling(st.session_state.user)
         elif selected_tab == "manage_programs":
             # Call the manage programs function here
             st.subheader("Manage Programs")
