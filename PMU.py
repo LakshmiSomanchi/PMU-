@@ -348,10 +348,5 @@ def main():
     if st.session_state.user is not None:
         dashboard(st.session_state.user)
 
-    # Logout button with a unique key
-    if st.sidebar.button("🔓 Logout", key="logout_button"):
-        st.session_state.user = None
-        st.success("You have been logged out.")
-
 if __name__ == "__main__":
     main()
