@@ -79,6 +79,9 @@ def dashboard(user):
                 background-color: #e1f5fe;
             }
             h1, h2, h3, h4, h5, h6 { color: #0f4c75; }
+            .badge-completed { color: green; }
+            .badge-in-progress { color: orange; }
+            .badge-not-started { color: red; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -123,7 +126,8 @@ def dashboard(user):
             st.markdown(f"_Description_: {ws.description}")
             for wp in ws.workplans:
                 badge = "✅" if wp.status == "Completed" else ("🔹" if wp.status == "In Progress" else "⚪")
-                st.markdown(f"- {badge} **{wp.title}** | 📅 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
+                badge_color = "badge-completed" if wp.status == "Completed" else ("badge-in-progress" if wp.status == "In Progress" else "badge-not-started")
+                st.markdown(f"<span class='{badge_color}'>{badge}</span> **{wp.title}** | 📅 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
 
     with tabs[1]:
         st.subheader("🌐 Team Workstreams and Plans")
