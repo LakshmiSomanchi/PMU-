@@ -270,7 +270,7 @@ def dashboard(user):
                 db.commit()
                 st.success(f"Target '{target.description}' marked as completed.")
 
-     with tabs[5]:  # Programs tab
+  with tabs[5]:  # Programs tab
         st.subheader("📚 Manage Programs")
         
         # Initialize a session state list to hold multiple programs
@@ -278,7 +278,7 @@ def dashboard(user):
             st.session_state.programs = []
 
         # Form to add a new program
-     with st.form("add_program", clear_on_submit=True):
+        with st.form("add_program", clear_on_submit=True):
             new_program_name = st.text_input("Program Name")
             new_program_description = st.text_area("Program Description")
             new_program_status = st.selectbox("Program Status", ["Active", "Completed", "On Hold"])
