@@ -290,7 +290,13 @@ def dashboard(user):
 def main():
     preload_users()
     db = get_db()
-    if not st.session_state.user:
+    
+    # Initialize session state for user if not already done
+    if "user" not in st.session_state:
+        st.session_state.user = None
+
+    # Display the login section if no user is logged in
+    if st.session_state.user is None:
         st.title("🔐 Login")
         display_notice()
         all_users = db.query(Employee).all()
@@ -299,10 +305,20 @@ def main():
 
         if selected != "Select...":
             user = db.query(Employee).filter_by(email=selected).first()
-            st.session_state.user = user
-            st.experimental_rerun()
-    else:
+            if user:
+                st.session_state.user = user
+                st.success(f"Welcome, {user.name}!")
+                # No need to rerun, the dashboard will be displayed below
+
+    # Display the dashboard if a user is logged in
+    if st.session_state.user is not None:
         dashboard(st.session_state.user)
+
+    # Logout button
+    if st.sidebar.button("🔓 Logout"):
+        st.session_state.user = None
+        st.success("You have been logged out.")
+        # No need to rerun, the login section will be displayed again
 
 if __name__ == "__main__":
     main()
