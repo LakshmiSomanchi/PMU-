@@ -186,7 +186,7 @@ def main():
         all_users = db.query(Employee).all()
         emails = [u.email for u in all_users]
         selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
-        if selected != "Select...":
+    if selected != "Select...":
         st.session_state.login_selected = selected
 
 if "login_selected" in st.session_state and not st.session_state.user:
