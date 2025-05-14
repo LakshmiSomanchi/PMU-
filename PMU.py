@@ -58,6 +58,8 @@ class Program(Base):
     __tablename__ = "programs"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    description = Column(Text)  # New field for description
+    status = Column(String, default="Active")  # New field for status
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="programs")
 
@@ -268,29 +270,35 @@ def dashboard(user):
                 db.commit()
                 st.success(f"Target '{target.description}' marked as completed.")
 
-    with tabs[5]:
+    with tabs[5]:  # Programs tab
         st.subheader("📚 Manage Programs")
+        
+        # Form to add a new program
         with st.form("add_program"):
-            new_program = st.text_input("Program Name")
+            new_program_name = st.text_input("Program Name")
+            new_program_description = st.text_area("Program Description")
+            new_program_status = st.selectbox("Program Status", ["Active", "Completed", "On Hold"])
             if st.form_submit_button("Add Program"):
                 try:
-                    db.add(Program(name=new_program, employee_id=user.id))
+                    db.add(Program(name=new_program_name, description=new_program_description, status=new_program_status, employee_id=user.id))
                     db.commit()
                     st.success("Program added successfully")
                 except IntegrityError:
                     db.rollback()
                     st.error("Program already exists")
 
+        # Display existing programs
         st.subheader("Existing Programs")
         programs = db.query(Program).filter_by(employee_id=user.id).all()
         for program in programs:
             col1, col2 = st.columns([3, 1])
-            col1.markdown(f"**{program.name}**")
+            col1.markdown(f"**{program.name}** - {program.description} | Status: {program.status}")
             with col2:
-                if st.button(f"Delete {program.name}"):
-                    db.delete(program)
+                if st.button(f"Update Status for {program.name}"):
+                    new_status = st.selectbox("Select New Status", ["Active", "Completed", "On Hold"], key=program.id)
+                    program.status = new_status
                     db.commit()
-                    st.success(f"Program '{program.name}' deleted.")
+                    st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
 def main():
     preload_users()
