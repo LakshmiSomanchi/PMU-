@@ -195,7 +195,7 @@ if "login_selected" in st.session_state and not st.session_state.user:
     del st.session_state.login_selected
     st.experimental_rerun()
 
-    else:
+else:
         dashboard(st.session_state.user)
 
 if __name__ == "__main__":
