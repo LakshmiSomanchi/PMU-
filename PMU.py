@@ -29,6 +29,7 @@ class WorkStream(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     description = Column(Text)
+    category = Column(String)  # New field for category
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="workstreams")
     workplans = relationship("WorkPlan", back_populates="workstream")
@@ -113,8 +114,9 @@ def dashboard(user):
             with st.form("add_ws"):
                 ws_title = st.text_input("Workstream Title")
                 ws_desc = st.text_area("Description")
+                ws_category = st.selectbox("Category", ["Cotton", "Dairy", "Water", "PMU", "Cotton Desk", "Heritage", "Abbott"])
                 if st.form_submit_button("Add"):
-                    db.add(WorkStream(title=ws_title, description=ws_desc, employee_id=user.id))
+                    db.add(WorkStream(title=ws_title, description=ws_desc, category=ws_category, employee_id=user.id))
                     db.commit()
                     st.success("Workstream added")
 
@@ -143,7 +145,7 @@ def dashboard(user):
                     st.success("Target added")
 
         for ws in my_ws:
-            st.markdown(f"### 🌟 {ws.title}")
+            st.markdown(f"### 🌟 {ws.title} (Category: {ws.category})")
             st.markdown(f"_Description_: {ws.description}")
             for wp in ws.workplans:
                 badge = "✅" if wp.status == "Completed" else ("🔹" if wp.status == "In Progress" else "⚪")
@@ -161,7 +163,7 @@ def dashboard(user):
         all_ws = db.query(WorkStream).all()
         for ws in all_ws:
             st.markdown(f"<div style='background:#e3f2fd;padding:10px;border-left:6px solid #42a5f5;margin-bottom:10px;'>", unsafe_allow_html=True)
-            st.markdown(f"<strong>{ws.title}</strong> by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
+            st.markdown(f"<strong>{ws.title}</strong> (Category: {ws.category}) by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
             for wp in ws.workplans:
                 st.markdown(f"<li><b>{wp.title}</b> | {wp.deadline} | {wp.status}<br>{wp.details}</li>", unsafe_allow_html=True)
             st.markdown("</div>", unsafe_allow_html=True)
