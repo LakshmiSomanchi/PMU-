@@ -60,7 +60,6 @@ class Program(Base):
     name = Column(String, unique=True)
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="programs")
-    workstreams = relationship("WorkStream", back_populates="program")
 
 Base.metadata.create_all(bind=engine)
 
