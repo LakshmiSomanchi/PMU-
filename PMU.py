@@ -23,6 +23,7 @@ class Employee(Base):
     email = Column(String, unique=True)
     workstreams = relationship("WorkStream", back_populates="employee")
     targets = relationship("Target", back_populates="employee")
+    programs = relationship("Program", back_populates="employee")
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
@@ -57,6 +58,9 @@ class Program(Base):
     __tablename__ = "programs"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    employee = relationship("Employee", back_populates="programs")
+    workstreams = relationship("WorkStream", back_populates="program")
 
 Base.metadata.create_all(bind=engine)
 
@@ -88,7 +92,7 @@ def preload_users():
 def display_notice():
     st.markdown("""
         <h2 style='text-align:center;'>NOTICE & PROTOCOL FOR WORKSTREAM TRACKING PLATFORM USAGE</h2>
-        <p>Welcome to the [Platform Name] – your central hub for tracking progress, setting targets, and streamlining team alignment.</p>
+        <p>Welcome to the PMU Tracker – your central hub for tracking progress, setting targets, and streamlining team alignment.</p>
         <p>To ensure effective and consistent usage, please review and adhere to the following protocol:</p>
         <h3>Platform Purpose</h3>
         <p>This platform serves as a shared space for all team members to:</p>
@@ -269,7 +273,7 @@ def dashboard(user):
             new_program = st.text_input("Program Name")
             if st.form_submit_button("Add Program"):
                 try:
-                    db.add(Program(name=new_program))
+                    db.add(Program(name=new_program, employee_id=user.id))
                     db.commit()
                     st.success("Program added successfully")
                 except IntegrityError:
@@ -277,7 +281,7 @@ def dashboard(user):
                     st.error("Program already exists")
 
         st.subheader("Existing Programs")
-        programs = db.query(Program).all()
+        programs = db.query(Program).filter_by(employee_id=user.id).all()
         for program in programs:
             col1, col2 = st.columns([3, 1])
             col1.markdown(f"**{program.name}**")
@@ -308,17 +312,15 @@ def main():
             if user:
                 st.session_state.user = user
                 st.success(f"Welcome, {user.name}!")
-                # No need to rerun, the dashboard will be displayed below
 
     # Display the dashboard if a user is logged in
     if st.session_state.user is not None:
         dashboard(st.session_state.user)
 
-    # Logout button
-    if st.sidebar.button("🔓 Logout"):
+    # Logout button with a unique key
+    if st.sidebar.button("🔓 Logout", key="logout_button"):
         st.session_state.user = None
         st.success("You have been logged out.")
-        # No need to rerun, the login section will be displayed again
 
 if __name__ == "__main__":
     main()
