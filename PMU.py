@@ -6,6 +6,72 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 
+# Add custom CSS for full background color and styled sidebar
+st.markdown("""
+    <style>
+        /* Global page background */
+        .stApp {
+            background: linear-gradient(120deg, #f6f9fc, #e9f2ff);
+            color: #1f1f1f;
+        }
+
+        /* Sidebar styling */
+        section[data-testid="stSidebar"] > div:first-child {
+            background: linear-gradient(120deg, #003566, #00509d);
+            color: white;
+            border-radius: 0 10px 10px 0;
+            padding: 10px;
+        }
+
+        /* Sidebar text */
+        .stSidebar > div > div > div > div {
+            color: white !important;
+        }
+
+        /* Header text color */
+        h1, h2, h3, h4 {
+            color: #003566;
+        }
+
+        /* Expander boxes */
+        .streamlit-expanderHeader {
+            background-color: #dceefb;
+            border: 1px solid #cce0ff;
+            border-radius: 5px;
+        }
+
+        /* Buttons */
+        .stButton > button {
+            background-color: #0077b6;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5em 1em;
+        }
+        .stButton > button:hover {
+            background-color: #0096c7;
+        }
+
+        /* Dataframe styling */
+        .stDataFrame {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+        }
+
+        /* Tabs */
+        .stTabs [role="tab"] {
+            background-color: #edf6ff;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            border: 1px solid #b6d4fe;
+        }
+        .stTabs [role="tab"][aria-selected="true"] {
+            background-color: #0077b6;
+            color: white;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
