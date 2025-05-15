@@ -18,7 +18,7 @@ st.markdown(f"""
         }}
 
         section[data-testid="stSidebar"] > div:first-child {{
-            background-image: url("graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
