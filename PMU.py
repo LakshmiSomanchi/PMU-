@@ -30,7 +30,7 @@ st.markdown("""
             background-repeat: no-repeat;
             background-position: center;
             color: white;
-            padding: 20px;
+            padding: 10px;
             border-radius: 0 10px 10px 0;
         }
 
@@ -51,7 +51,7 @@ st.markdown("""
         .streamlit-expanderHeader {
             background-color: #dceefb;
             border: 1px solid #cce0ff;
-            border-radius: 10px;
+            border-radius: 5px;
         }
 
         .stButton > button {
@@ -59,27 +59,41 @@ st.markdown("""
             color: white;
             border-radius: 8px;
             padding: 0.5em 1em;
+            transition: background-color 0.3s ease; /* Smooth transition */
         }
         .stButton > button:hover {
             background-color: #0096c7;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
         }
 
         .stDataFrame {
-            background-color: #ffffff;
-            border: 5px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
         }
-
-        .stTabs [role="tab"] {
-            background-color: #edf6ff;
-            padding: 10px;
-            border-radius: 10px 10px 0 0;
-            margin-right: 5px;
-            border: 1px solid #b6d4fe;
-        }
-
-        .stTabs [role="tab"][aria-selected="true"] {
+        .stDataFrame th {
             background-color: #0077b6;
             color: white;
+        }
+        .stDataFrame tr:nth-child(even) {
+            background-color: #f9f9f9; /* Zebra striping */
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5; /* Adjust opacity for visibility */
         }
     </style>
 """, unsafe_allow_html=True)
@@ -245,28 +259,6 @@ def sidebar():
 
 def dashboard(user):
     db = get_db()
-
-    st.markdown("""
-        <style>
-            .main { 
-                position: relative; 
-                overflow: hidden; 
-            }
-            .video-background {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: -1;
-                opacity: 0.5; /* Adjust opacity for visibility */
-            }
-            h1, h2, h3, h4, h5, h6 { color: #0f4c75; }
-            .badge-completed { color: green; }
-            .badge-in-progress { color: orange; }
-            .badge-not-started { color: red; }
-        </style>
-    """, unsafe_allow_html=True)
 
     st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
