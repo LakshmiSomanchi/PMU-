@@ -69,6 +69,27 @@ st.markdown(f"""
             margin-right: 5px;
             border: 1px solid #b6d4fe;
         }}
+        st.markdown("""
+    <style>
+        .video-background {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100vw;
+            min-height: 100vh;
+            z-index: -1;
+            opacity: 0.2;
+            object-fit: cover;
+        }
+        .content-overlay {
+            position: relative;
+            z-index: 1;
+        }
+    <video autoplay muted loop class="video-background">
+        <source src="https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/7f9ca1c2e924fbd31397ba769fe7ec85dc7fb0d1/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4" type="video/mp4">
+    </video>
+    <div class="content-overlay">
+    
         .stTabs [role="tab"][aria-selected="true"] {{
             background-color: #0077b6;
             color: white;
@@ -270,7 +291,8 @@ def dashboard(user):
     # Video background
     st.markdown("""
         <video autoplay muted loop class="video-background">
-            <source src="https://github.com/LakshmiSomanchi/PMU-/blob/2c32d56cbaa850061ad7a93e3200320ee04a4de9/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4"> <!-- Update with your video path -->
+            <source src="https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/7f9ca1c2e924fbd31397ba769fe7ec85dc7fb0d1/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4
+"> <!-- Update with your video path -->
             Your browser does not support the video tag.
         </video>
     """, unsafe_allow_html=True)
