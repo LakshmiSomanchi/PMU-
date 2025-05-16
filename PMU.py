@@ -270,7 +270,7 @@ def dashboard(user):
     # Video background
     st.markdown("""
         <video autoplay muted loop class="video-background">
-            <source src="path_to_your_video.mp4" type="video/mp4"> <!-- Update with your video path -->
+            <source src="https://github.com/LakshmiSomanchi/PMU-/blob/2c32d56cbaa850061ad7a93e3200320ee04a4de9/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4"> <!-- Update with your video path -->
             Your browser does not support the video tag.
         </video>
     """, unsafe_allow_html=True)
