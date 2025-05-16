@@ -9,15 +9,19 @@ from datetime import date
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# ✅ Custom CSS with sidebar background image and photo-ready dashboard background
+# ✅ Custom CSS with sidebar background image and global page background image
 st.markdown("""
     <style>
-        .stApp {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/background-placeholder.jpg");
+        body {
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/3309939.jpg");
             background-size: cover;
             background-repeat: no-repeat;
+            background-attachment: fixed;
             background-position: center;
-            color: #1f1f1f;
+        }
+
+        .stApp {
+            background-color: rgba(255, 255, 255, 0.85);
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -78,7 +82,6 @@ st.markdown("""
             color: white;
         }
     </style>
-""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
 
 # SQLite + SQLAlchemy setup
