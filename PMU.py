@@ -173,7 +173,7 @@ def display_notice():
     st.markdown("""
         <style>
             .notice {
-                background-color: #d4f3a7; /* HEX color for notice page */
+                background-color: #ffffff; /* HEX color for notice page */
                 padding: 20px;
                 border-radius: 10px;
             }
