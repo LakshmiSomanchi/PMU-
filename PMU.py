@@ -21,7 +21,7 @@ st.markdown("""
         }
 
         .stApp {
-            background-color: rgba(255, 255, 255, 0.50);
+            background-color: rgba(255, 255, 255, 0.75); /* Increased transparency for better visibility */
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -246,20 +246,6 @@ def sidebar():
 def dashboard(user):
     db = get_db()
 
-    st.markdown("""
-        <style>
-            .main { 
-                position: relative; 
-                overflow: hidden; 
-            }
-         
-            h1, h2, h3, h4, h5, h6 { color: #0f4c75; }
-            .badge-completed { color: green; }
-            .badge-in-progress { color: orange; }
-            .badge-not-started { color: red; }
-        </style>
-    """, unsafe_allow_html=True)
-
     st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
@@ -348,11 +334,17 @@ def dashboard(user):
                 "Workplans": total_wp,
                 "Completed Workplans": completed_wp,
                 "Targets": total_targets,
-                "Completed Targets": completed_targets
+                "Completed Targets": completed_targets,
+                "Workplan Completion %": (completed_wp / total_wp * 100) if total_wp > 0 else 0,
+                "Target Completion %": (completed_targets / total_targets * 100) if total_targets > 0 else 0
             })
         df = pd.DataFrame(report_data)
         st.dataframe(df, use_container_width=True)
         st.bar_chart(df.set_index("Employee")[["Workplans", "Completed Workplans", "Targets", "Completed Targets"]])
+
+        # Download option for the report
+        csv = df.to_csv(index=False)
+        st.download_button("Download Report", csv, "team_progress_report.csv", "text/csv")
 
     with tabs[3]:
         st.subheader("👥 Manage Users")
