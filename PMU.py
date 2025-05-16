@@ -26,14 +26,15 @@ st.markdown("""
         }
 
         section[data-testid="stSidebar"] > div:first-child {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/sidepm.jpg");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            color: white;
-            padding: 20px;
-            border-radius: 0 10px 10px 0;
-        }
+    background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/sidepm.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: white;
+    padding: 20px;
+    border-radius: 0 10px 10px 0;
+}
+
 
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
