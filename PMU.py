@@ -21,7 +21,7 @@ st.markdown("""
         }
 
         .stApp {
-            background-color: rgba(255, 255, 255, 0.60);
+            background-color: rgba(255, 255, 255, 0.50);
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -66,7 +66,7 @@ st.markdown("""
 
         .stDataFrame {
             background-color: #ffffff;
-            border: 1px solid #ccc;
+            border: 5px solid #ccc;
         }
 
         .stTabs [role="tab"] {
@@ -182,7 +182,7 @@ def display_notice():
         <style>
             .notice {
                 background-color: #ffffff; /* HEX color for notice page */
-                padding: 20px;
+                padding: 5px;
                 border-radius: 10px;
             }
         </style>
