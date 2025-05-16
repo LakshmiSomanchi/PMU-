@@ -30,7 +30,7 @@ st.markdown("""
             background-repeat: no-repeat;
             background-position: center;
             color: white;
-            padding: 20px;
+            padding: 10px;
             border-radius: 0 10px 10px 0;
         }
 
@@ -71,7 +71,7 @@ st.markdown("""
 
         .stTabs [role="tab"] {
             background-color: #edf6ff;
-            padding: 5px;
+            padding: 10px;
             border-radius: 10px 10px 0 0;
             margin-right: 5px;
             border: 1px solid #b6d4fe;
@@ -268,12 +268,7 @@ def dashboard(user):
         </style>
     """, unsafe_allow_html=True)
 
-   st.markdown("""
-    <h1 style='text-align:center; color:#1a73e8;'>
-        <img src='3592856_general_group_office_personal_relation_icon.png' width='30' style='vertical-align:middle; margin-right:10px;'>
-        Project Management Dashboard
-    </h1>
-""", unsafe_allow_html=True)
+   st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
     if st.sidebar.button("🔓 Logout"):
