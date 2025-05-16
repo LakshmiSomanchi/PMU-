@@ -195,15 +195,10 @@ def display_notice():
     st.markdown("""
         <style>
             .notice {
-                background-color: rgba(255, 255, 255, 0.1); /* transparent white */
+                background-color: #ffffff; /* HEX color for notice page */
                 padding: 5px;
                 border-radius: 15px;
             }
-        </style>
-        <div class="notice">
-            <p>This is a transparent notice box.</p>
-        </div>
-    """, unsafe_allow_html=True)
 
     </style>
         <div class="notice">
