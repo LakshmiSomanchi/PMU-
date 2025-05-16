@@ -224,7 +224,7 @@ def sidebar():
     st.sidebar.markdown("""
         <style>
             .sidebar {
-                background-image: url('graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg'); /* Update with your sidebar image path */
+                background-image: url('https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg'); /* Update with your sidebar image path */
                 background-size: cover;
                 color: white;
                 padding: 20px;
