@@ -10,7 +10,7 @@ import os
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# ✅ Custom CSS with sidebar background image and global page background image
+# Custom CSS with sidebar background image and global page background image
 st.markdown("""
     <style>
         body {
@@ -34,7 +34,9 @@ st.markdown("""
     padding: 20px;
     border-radius: 0 10px 10px 0;
 }
-
+        .stApp {
+            background-color: rgba(255, 255, 255, 0.75); /* Increased transparency for better visibility */
+        }
 
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
