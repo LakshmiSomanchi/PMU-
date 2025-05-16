@@ -26,7 +26,7 @@ st.markdown("""
         }
 
         section[data-testid="stSidebar"] > div:first-child {
-    background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/sidepm.jpg");
+    background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/sidebarpmu.jpg");
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
