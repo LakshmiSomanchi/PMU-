@@ -9,11 +9,14 @@ from datetime import date
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# ✅ Custom CSS with sidebar background image and dashboard video background
+# ✅ Custom CSS with sidebar background image and photo-ready dashboard background
 st.markdown("""
     <style>
         .stApp {
-            background: linear-gradient(120deg, #f6f9fc, #e9f2ff);
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/background-placeholder.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
             color: #1f1f1f;
         }
 
@@ -74,27 +77,8 @@ st.markdown("""
             background-color: #0077b6;
             color: white;
         }
-
-        .video-background {
-            position: fixed;
-            right: 0;
-            bottom: 0;
-            min-width: 100vw;
-            min-height: 100vh;
-            z-index: -1;
-            opacity: 0.2;
-            object-fit: cover;
-        }
-
-        .content-overlay {
-            position: relative;
-            z-index: 1;
-        }
     </style>
-    <video autoplay muted loop class="video-background">
-        <source src="https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/7f9ca1c2e924fbd31397ba769fe7ec85dc7fb0d1/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4" type="video/mp4">
-    </video>
-    <div class="content-overlay">
+""", unsafe_allow_html=True)
 """, unsafe_allow_html=True)
 
 # SQLite + SQLAlchemy setup
