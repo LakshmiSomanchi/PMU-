@@ -5,6 +5,8 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
+import plotly.express as px
+import os
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -154,6 +156,19 @@ Base.metadata.create_all(bind=engine)  # This will recreate the tables
 
 if "user" not in st.session_state:
     st.session_state.user = None
+
+if "settings" not in st.session_state:
+    st.session_state.settings = {
+        "theme": "Light",
+        "notification": "Email",
+        "language": "English",
+        "project_timeline": "Weekly",
+        "units": "Hours",
+        "progress_metric": "% Complete",
+        "report_frequency": "Weekly",
+        "report_format": "PDF",
+        "auto_email_summary": False
+    }
 
 preloaded_users = [
     ("Somanchi", "rsomanchi@tns.org"),
@@ -433,6 +448,81 @@ def dashboard(user):
                     db.commit()
                     st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
+def settings():
+    st.subheader("⚙️ Settings")
+    
+    # User Preferences
+    st.markdown("### User Preferences")
+    theme = st.selectbox("Theme", ["Light", "Dark"], index=0)
+    notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=0)
+    language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=0)
+
+    # Project Preferences
+    st.markdown("### Project Preferences")
+    project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=1)
+    units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=0)
+    progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=0)
+
+    # Access Control
+    st.markdown("### Access Control")
+    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=0)
+    api_key = st.text_input("API Key/Token Management", "")
+
+    # Report Configuration
+    st.markdown("### Report Configuration")
+    report_frequency = st.selectbox("Default Report Frequency", ["Weekly", "Bi-weekly", "Monthly"], index=0)
+    report_format = st.selectbox("Report Formats", ["PDF", "Excel", "JSON"], index=0)
+    auto_email_summary = st.checkbox("Auto-email Summary", value=False)
+
+    if st.button("Save Settings"):
+        st.session_state.settings.update({
+            "theme": theme,
+            "notification": notification,
+            "language": language,
+            "project_timeline": project_timeline,
+            "units": units,
+            "progress_metric": progress_metric,
+            "role": role,
+            "api_key": api_key,
+            "report_frequency": report_frequency,
+            "report_format": report_format,
+            "auto_email_summary": auto_email_summary
+        })
+        st.success("Settings saved successfully!")
+
+def reports():
+    st.subheader("📊 Reports")
+    st.markdown("### Weekly Document Summary")
+    
+    # Generate a weekly summary document
+    if st.button("Generate Weekly Summary"):
+        summary_data = {
+            "Project": [],
+            "Progress Overview": [],
+            "Milestones Completed": [],
+            "Delays": [],
+            "Blockers": [],
+            "Action Items": []
+        }
+        
+        # Simulate data generation
+        for i in range(1, 4):
+            summary_data["Project"].append(f"Project {i}")
+            summary_data["Progress Overview"].append(f"{i * 10}%")
+            summary_data["Milestones Completed"].append(f"{i} milestones")
+            summary_data["Delays"].append(f"{i} delays")
+            summary_data["Blockers"].append(f"{i} blockers")
+            summary_data["Action Items"].append(f"Action item {i}")
+
+        summary_df = pd.DataFrame(summary_data)
+        summary_filename = f"weekly_summary_{date.today()}.csv"
+        summary_df.to_csv(summary_filename, index=False)
+        st.success(f"Weekly summary generated: {summary_filename}")
+
+    # Display the summary
+    if os.path.exists(summary_filename):
+        st.dataframe(summary_df)
+
 def scheduling(user):
     db = get_db()
     st.subheader("🗓️ Employee Scheduling")
@@ -485,13 +575,9 @@ def main():
             st.subheader("Manage Programs")
             # Add your manage programs code here
         elif selected_tab == "reports":
-            # Call the reports function here
-            st.subheader("Reports")
-            # Add your reports code here
+            reports()
         elif selected_tab == "settings":
-            # Call the settings function here
-            st.subheader("Settings")
-            st.write("Settings functionality will be implemented here.")
+            settings()
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
