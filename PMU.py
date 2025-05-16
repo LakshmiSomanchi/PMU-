@@ -21,7 +21,7 @@ st.markdown("""
         }
 
         .stApp {
-            background-color: rgba(255, 255, 255, 0.85);
+            background-color: rgba(255, 255, 255, 0.60);
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -71,7 +71,7 @@ st.markdown("""
 
         .stTabs [role="tab"] {
             background-color: #edf6ff;
-            padding: 10px;
+            padding: 5px;
             border-radius: 10px 10px 0 0;
             margin-right: 5px;
             border: 1px solid #b6d4fe;
