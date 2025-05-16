@@ -9,23 +9,23 @@ from datetime import date
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# ✅ Custom CSS with sidebar background image
-st.markdown(f"""
+# ✅ Custom CSS with sidebar background image and dashboard video background
+st.markdown("""
     <style>
-        .stApp {{
+        .stApp {
             background: linear-gradient(120deg, #f6f9fc, #e9f2ff);
             color: #1f1f1f;
-        }}
+        }
 
-        section[data-testid="stSidebar"] > div:first-child {{
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg");
+        section[data-testid="stSidebar"] > div:first-child {
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
             color: white;
             padding: 20px;
             border-radius: 0 10px 10px 0;
-        }}
+        }
 
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
@@ -33,44 +33,48 @@ st.markdown(f"""
         section[data-testid="stSidebar"] h4,
         section[data-testid="stSidebar"] h5,
         section[data-testid="stSidebar"] h6,
-        section[data-testid="stSidebar"] .stRadio label {{
+        section[data-testid="stSidebar"] .stRadio label {
             color: white !important;
-        }}
+        }
 
-        h1, h2, h3, h4 {{
+        h1, h2, h3, h4 {
             color: #003566;
-        }}
+        }
 
-        .streamlit-expanderHeader {{
+        .streamlit-expanderHeader {
             background-color: #dceefb;
             border: 1px solid #cce0ff;
             border-radius: 5px;
-        }}
+        }
 
-        .stButton > button {{
+        .stButton > button {
             background-color: #0077b6;
             color: white;
             border-radius: 8px;
             padding: 0.5em 1em;
-        }}
-        .stButton > button:hover {{
+        }
+        .stButton > button:hover {
             background-color: #0096c7;
-        }}
+        }
 
-        .stDataFrame {{
+        .stDataFrame {
             background-color: #ffffff;
             border: 1px solid #ccc;
-        }}
+        }
 
-        .stTabs [role="tab"] {{
+        .stTabs [role="tab"] {
             background-color: #edf6ff;
             padding: 10px;
             border-radius: 10px 10px 0 0;
             margin-right: 5px;
             border: 1px solid #b6d4fe;
-        }}
-        st.markdown("""
-    <style>
+        }
+
+        .stTabs [role="tab"][aria-selected="true"] {
+            background-color: #0077b6;
+            color: white;
+        }
+
         .video-background {
             position: fixed;
             right: 0;
@@ -81,20 +85,16 @@ st.markdown(f"""
             opacity: 0.2;
             object-fit: cover;
         }
+
         .content-overlay {
             position: relative;
             z-index: 1;
         }
+    </style>
     <video autoplay muted loop class="video-background">
         <source src="https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/7f9ca1c2e924fbd31397ba769fe7ec85dc7fb0d1/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4" type="video/mp4">
     </video>
     <div class="content-overlay">
-    
-        .stTabs [role="tab"][aria-selected="true"] {{
-            background-color: #0077b6;
-            color: white;
-        }}
-    </style>
 """, unsafe_allow_html=True)
 
 # SQLite + SQLAlchemy setup
