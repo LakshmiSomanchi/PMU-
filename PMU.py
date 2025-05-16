@@ -195,10 +195,16 @@ def display_notice():
     st.markdown("""
         <style>
             .notice {
-                background-color: #ffffff; /* HEX color for notice page */
+                background-color: rgba(255, 255, 255, 0.1); /* transparent white */
                 padding: 5px;
                 border-radius: 15px;
             }
+        </style>
+        <div class="notice">
+            <p>This is a transparent notice box.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
         </style>
         <div class="notice">
             <h2 style='text-align:center;'>NOTICE & PROTOCOL FOR WORKSTREAM TRACKING PLATFORM USAGE</h2>
@@ -227,9 +233,9 @@ def display_notice():
             <p>Any technical issues or submission challenges should be reported within the window</p>
             <p>Use official channels for queries to ensure swift response</p>
             <p>We appreciate your cooperation in making this system a success. Let’s keep progress transparent, teamwork tight, and targets in sight.</p>
-            <p>For questions or support, please contact [Your Admin/Support Contact Info].</p>
+            <p>For questions or support, please contact rsomanchi@tns.org.</p>
             <p>Let the tracking begin – elegantly, efficiently, and with a touch of excellence.</p>
-            <p>[Platform Admin / Supervisor Name] On behalf of the Coordination Team</p>
+            <p>On behalf of the Coordination Team</p>
         </div>
     """, unsafe_allow_html=True)
 
