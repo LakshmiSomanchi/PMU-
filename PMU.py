@@ -200,10 +200,6 @@ def display_notice():
                 border-radius: 15px;
             }
         </style>
-    """, unsafe_allow_html=True)
-
-
-    </style>
         <div class="notice">
             <h2 style='text-align:center;'>NOTICE & PROTOCOL FOR WORKSTREAM TRACKING PLATFORM USAGE</h2>
             <p>Welcome to the PMU Tracker – your central hub for tracking progress, setting targets, and streamlining team alignment.</p>
