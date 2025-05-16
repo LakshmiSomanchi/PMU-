@@ -275,15 +275,6 @@ def dashboard(user):
         st.session_state.user = None
         st.experimental_rerun()
 
-    # Video background
-    st.markdown("""
-        <video autoplay muted loop class="video-background">
-            <source src="https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/7f9ca1c2e924fbd31397ba769fe7ec85dc7fb0d1/3141208-uhd_3840_2160_25fps%20(1)%20(1).mp4
-"> <!-- Update with your video path -->
-            Your browser does not support the video tag.
-        </video>
-    """, unsafe_allow_html=True)
-
     tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management", "🎯 Target Management", "📚 Programs"])
 
     with tabs[0]:
