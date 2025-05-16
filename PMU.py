@@ -22,7 +22,7 @@ st.markdown("""
         }
 
         .stApp {
-            background-color: rgba(255, 255, 255, 0.60); /* Increased transparency for better visibility */
+            background-color: rgba(255, 255, 255, 0.55); /* Increased transparency for better visibility */
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -34,10 +34,7 @@ st.markdown("""
     padding: 20px;
     border-radius: 0 10px 10px 0;
 }
-        .stApp {
-            background-color: rgba(255, 255, 255, 0.75); /* Increased transparency for better visibility */
-        }
-
+       
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
         section[data-testid="stSidebar"] h3,
