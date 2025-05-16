@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
-import plotly.express as px
 import os
 
 # Set Streamlit page config (must be first)
