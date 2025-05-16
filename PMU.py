@@ -268,7 +268,12 @@ def dashboard(user):
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
+   st.markdown("""
+    <h1 style='text-align:center; color:#1a73e8;'>
+        <img src='3592856_general_group_office_personal_relation_icon.png' width='30' style='vertical-align:middle; margin-right:10px;'>
+        Project Management Dashboard
+    </h1>
+""", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
     if st.sidebar.button("🔓 Logout"):
