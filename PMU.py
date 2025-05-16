@@ -493,6 +493,9 @@ def reports():
     st.subheader("📊 Reports")
     st.markdown("### Weekly Document Summary")
     
+    # Initialize summary filename
+    summary_filename = ""
+
     # Generate a weekly summary document
     if st.button("Generate Weekly Summary"):
         summary_data = {
@@ -518,8 +521,9 @@ def reports():
         summary_df.to_csv(summary_filename, index=False)
         st.success(f"Weekly summary generated: {summary_filename}")
 
-    # Display the summary
-    if os.path.exists(summary_filename):
+    # Display the summary if it exists
+    if summary_filename and os.path.exists(summary_filename):
+        summary_df = pd.read_csv(summary_filename)
         st.dataframe(summary_df)
 
 def scheduling(user):
