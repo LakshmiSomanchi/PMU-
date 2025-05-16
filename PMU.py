@@ -51,7 +51,7 @@ st.markdown("""
         .streamlit-expanderHeader {
             background-color: #dceefb;
             border: 1px solid #cce0ff;
-            border-radius: 5px;
+            border-radius: 10px;
         }
 
         .stButton > button {
