@@ -491,7 +491,7 @@ def main():
         elif selected_tab == "settings":
             # Call the settings function here
             st.subheader("Settings")
-            # Add your settings code here
+            st.write("Settings functionality will be implemented here.")
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
