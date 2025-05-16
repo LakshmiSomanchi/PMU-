@@ -22,7 +22,7 @@ st.markdown("""
         }
 
         .stApp {
-            background-color: rgba(255, 255, 255, 0.75); /* Increased transparency for better visibility */
+            background-color: rgba(255, 255, 255, 0.60); /* Increased transparency for better visibility */
         }
 
         section[data-testid="stSidebar"] > div:first-child {
