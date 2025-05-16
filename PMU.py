@@ -26,14 +26,14 @@ st.markdown("""
         }
 
         section[data-testid="stSidebar"] > div:first-child {
-    background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/sidebarpmu.jpg");
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    color: white;
-    padding: 20px;
-    border-radius: 0 10px 10px 0;
-}
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/sidebarpmu.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: white;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+        }
        
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
@@ -97,10 +97,12 @@ class Employee(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     email = Column(String, unique=True)
+    password = Column(String)  # Added password field
     workstreams = relationship("WorkStream", back_populates="employee")
     targets = relationship("Target", back_populates="employee")
     programs = relationship("Program", back_populates="employee")
     schedules = relationship("Schedule", back_populates="employee")
+    workplans = relationship("WorkPlan", back_populates="supervisor")  # Added relationship for workplans
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
@@ -121,6 +123,8 @@ class WorkPlan(Base):
     status = Column(String, default="Not Started")
     workstream_id = Column(Integer, ForeignKey("workstreams.id"))
     workstream = relationship("WorkStream", back_populates="workplans")
+    supervisor_id = Column(Integer, ForeignKey("employees.id"))  # Added supervisor relationship
+    supervisor = relationship("Employee", back_populates="workplans")  # Relationship to Employee
 
 class Target(Base):
     __tablename__ = "targets"
@@ -156,27 +160,14 @@ Base.metadata.create_all(bind=engine)  # This will recreate the tables
 if "user" not in st.session_state:
     st.session_state.user = None
 
-if "settings" not in st.session_state:
-    st.session_state.settings = {
-        "theme": "Light",
-        "notification": "Email",
-        "language": "English",
-        "project_timeline": "Weekly",
-        "units": "Hours",
-        "progress_metric": "% Complete",
-        "report_frequency": "Weekly",
-        "report_format": "PDF",
-        "auto_email_summary": False
-    }
-
 preloaded_users = [
-    ("Somanchi", "rsomanchi@tns.org"),
-    ("Ranu", "rladdha@tns.org"),
-    ("Pari", "paris@tns.org"),
-    ("Muskan", "mkaushal@tns.org"),
-    ("Rupesh", "rmukherjee@tns.org"),
-    ("Shifali", "shifalis@tns.org"),
-    ("Pragya Bharati", "pbharati@tns.org")
+    ("Somanchi", "rsomanchi@tns.org", "password1"),
+    ("Ranu", "rladdha@tns.org", "password2"),
+    ("Pari", "paris@tns.org", "password3"),
+    ("Muskan", "mkaushal@tns.org", "password4"),
+    ("Rupesh", "rmukherjee@tns.org", "password5"),
+    ("Shifali", "shifalis@tns.org", "password6"),
+    ("Pragya Bharati", "pbharati@tns.org", "password7")
 ]
 
 def get_db():
@@ -184,9 +175,9 @@ def get_db():
 
 def preload_users():
     db = get_db()
-    for name, email in preloaded_users:
+    for name, email, password in preloaded_users:
         try:
-            db.add(Employee(name=name, email=email))
+            db.add(Employee(name=name, email=email, password=password))
             db.commit()
         except IntegrityError:
             db.rollback()
@@ -294,7 +285,7 @@ def dashboard(user):
                     wp_deadline = st.date_input("Deadline", date.today())
                     wp_status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
                     if st.form_submit_button("Add Workplan"):
-                        db.add(WorkPlan(title=wp_title, details=wp_details, deadline=str(wp_deadline), status=wp_status, workstream_id=ws_options[selected_ws]))
+                        db.add(WorkPlan(title=wp_title, details=wp_details, deadline=str(wp_deadline), status=wp_status, workstream_id=ws_options[selected_ws], supervisor_id=user.id))
                         db.commit()
                         st.success("Workplan added")
 
@@ -365,9 +356,10 @@ def dashboard(user):
         with st.form("add_user"):
             new_name = st.text_input("Full Name")
             new_email = st.text_input("Email Address")
+            new_password = st.text_input("Password", type="password")
             if st.form_submit_button("Add"):
                 try:
-                    db.add(Employee(name=new_name, email=new_email))
+                    db.add(Employee(name=new_name, email=new_email, password=new_password))
                     db.commit()
                     st.success("User added successfully")
                 except IntegrityError:
@@ -562,9 +554,12 @@ def main():
 
         if selected != "Select...":
             user = db.query(Employee).filter_by(email=selected).first()
-            if user:
+            password = st.text_input("Password", type="password")
+            if user and user.password == password:
                 st.session_state.user = user
                 st.success(f"Welcome, {user.name}!")
+            elif user and user.password != password:
+                st.error("Incorrect password.")
 
     # Display the dashboard if a user is logged in
     if st.session_state.user is not None:
