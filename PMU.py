@@ -447,7 +447,7 @@ def settings():
     # Access Control
     st.markdown("### Access Control")
     role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=0)
-    api_key = st.text_input("API Key/Token Management", "")
+    # Removed API Key/Token Management
 
     # Report Configuration
     st.markdown("### Report Configuration")
@@ -464,7 +464,6 @@ def settings():
             "units": units,
             "progress_metric": progress_metric,
             "role": role,
-            "api_key": api_key,
             "report_frequency": report_frequency,
             "report_format": report_format,
             "auto_email_summary": auto_email_summary
