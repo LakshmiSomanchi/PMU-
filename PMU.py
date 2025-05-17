@@ -186,7 +186,7 @@ def display_notice():
     st.markdown("""
         <style>
             .notice {
-                background-color: rgba(255, 255, 255, 0.1); /* transparent white */
+                background-color: rgba(255, 255, 255, 0.6); /* transparent white */
                 padding: 5px;
                 border-radius: 15px;
             }
