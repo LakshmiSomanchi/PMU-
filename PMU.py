@@ -157,9 +157,11 @@ class Schedule(Base):
 Base.metadata.drop_all(bind=engine)  # This will drop all tables
 Base.metadata.create_all(bind=engine)  # This will recreate the tables
 
+# Initialize session state for user if not already done
 if "user" not in st.session_state:
     st.session_state.user = None
 
+# Preloaded users
 preloaded_users = [
     ("Somanchi", "rsomanchi@tns.org", "password1"),
     ("Ranu", "rladdha@tns.org", "password2"),
@@ -226,17 +228,6 @@ def display_notice():
 
 def sidebar():
     st.sidebar.title("Navigation")
-    st.sidebar.markdown("""
-        <style>
-            .sidebar {
-                background-image: url('https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/graphic-2d-colorful-wallpaper-with-grainy-gradients.jpg'); /* Update with your sidebar image path */
-                background-size: cover;
-                color: white;
-                padding: 20px;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-    
     menu_options = {
         "Dashboard": "dashboard",
         "Manage Programs": "manage_programs",
@@ -250,7 +241,6 @@ def sidebar():
 
 def dashboard(user):
     db = get_db()
-
     st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
     st.sidebar.markdown("### Logged in as")
     st.sidebar.success(user.name)
