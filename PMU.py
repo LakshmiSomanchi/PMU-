@@ -103,6 +103,7 @@ class Employee(Base):
     programs = relationship("Program", back_populates="employee")
     schedules = relationship("Schedule", back_populates="employee")
     workplans = relationship("WorkPlan", back_populates="supervisor")  # Added relationship for workplans
+    field_teams = relationship("FieldTeam", back_populates="pmu")  # Relationship to Field Teams
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
@@ -152,6 +153,23 @@ class Schedule(Base):
     start_time = Column(String)
     end_time = Column(String)
     employee = relationship("Employee", back_populates="schedules")
+
+class FieldTeam(Base):
+    __tablename__ = "field_teams"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    pmu_id = Column(Integer, ForeignKey("employees.id"))  # PMU supervisor
+    pmu = relationship("Employee", back_populates="field_teams")
+    tasks = relationship("Task", back_populates="field_team")  # Relationship to tasks assigned to the field team
+
+class Task(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    deadline = Column(String)
+    status = Column(String, default="Not Started")
+    field_team_id = Column(Integer, ForeignKey("field_teams.id"))
+    field_team = relationship("FieldTeam", back_populates="tasks")
 
 # Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)  # This will drop all tables
@@ -233,6 +251,7 @@ def sidebar():
         "Manage Programs": "manage_programs",
         "Reports": "reports",
         "Employee Scheduling": "scheduling",
+        "Field Team Management": "field_team_management",  # New section for field teams
         "Settings": "settings",
         "Logout": "logout"
     }
@@ -429,31 +448,78 @@ def dashboard(user):
                     db.commit()
                     st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
+def field_team_management():
+    db = get_db()
+    st.subheader("🌾 Field Team Management")
+
+    # Add a new field team
+    with st.form("add_field_team"):
+        field_team_name = st.text_input("Field Team Name")
+        if st.form_submit_button("Add Field Team"):
+            try:
+                db.add(FieldTeam(name=field_team_name, pmu_id=st.session_state.user.id))
+                db.commit()
+                st.success(f"Field Team '{field_team_name}' added successfully.")
+            except IntegrityError:
+                db.rollback()
+                st.error("Field Team already exists.")
+
+    # Display existing field teams
+    st.subheader("Existing Field Teams")
+    field_teams = db.query(FieldTeam).all()
+    for team in field_teams:
+        st.markdown(f"**{team.name}** | PMU ID: {team.pmu_id}")
+
+    # Assign tasks to field teams
+    with st.form("assign_task"):
+        task_description = st.text_input("Task Description")
+        task_deadline = st.date_input("Task Deadline", date.today())
+        selected_team = st.selectbox("Select Field Team", [team.name for team in field_teams])
+        if st.form_submit_button("Assign Task"):
+            field_team = db.query(FieldTeam).filter_by(name=selected_team).first()
+            db.add(Task(description=task_description, deadline=str(task_deadline), field_team_id=field_team.id))
+            db.commit()
+            st.success(f"Task assigned to {selected_team}.")
+
 def settings():
     st.subheader("⚙️ Settings")
     
+    # Initialize settings in session state if not already done
+    if "settings" not in st.session_state:
+        st.session_state.settings = {
+            "theme": "Light",
+            "notification": "Email",
+            "language": "English",
+            "project_timeline": "Weekly",
+            "units": "Hours",
+            "progress_metric": "% Complete",
+            "role": "Admin",  # Default role
+            "report_frequency": "Weekly",
+            "report_format": "PDF",
+            "auto_email_summary": False
+        }
+
     # User Preferences
     st.markdown("### User Preferences")
-    theme = st.selectbox("Theme", ["Light", "Dark"], index=0)
-    notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=0)
-    language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=0)
+    theme = st.selectbox("Theme", ["Light", "Dark"], index=["Light", "Dark"].index(st.session_state.settings["theme"]))
+    notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]))
+    language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=["English", "Spanish", "French"].index(st.session_state.settings["language"]))
 
     # Project Preferences
     st.markdown("### Project Preferences")
-    project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=1)
-    units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=0)
-    progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=0)
+    project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]))
+    units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]))
+    progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]))
 
     # Access Control
     st.markdown("### Access Control")
-    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=0)
-    # Removed API Key/Token Management
+    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]))
 
     # Report Configuration
     st.markdown("### Report Configuration")
-    report_frequency = st.selectbox("Default Report Frequency", ["Weekly", "Bi-weekly", "Monthly"], index=0)
-    report_format = st.selectbox("Report Formats", ["PDF", "Excel", "JSON"], index=0)
-    auto_email_summary = st.checkbox("Auto-email Summary", value=False)
+    report_frequency = st.selectbox("Default Report Frequency", ["Weekly", "Bi-weekly", "Monthly"], index=["Weekly", "Bi-weekly", "Monthly"].index(st.session_state.settings["report_frequency"]))
+    report_format = st.selectbox("Report Formats", ["PDF", "Excel", "JSON"], index=["PDF", "Excel", "JSON"].index(st.session_state.settings["report_format"]))
+    auto_email_summary = st.checkbox("Auto-email Summary", value=st.session_state.settings["auto_email_summary"])
 
     if st.button("Save Settings"):
         st.session_state.settings.update({
@@ -557,10 +623,8 @@ def main():
             dashboard(st.session_state.user)
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
-        elif selected_tab == "manage_programs":
-            # Call the manage programs function here
-            st.subheader("Manage Programs")
-            # Add your manage programs code here
+        elif selected_tab == "field_team_management":
+            field_team_management()  # New section for field team management
         elif selected_tab == "reports":
             reports()
         elif selected_tab == "settings":
