@@ -418,8 +418,8 @@ def dashboard(user):
             new_program_description = st.text_area("Program Description")
             new_program_status = st.selectbox("Program Status", ["Active", "Completed", "On Hold"])
             if st.form_submit_button("Add Program"):
-    if new_program_name:
-        existing = db.query(Program).filter_by(name=new_program_name, employee_id=user.id).first()
+            if new_program_name:
+            existing = db.query(Program).filter_by(name=new_program_name, employee_id=user.id).first()
         if existing:
             st.warning(f"Program '{new_program_name}' already exists.")
         else:
