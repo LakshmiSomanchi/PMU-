@@ -26,7 +26,7 @@ st.markdown("""
         }
 
         section[data-testid="stSidebar"] > div:first-child {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20green%20minimalist%20background%20with%20leaves%20on%20keft%20side.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20green%20plain%20background.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
