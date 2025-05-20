@@ -171,6 +171,14 @@ class Task(Base):
     field_team_id = Column(Integer, ForeignKey("field_teams.id"))
     field_team = relationship("FieldTeam", back_populates="tasks")
 
+class FarmerData(Base):
+    __tablename__ = "farmer_data"
+    id = Column(Integer, primary_key=True)
+    farmer_name = Column(String)
+    number_of_cows = Column(Integer)
+    yield_per_cow = Column(Float)  # Yield per cow
+    date = Column(String)  # Date of the record
+
 # Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)  # This will drop all tables
 Base.metadata.create_all(bind=engine)  # This will recreate the tables
@@ -252,6 +260,7 @@ def sidebar():
         "Reports": "reports",
         "Employee Scheduling": "scheduling",
         "Field Team Management": "field_team_management",  # New section for field teams
+        "Live Dashboard": "live_dashboard",  # New section for live dashboard
         "Settings": "settings",
         "Logout": "logout"
     }
@@ -448,51 +457,38 @@ def dashboard(user):
                     db.commit()
                     st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
-with tabs[6]:
+def live_dashboard():
+    db = get_db()
     st.subheader("📈 Live Monitoring Dashboard")
 
-    employees = db.query(Employee).all()
+    # Fetch farmer data
+    farmer_data = db.query(FarmerData).all()
+    if not farmer_data:
+        st.warning("No farmer data available.")
+        return
 
-    total_cows = 0
-    total_milk = 0.0
-    total_farmers = len(employees)
+    # Prepare data for display
+    total_farmers = len(farmer_data)
+    total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
+    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
+    yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
 
-    report_data = []
+    # Display metrics
+    st.metric("🧮 Total Farmers", total_farmers)
+    st.metric("🐄 Total Cows", total_cows)
+    st.metric("🍼 Total Yield (L)", total_yield)
+    st.metric("📊 Yield per Cow (L)", round(yield_per_cow, 2))
 
-    for emp in employees:
-        # Optional: if you integrate Dairy data with each employee
-        emp_ws = db.query(WorkStream).filter_by(employee_id=emp.id).all()
-        total_ws = len(emp_ws)
-        total_wp = sum(len(ws.workplans) for ws in emp_ws)
-        completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp_ws)
-        completed_targets = sum(1 for t in emp.targets if t.status == "Completed")
+    # Create a DataFrame for detailed view
+    df = pd.DataFrame({
+        "Farmer Name": [farmer.farmer_name for farmer in farmer_data],
+        "Number of Cows": [farmer.number_of_cows for farmer in farmer_data],
+        "Yield per Cow (L)": [farmer.yield_per_cow for farmer in farmer_data]
+    })
 
-        report_data.append({
-            "Employee": emp.name,
-            "Workstreams": total_ws,
-            "Workplans": total_wp,
-            "Completed": completed_wp,
-            "Targets": len(emp.targets),
-            "Completed Targets": completed_targets
-        })
-
-    df = pd.DataFrame(report_data)
-
-    # Replace with actual dairy metrics if available
-    st.metric("🧮 Total Employees", total_farmers)
-    st.metric("🌾 Total Workplans", df['Workplans'].sum())
-    st.metric("✅ Completed Workplans", df['Completed'].sum())
-
-    # Future:
-    # st.metric("🐄 Total Cows", total_cows)
-    # st.metric("🍼 Total Milk (L)", total_milk)
-    # st.metric("Yield per Cow (L)", round(total_milk / total_cows, 2))
-
-    st.subheader("📊 Workstream Performance Overview")
+    st.subheader("📊 Farmer Data Overview")
     st.dataframe(df)
-    st.bar_chart(df.set_index("Employee")[["Workplans", "Completed", "Targets", "Completed Targets"]])
 
-                    
 def field_team_management():
     db = get_db()
     st.subheader("🌾 Field Team Management")
@@ -670,6 +666,8 @@ def main():
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
             field_team_management()  # New section for field team management
+        elif selected_tab == "live_dashboard":
+            live_dashboard()  # New section for live dashboard
         elif selected_tab == "reports":
             reports()
         elif selected_tab == "settings":
