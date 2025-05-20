@@ -492,7 +492,7 @@ with tabs[6]:
     st.dataframe(df)
     st.bar_chart(df.set_index("Employee")[["Workplans", "Completed", "Targets", "Completed Targets"]])
 
-
+                    
 def field_team_management():
     db = get_db()
     st.subheader("🌾 Field Team Management")
