@@ -1,5 +1,5 @@
 import streamlit as st
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, create_engine
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine  # Added Float import
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
