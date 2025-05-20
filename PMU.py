@@ -448,7 +448,7 @@ def dashboard(user):
                     db.commit()
                     st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
-  with tabs[6]:
+with tabs[6]:
     st.subheader("📈 Live Monitoring Dashboard")
 
     employees = db.query(Employee).all()
