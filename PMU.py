@@ -448,6 +448,51 @@ def dashboard(user):
                     db.commit()
                     st.success(f"Status for '{program.name}' updated to '{new_status}'.")
 
+with tabs[6]:
+    st.subheader("📈 Live Monitoring Dashboard")
+
+    employees = db.query(Employee).all()
+
+    total_cows = 0
+    total_milk = 0.0
+    total_farmers = len(employees)
+
+    report_data = []
+
+    for emp in employees:
+        # Optional: if you integrate Dairy data with each employee
+        emp_ws = db.query(WorkStream).filter_by(employee_id=emp.id).all()
+        total_ws = len(emp_ws)
+        total_wp = sum(len(ws.workplans) for ws in emp_ws)
+        completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp_ws)
+        completed_targets = sum(1 for t in emp.targets if t.status == "Completed")
+
+        report_data.append({
+            "Employee": emp.name,
+            "Workstreams": total_ws,
+            "Workplans": total_wp,
+            "Completed": completed_wp,
+            "Targets": len(emp.targets),
+            "Completed Targets": completed_targets
+        })
+
+    df = pd.DataFrame(report_data)
+
+    # Replace with actual dairy metrics if available
+    st.metric("🧮 Total Employees", total_farmers)
+    st.metric("🌾 Total Workplans", df['Workplans'].sum())
+    st.metric("✅ Completed Workplans", df['Completed'].sum())
+
+    # Future:
+    # st.metric("🐄 Total Cows", total_cows)
+    # st.metric("🍼 Total Milk (L)", total_milk)
+    # st.metric("Yield per Cow (L)", round(total_milk / total_cows, 2))
+
+    st.subheader("📊 Workstream Performance Overview")
+    st.dataframe(df)
+    st.bar_chart(df.set_index("Employee")[["Workplans", "Completed", "Targets", "Completed Targets"]])
+
+
 def field_team_management():
     db = get_db()
     st.subheader("🌾 Field Team Management")
