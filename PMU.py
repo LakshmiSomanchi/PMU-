@@ -14,7 +14,7 @@ st.set_page_config(page_title="PMU Tracker", layout="wide")
 st.markdown("""
     <style>
         body {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/3309939.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/backgrnd%20img.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -26,7 +26,7 @@ st.markdown("""
         }
 
         section[data-testid="stSidebar"] > div:first-child {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/sidebarpmu.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/sideeee.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center;
