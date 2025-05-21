@@ -276,195 +276,20 @@ def dashboard(user):
         st.session_state.user = None
         st.experimental_rerun()
 
-    tabs = st.tabs(["👤 My Dashboard", "🌍 Team Overview", "📊 Tracker Report", "👥 User Management", "🎯 Target Management", "📚 Programs"])
+    # Tabs for different dashboards
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
 
-    with tabs[0]:
-        st.subheader("📌 Your Activities, Targets & Progress")
-        my_ws = db.query(WorkStream).filter_by(employee_id=user.id).all()
-        my_targets = db.query(Target).filter_by(employee_id=user.id).all()
+    for tab in dashboard_tabs:
+        with tab:
+            st.subheader(f"📊 {tab.label}")
+            # Here you can add specific content for each dashboard
+            # For example, you can display progress for each section
+            st.write("This is where you can display progress and other metrics.")
 
-        with st.expander("➕ Add Workstream"):
-            with st.form("add_ws"):
-                ws_title = st.text_input("Workstream Title")
-                ws_desc = st.text_area("Description")
-                ws_category = st.selectbox("Category", ["Cotton", "Dairy", "Water", "PMU", "Cotton Desk", "Heritage", "Abbott"])
-                if st.form_submit_button("Add"):
-                    db.add(WorkStream(title=ws_title, description=ws_desc, category=ws_category, employee_id=user.id))
-                    db.commit()
-                    st.success("Workstream added")
-
-        with st.expander("➕ Add Workplan"):
-            if my_ws:
-                ws_options = {f"{ws.title}": ws.id for ws in my_ws}
-                with st.form("add_wp"):
-                    selected_ws = st.selectbox("Workstream", list(ws_options.keys()))
-                    wp_title = st.text_input("Title")
-                    wp_details = st.text_area("Details")
-                    wp_deadline = st.date_input("Deadline", date.today())
-                    wp_status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
-                    if st.form_submit_button("Add Workplan"):
-                        db.add(WorkPlan(title=wp_title, details=wp_details, deadline=str(wp_deadline), status=wp_status, workstream_id=ws_options[selected_ws], supervisor_id=user.id))
-                        db.commit()
-                        st.success("Workplan added")
-
-        with st.expander("➕ Add Target"):
-            with st.form("add_target"):
-                target_desc = st.text_input("Target Description")
-                target_deadline = st.date_input("Target Deadline", date.today())
-                target_status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
-                if st.form_submit_button("Add Target"):
-                    db.add(Target(description=target_desc, deadline=str(target_deadline), status=target_status, employee_id=user.id))
-                    db.commit()
-                    st.success("Target added")
-
-        for ws in my_ws:
-            st.markdown(f"### 🌟 {ws.title} (Category: {ws.category})")
-            st.markdown(f"_Description_: {ws.description}")
-            for wp in ws.workplans:
-                badge = "✅" if wp.status == "Completed" else ("🔹" if wp.status == "In Progress" else "⚪")
-                badge_color = "badge-completed" if wp.status == "Completed" else ("badge-in-progress" if wp.status == "In Progress" else "badge-not-started")
-                st.markdown(f"<span class='{badge_color}'>{badge}</span> **{wp.title}** | 📅 {wp.deadline} | _{wp.status}_<br>{wp.details}", unsafe_allow_html=True)
-
-        st.subheader("🎯 Your Targets")
-        for target in my_targets:
-            badge = "✅" if target.status == "Completed" else ("🔹" if target.status == "In Progress" else "⚪")
-            badge_color = "badge-completed" if target.status == "Completed" else ("badge-in-progress" if target.status == "In Progress" else "badge-not-started")
-            st.markdown(f"<span class='{badge_color}'>{badge}</span> **{target.description}** | 📅 {target.deadline} | _{target.status}_", unsafe_allow_html=True)
-
-    with tabs[1]:
-        st.subheader("🌐 Team Workstreams and Plans")
-        all_ws = db.query(WorkStream).all()
-        for ws in all_ws:
-            st.markdown(f"<div style='background:#e3f2fd;padding:10px;border-left:6px solid #42a5f5;margin-bottom:10px;'>", unsafe_allow_html=True)
-            st.markdown(f"<strong>{ws.title}</strong> (Category: {ws.category}) by <em>{ws.employee.name}</em><br><small>{ws.description}</small>", unsafe_allow_html=True)
-            for wp in ws.workplans:
-                st.markdown(f"<li><b>{wp.title}</b> | {wp.deadline} | {wp.status}<br>{wp.details}</li>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
-    with tabs[2]:
-        st.subheader("📊 Progress Tracker Report")
-        employees = db.query(Employee).all()
-        report_data = []
-        for emp in employees:
-            total_ws = db.query(WorkStream).filter_by(employee_id=emp.id).count()
-            total_wp = sum(len(ws.workplans) for ws in emp.workstreams)
-            completed_wp = sum(len([wp for wp in ws.workplans if wp.status == "Completed"]) for ws in emp.workstreams)
-            total_targets = len(emp.targets)
-            completed_targets = sum(1 for target in emp.targets if target.status == "Completed")
-            report_data.append({
-                "Employee": emp.name,
-                "Workstreams": total_ws,
-                "Workplans": total_wp,
-                "Completed Workplans": completed_wp,
-                "Targets": total_targets,
-                "Completed Targets": completed_targets,
-                "Workplan Completion %": (completed_wp / total_wp * 100) if total_wp > 0 else 0,
-                "Target Completion %": (completed_targets / total_targets * 100) if total_targets > 0 else 0
-            })
-        df = pd.DataFrame(report_data)
-        st.dataframe(df, use_container_width=True)
-        st.bar_chart(df.set_index("Employee")[["Workplans", "Completed Workplans", "Targets", "Completed Targets"]])
-
-        # Download option for the report
-        csv = df.to_csv(index=False)
-        st.download_button("Download Report", csv, "team_progress_report.csv", "text/csv")
-
-    with tabs[3]:
-        st.subheader("👥 Manage Users")
-        with st.form("add_user"):
-            new_name = st.text_input("Full Name")
-            new_email = st.text_input("Email Address")
-            new_password = st.text_input("Password", type="password")
-            if st.form_submit_button("Add"):
-                try:
-                    db.add(Employee(name=new_name, email=new_email, password=new_password))
-                    db.commit()
-                    st.success("User added successfully")
-                except IntegrityError:
-                    db.rollback()
-                    st.error("User already exists")
-
-        with st.form("remove_user"):
-            remove_email = st.text_input("Email to Remove")
-            if st.form_submit_button("Delete"):
-                user_to_remove = db.query(Employee).filter(Employee.email == remove_email).first()
-                if user_to_remove:
-                    db.delete(user_to_remove)
-                    db.commit()
-                    st.success("User deleted")
-                else:
-                    st.warning("Email not found")
-
-    with tabs[4]:
-        st.subheader("🎯 Manage Targets")
-        all_targets = db.query(Target).all()
-        for target in all_targets:
-            st.markdown(f"**{target.description}** | 📅 {target.deadline} | _{target.status}_")
-            if st.button(f"Complete Target: {target.description}"):
-                target.status = "Completed"
-                db.commit()
-                st.success(f"Target '{target.description}' marked as completed.")
-
-    with tabs[5]:  # Programs tab
-        st.subheader("📚 Manage Programs")
-        
-        # Initialize a session state list to hold multiple programs
-        if "programs" not in st.session_state:
-            st.session_state.programs = []
-
-        # Form to add a new program
-        with st.form("add_program", clear_on_submit=True):
-            new_program_name = st.text_input("Program Name")
-            new_program_description = st.text_area("Program Description")
-            new_program_status = st.selectbox("Program Status", ["Active", "Completed", "On Hold"])
-            if st.form_submit_button("Add Program"):
-                if new_program_name:
-                    existing = db.query(Program).filter_by(name=new_program_name, employee_id=user.id).first()
-                    if existing:
-                        st.warning(f"Program '{new_program_name}' already exists.")
-                    else:
-                        try:
-                            db.add(Program(
-                                name=new_program_name,
-                                description=new_program_description,
-                                status=new_program_status,
-                                employee_id=user.id
-                            ))
-                            db.commit()
-                            st.success(f"Program '{new_program_name}' added successfully.")
-                        except Exception as e:
-                            db.rollback()
-                            st.error(f"Failed to save program: {e}")
-
-        # Display the list of programs to be added
-        st.subheader("Programs to be Added")
-        for program in st.session_state.programs:
-            st.markdown(f"**{program['name']}** - {program['description']} | Status: {program['status']}")
-
-        # Button to save all programs to the database
-        if st.button("Save All Programs"):
-            for program in st.session_state.programs:
-                try:
-                    db.add(Program(name=program['name'], description=program['description'], status=program['status'], employee_id=user.id))
-                    db.commit()
-                except IntegrityError:
-                    db.rollback()
-                    st.error(f"Program '{program['name']}' already exists.")
-            st.session_state.programs = []  # Clear the list after saving
-            st.success("All programs saved successfully.")
-
-        # Display existing programs
-        st.subheader("Existing Programs")
-        programs = db.query(Program).filter_by(employee_id=user.id).all()
-        for program in programs:
-            col1, col2 = st.columns([3, 1])
-            col1.markdown(f"**{program.name}** - {program.description} | Status: {program.status}")
-            with col2:
-                if st.button(f"Update Status for {program.name}"):
-                    new_status = st.selectbox("Select New Status", ["Active", "Completed", "On Hold"], key=program.id)
-                    program.status = new_status
-                    db.commit()
-                    st.success(f"Status for '{program.name}' updated to '{new_status}'.")
+            # Example of displaying employee progress
+            employees = db.query(Employee).all()
+            for emp in employees:
+                st.markdown(f"**{emp.name}**: Progress details here...")  # Replace with actual progress data
 
 def live_dashboard():
     db = get_db()
@@ -498,40 +323,8 @@ def live_dashboard():
     st.subheader("📊 Farmer Data Overview")
     st.dataframe(df)
 
-def field_team_management():
-    db = get_db()
-    st.subheader("🌾 Field Team Management")
-
-    # Add a new field team
-    with st.form("add_field_team"):
-        field_team_name = st.text_input("Field Team Name")
-        if st.form_submit_button("Add Field Team"):
-            try:
-                db.add(FieldTeam(name=field_team_name, pmu_id=st.session_state.user.id))
-                db.commit()
-                st.success(f"Field Team '{field_team_name}' added successfully.")
-            except IntegrityError:
-                db.rollback()
-                st.error("Field Team already exists.")
-
-    # Display existing field teams
-    st.subheader("Existing Field Teams")
-    field_teams = db.query(FieldTeam).all()
-    for team in field_teams:
-        st.markdown(f"**{team.name}** | PMU ID: {team.pmu_id}")
-
-    # Assign tasks to field teams
-    with st.form("assign_task"):
-        task_description = st.text_input("Task Description")
-        task_deadline = st.date_input("Task Deadline", date.today())
-        selected_team = st.selectbox("Select Field Team", [team.name for team in field_teams])
-        if st.form_submit_button("Assign Task"):
-            field_team = db.query(FieldTeam).filter_by(name=selected_team).first()
-            db.add(Task(description=task_description, deadline=str(task_deadline), field_team_id=field_team.id))
-            db.commit()
-            st.success(f"Task assigned to {selected_team}.")
-
 def settings():
+    db = get_db()
     st.subheader("⚙️ Settings")
     
     # Initialize settings in session state if not already done
@@ -570,6 +363,19 @@ def settings():
     report_frequency = st.selectbox("Default Report Frequency", ["Weekly", "Bi-weekly", "Monthly"], index=["Weekly", "Bi-weekly", "Monthly"].index(st.session_state.settings["report_frequency"]))
     report_format = st.selectbox("Report Formats", ["PDF", "Excel", "JSON"], index=["PDF", "Excel", "JSON"].index(st.session_state.settings["report_format"]))
     auto_email_summary = st.checkbox("Auto-email Summary", value=st.session_state.settings["auto_email_summary"])
+
+    # Change Password Section
+    st.markdown("### Change Password")
+    new_password = st.text_input("New Password", type="password")
+    confirm_password = st.text_input("Confirm New Password", type="password")
+    if st.button("Change Password"):
+        if new_password == confirm_password:
+            user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
+            user.password = new_password
+            db.commit()
+            st.success("Password changed successfully!")
+        else:
+            st.error("Passwords do not match.")
 
     if st.button("Save Settings"):
         st.session_state.settings.update({
