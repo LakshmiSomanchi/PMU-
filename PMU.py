@@ -1,5 +1,5 @@
 import streamlit as st
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine  # Added Float import
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
@@ -418,23 +418,23 @@ def dashboard(user):
             new_program_description = st.text_area("Program Description")
             new_program_status = st.selectbox("Program Status", ["Active", "Completed", "On Hold"])
             if st.form_submit_button("Add Program"):
-            if new_program_name:
-            existing = db.query(Program).filter_by(name=new_program_name, employee_id=user.id).first()
-        if existing:
-            st.warning(f"Program '{new_program_name}' already exists.")
-        else:
-            try:
-                db.add(Program(
-                    name=new_program_name,
-                    description=new_program_description,
-                    status=new_program_status,
-                    employee_id=user.id
-                ))
-                db.commit()
-                st.success(f"Program '{new_program_name}' added successfully.")
-            except Exception as e:
-                db.rollback()
-                st.error(f"Failed to save program: {e}")
+                if new_program_name:
+                    existing = db.query(Program).filter_by(name=new_program_name, employee_id=user.id).first()
+                    if existing:
+                        st.warning(f"Program '{new_program_name}' already exists.")
+                    else:
+                        try:
+                            db.add(Program(
+                                name=new_program_name,
+                                description=new_program_description,
+                                status=new_program_status,
+                                employee_id=user.id
+                            ))
+                            db.commit()
+                            st.success(f"Program '{new_program_name}' added successfully.")
+                        except Exception as e:
+                            db.rollback()
+                            st.error(f"Failed to save program: {e}")
 
         # Display the list of programs to be added
         st.subheader("Programs to be Added")
