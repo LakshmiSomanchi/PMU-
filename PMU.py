@@ -7,8 +7,9 @@ import pandas as pd
 from datetime import date
 import os
 import datetime
-import io
+from pathlib import Path  # Import Path for directory creation
 from PIL import Image
+import plotly.express as px  # Ensure Plotly is imported correctly
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -449,6 +450,12 @@ def scheduling(user):
     for schedule in schedules:
         st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
 
+def field_team_management():
+    st.subheader("👥 Field Team Management")
+    st.markdown("### Manage your field teams here.")
+    # Placeholder for field team management functionality
+    st.write("This section will allow you to manage field teams.")
+
 def heritage_survey():
     # Heritage Program - SNF Survey Code
     SAVE_DIR = 'survey_responses'
@@ -589,7 +596,6 @@ def cotton_baseline_survey():
     SAVE_DIR = "responses"
     os.makedirs(SAVE_DIR, exist_ok=True)
 
-    st.set_page_config(page_title="Cotton Farming Questionnaire", layout="wide")
     st.title("🌾 Cotton Farming Questionnaire (किसान सर्वे)")
 
     language = st.selectbox("Select Language / भाषा निवडा / ભાષા પસંદ કરો", ["English", "Hindi", "Marathi", "Gujarati"])
@@ -710,7 +716,7 @@ def cotton_baseline_survey():
     PHOTOS_DIR = "photos"
     os.makedirs(PHOTOS_DIR, exist_ok=True)
 
-    with st.form("questionnaire_form"):
+    with st.form("survey_form"):
         for question_key in questions:
             question_text = labels.get(question_key, f"Question {question_key} (No translation)")
             if question_key == "4":
@@ -758,260 +764,8 @@ def cotton_baseline_survey():
                     now = datetime.datetime.now()
                     filename = f"survey_{now.strftime('%Y%m%d_%H%M%S')}.csv"
                     df = pd.DataFrame([data])
-                    df.to_csv(os.path.join(SAVE_DIR, filename), index=False, encoding="utf-8")
+                    df.to_csv(os.path.join(SAVE_DIR, filename), index=False, encoding='utf-8')
                     st.success("✅ Survey Submitted and Saved!")
-
-def plant_population_tool():
-    # Plant Population Tool Code
-    excel_file = "plant_population_data.xlsx"
-    if os.path.exists(excel_file):
-        saved_data = pd.read_excel(excel_file)
-    else:
-        saved_data = pd.DataFrame()
-
-    st.set_page_config(page_title="Plant Population Dashboard", layout="wide")
-    st.title("🌱 Plant Population Tool")
-    st.markdown("---")
-
-    st.subheader("Field Input Parameters")
-
-    with st.form("plant_population_form"):
-        cols1 = st.columns(6)
-        farmer_name = cols1[0].text_input("Farmer Name")
-        field_id = cols1[1].text_input("Field ID")
-        area_acre = cols1[2].number_input("Area (acre)", min_value=0.0, step=0.01)
-        area_m = cols1[3].number_input("Area (m)", min_value=0.0, step=0.1)
-        spacing_cm = cols1[4].text_input("Row × Plant Spacing (cm)")
-        spacing_m = cols1[5].text_input("Row × Plant Spacing (m)")
-
-        cols2 = st.columns(5)
-        sowing_date = cols2[0].date_input("Sowing Date", value=date.today())
-        expected_plants = cols2[1].number_input("Expected Plants", min_value=0)
-        plants_emerged = cols2[2].number_input("Plants Emerged", min_value=0)
-        actual_stand = cols2[3].number_input("Actual Stand (%)", min_value=0.0, max_value=100.0, step=0.1)
-        missing_plants = cols2[4].number_input("Missing Plants", min_value=0)
-
-        cols3 = st.columns(5)
-        gaps_filled = cols3[0].number_input("Gaps filled", min_value=0)
-        total_gaps = cols3[1].number_input("Total Gaps", min_value=0)
-        gap_percent = cols3[2].number_input("Gap %", min_value=0.0, max_value=100.0, step=0.1)
-        gap_filling_date = cols3[3].date_input("Gap Filling Date", value=date.today())
-        success_rate = cols3[4].number_input("Success Rate (%)", min_value=0.0, max_value=100.0, step=0.1)
-
-        cols4 = st.columns(2)
-        labour_hours = cols4[0].number_input("Labour Hours", min_value=0.0, step=0.1)
-        labour_efficiency = cols4[1].number_input("Labour Efficiency (gaps/hr)", min_value=0.0, step=0.1)
-
-        submitted = st.form_submit_button("Submit")
-
-    if submitted:
-        new_entry = pd.DataFrame([{
-            "Farmer Name": farmer_name,
-            "Field ID": field_id,
-            "Area (acre)": area_acre,
-            "Area (m)": area_m,
-            "Row × Plant Spacing (cm)": spacing_cm,
-            "Row × Plant Spacing (m)": spacing_m,
-            "Sowing Date": sowing_date,
-            "Expected Plants": expected_plants,
-            "Plants Emerged": plants_emerged,
-            "Actual Stand (%)": actual_stand,
-            "Missing Plants": missing_plants,
-            "Gaps filled": gaps_filled,
-            "Total Gaps": total_gaps,
-            "Gap %": gap_percent,
-            "Gap Filling Date": gap_filling_date,
-            "Success Rate (%)": success_rate,
-            "Labour Hours": labour_hours,
-            "Labour Efficiency (gaps/hr)": labour_efficiency
-        }])
-
-        saved_data = pd.concat([saved_data, new_entry], ignore_index=True)
-        saved_data.to_excel(excel_file, index=False)
-        st.success("Data submitted and saved to Excel.")
-
-    st.markdown("---")
-    st.subheader("📊 Collected Submissions")
-
-    if not saved_data.empty:
-        with st.expander("🔍 Filter Data"):
-            farmers = saved_data["Farmer Name"].unique().tolist()
-            selected_farmers = st.multiselect("Farmer Name", options=farmers, default=farmers)
-
-            fields = saved_data["Field ID"].unique().tolist()
-            selected_fields = st.multiselect("Field ID", options=fields, default=fields)
-
-            filtered_data = saved_data[
-                saved_data["Farmer Name"].isin(selected_farmers) &
-                saved_data["Field ID"].isin(selected_fields)
-            ]
-
-        st.dataframe(filtered_data, use_container_width=True)
-
-        st.markdown("---")
-        st.subheader("📈 Summary Analysis")
-
-        avg_gap_percent = filtered_data["Gap %"].mean()
-        avg_success_rate = filtered_data["Success Rate (%)"].mean()
-        avg_efficiency = filtered_data["Labour Efficiency (gaps/hr)"].mean()
-        total_expected = filtered_data["Expected Plants"].sum()
-        total_emerged = filtered_data["Plants Emerged"].sum()
-        total_missing = filtered_data["Missing Plants"].sum()
-        total_filled = filtered_data["Gaps filled"].sum()
-
-        st.metric("Average Gap %", f"{avg_gap_percent:.2f}%")
-        st.metric("Average Success Rate", f"{avg_success_rate:.2f}%")
-        st.metric("Average Labour Efficiency", f"{avg_efficiency:.2f} gaps/hr")
-        st.metric("Total Expected Plants", total_expected)
-        st.metric("Total Emerged Plants", total_emerged)
-        st.metric("Total Missing Plants", total_missing)
-        st.metric("Total Gaps Filled", total_filled)
-
-        st.markdown("---")
-        st.subheader("📊 Charts")
-
-        chart_col1, chart_col2 = st.columns(2)
-
-        with chart_col1:
-            fig1 = px.bar(filtered_data, x="Farmer Name", y="Gap %", color="Field ID", title="Gap % by Farmer")
-            st.plotly_chart(fig1, use_container_width=True)
-
-        with chart_col2:
-            fig2 = px.line(filtered_data.sort_values("Sowing Date"), x="Sowing Date", y="Success Rate (%)", color="Farmer Name", title="Success Rate Over Time")
-            st.plotly_chart(fig2, use_container_width=True)
-
-        fig3 = px.scatter(filtered_data, x="Expected Plants", y="Plants Emerged", color="Farmer Name", size="Labour Efficiency (gaps/hr)", title="Expected vs Emerged Plants")
-        st.plotly_chart(fig3, use_container_width=True)
-
-def training():
-    # Training section code
-    BASE_DIR = "training_materials"
-    PROGRAMS = ["Cotton", "Dairy"]
-    CATEGORIES = ["Presentations", "Videos", "Audios", "Quizzes"]
-
-    for program in PROGRAMS:
-        for category in CATEGORIES:
-            Path(f"{BASE_DIR}/{program.lower()}/{category.lower()}").mkdir(parents=True, exist_ok=True)
-
-    st.set_page_config(page_title="TechnoServe Training Platform", layout="wide")
-
-    # Admin Authentication with Session State
-    if "is_admin" not in st.session_state:
-        st.session_state.is_admin = False
-
-    def admin_login():
-        if st.session_state.is_admin:
-            st.sidebar.success("✅ You are logged in as Admin.")
-            return True
-
-        st.sidebar.subheader("🔒 Admin Login")
-        admin_username = st.sidebar.text_input("Admin Username", type="default", key="admin_username")
-        admin_password = st.sidebar.text_input("Admin Password", type="password", key="admin_password")
-        if st.sidebar.button("Login"):
-            if admin_username == "admin" and admin_password == "admin123":
-                st.sidebar.success("✅ Login Successful!")
-                st.session_state.is_admin = True
-                return True
-            else:
-                st.sidebar.error("❌ Invalid credentials. Please try again.")
-        return False
-
-    is_admin = admin_login()
-
-    if is_admin:
-        st.sidebar.header("⚙️ Admin Panel")
-        st.sidebar.markdown("Welcome, Admin!")
-
-        # --- Admin Feature: Upload Content ---
-        st.header("📤 Upload Training Content")
-        selected_program = st.selectbox("🌟 Select Program", PROGRAMS, key="program_dropdown")
-        selected_category = st.selectbox("📂 Select Category", CATEGORIES, key="category_dropdown")
-        uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
-
-        if uploaded_file:
-            save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
-            Path(save_dir).mkdir(parents=True, exist_ok=True)
-            file_path = os.path.join(save_dir, uploaded_file.name)
-
-            if st.button("Upload"):
-                try:
-                    with open(file_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
-                except Exception as e:
-                    st.error(f"❌ Error uploading file: {e}")
-
-        # --- Admin Feature: Delete Content ---
-        st.header("🗑️ Delete Training Content")
-        delete_program = st.selectbox("🗂️ Select Program to View Files", PROGRAMS, key="delete_program_dropdown")
-        delete_category = st.selectbox("📂 Select Category to View Files", CATEGORIES, key="delete_category_dropdown")
-        delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
-
-        if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
-            delete_files = os.listdir(delete_folder_path)
-            delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
-
-            if st.button("Delete File"):
-                try:
-                    os.remove(delete_folder_path / delete_file)
-                    st.success(f"✅ File '{delete_file}' has been deleted!")
-                except Exception as e:
-                    st.error(f"❌ Error deleting file: {e}")
-        else:
-            st.warning(f"No files available in the **{delete_category}** category of the {delete_program} program.")
-
-    # --- Main Content ---
-    st.markdown("""
-    <div class="header">
-        🌾 <span style="font-weight: bold;">Farmer Training Program</span> 🌾
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("### 🎮 Level Up Your Farming Skills!")
-    st.markdown("""
-        <p>Welcome to the Farmer Training Program! Complete tasks, learn new skills, and earn rewards to become a <b>Master Farmer</b>.</p>
-        <ul>
-            <li>📚 Access training materials</li>
-            <li>🎯 Complete quizzes</li>
-            <li>🏆 Earn badges</li>
-        </ul>
-    """, unsafe_allow_html=True)
-
-    if st.button("🌟 Start Your Journey"):
-        st.success("🎉 You're on your way to becoming a Master Farmer! Explore the training materials below.")
-
-    selected_program = st.sidebar.selectbox("🌟 Choose a Program", PROGRAMS, key="view_program_dropdown")
-    selected_category = st.sidebar.radio("📂 Select Training Material", CATEGORIES, key="view_category_radio")
-
-    folder_path = Path(BASE_DIR) / selected_program.lower() / selected_category.lower()
-
-    if not folder_path.exists() or not any(folder_path.iterdir()):
-        st.warning(f"No content available for the **{selected_category}** category in the {selected_program} program.")
-    else:
-        files = os.listdir(folder_path)
-        for file in files:
-            file_path = folder_path / file
-            if file.endswith(".pdf"):
-                st.markdown(f"📄 **{file}**")
-                with open(file_path, "rb") as f:
-                    st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
-            elif file.endswith(".mp4"):
-                st.markdown(f"🎥 **{file}**")
-                st.video(str(file_path))
-            elif file.endswith(".mp3"):
-                st.markdown(f"🎵 **{file}**")
-                st.audio(str(file_path))
-            elif file.endswith(".json"):
-                st.markdown(f"📝 **{file}** (Quiz File)")
-                with open(file_path, "r") as f:
-                    st.json(json.load(f))
-            elif file.endswith((".png", ".jpg", ".jpeg")):
-                st.markdown(f"🖼️ **{file}**")
-                st.image(str(file_path))
-            elif file.endswith(".pptx"):
-                st.markdown(f"📑 **{file} (PPTX)**")
-                with open(file_path, "rb") as f:
-                    st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
 
 def main():
     preload_users()
@@ -1054,7 +808,7 @@ def main():
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
-            field_team_management()
+            field_team_management()  # Placeholder function
         elif selected_tab == "live_dashboard":
             live_dashboard()
         elif selected_tab == "reports":
