@@ -10,7 +10,7 @@ import datetime
 import io
 from PIL import Image
 import plotly
-print(plotly.__2.35.0__)
+print(plotly.__version__)
 import plotly.express as px
 
 # Set Streamlit page config (must be first)
