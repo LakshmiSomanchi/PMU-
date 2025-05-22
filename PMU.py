@@ -9,7 +9,6 @@ import os
 import datetime
 import io
 from PIL import Image
-import plotly
 import plotly.express as px  # Ensure Plotly is imported correctly
 
 # Set Streamlit page config (must be first)
@@ -432,7 +431,7 @@ def heritage_survey():
     st.set_page_config(page_title="Heritage Dairy Survey", page_icon="🐄", layout="centered")
 
     # Language Selection
-    lang = st.selectbox("Language / भाषा / భाषा", ("English", "Hindi", "Telugu"))
+    lang = st.selectbox("Language / भाषा / భाषా", ("English", "Hindi", "Telugu"))
     labels = dict_translations.get(lang, dict_translations['English'])
 
     # Title
