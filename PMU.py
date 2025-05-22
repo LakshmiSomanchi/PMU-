@@ -6,6 +6,9 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 import os
+import datetime
+import io
+from PIL import Image
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -97,20 +100,20 @@ class Employee(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     email = Column(String, unique=True)
-    password = Column(String)  # Added password field
+    password = Column(String)
     workstreams = relationship("WorkStream", back_populates="employee")
     targets = relationship("Target", back_populates="employee")
     programs = relationship("Program", back_populates="employee")
     schedules = relationship("Schedule", back_populates="employee")
-    workplans = relationship("WorkPlan", back_populates="supervisor")  # Added relationship for workplans
-    field_teams = relationship("FieldTeam", back_populates="pmu")  # Relationship to Field Teams
+    workplans = relationship("WorkPlan", back_populates="supervisor")
+    field_teams = relationship("FieldTeam", back_populates="pmu")
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     description = Column(Text)
-    category = Column(String)  # New field for category
+    category = Column(String)
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="workstreams")
     workplans = relationship("WorkPlan", back_populates="workstream")
@@ -124,8 +127,8 @@ class WorkPlan(Base):
     status = Column(String, default="Not Started")
     workstream_id = Column(Integer, ForeignKey("workstreams.id"))
     workstream = relationship("WorkStream", back_populates="workplans")
-    supervisor_id = Column(Integer, ForeignKey("employees.id"))  # Added supervisor relationship
-    supervisor = relationship("Employee", back_populates="workplans")  # Relationship to Employee
+    supervisor_id = Column(Integer, ForeignKey("employees.id"))
+    supervisor = relationship("Employee", back_populates="workplans")
 
 class Target(Base):
     __tablename__ = "targets"
@@ -140,8 +143,8 @@ class Program(Base):
     __tablename__ = "programs"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    description = Column(Text)  # New field for description
-    status = Column(String, default="Active")  # New field for status
+    description = Column(Text)
+    status = Column(String, default="Active")
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="programs")
 
@@ -158,9 +161,9 @@ class FieldTeam(Base):
     __tablename__ = "field_teams"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    pmu_id = Column(Integer, ForeignKey("employees.id"))  # PMU supervisor
+    pmu_id = Column(Integer, ForeignKey("employees.id"))
     pmu = relationship("Employee", back_populates="field_teams")
-    tasks = relationship("Task", back_populates="field_team")  # Relationship to tasks assigned to the field team
+    tasks = relationship("Task", back_populates="field_team")
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -176,12 +179,11 @@ class FarmerData(Base):
     id = Column(Integer, primary_key=True)
     farmer_name = Column(String)
     number_of_cows = Column(Integer)
-    yield_per_cow = Column(Float)  # Yield per cow
-    date = Column(String)  # Date of the record
+    yield_per_cow = Column(Float)
 
 # Drop all tables and recreate them
-Base.metadata.drop_all(bind=engine)  # This will drop all tables
-Base.metadata.create_all(bind=engine)  # This will recreate the tables
+Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # Initialize session state for user if not already done
 if "user" not in st.session_state:
@@ -214,7 +216,7 @@ def display_notice():
     st.markdown("""
         <style>
             .notice {
-                background-color: rgba(255, 255, 255, 0.3); /* transparent white */
+                background-color: rgba(255, 255, 255, 0.3);
                 padding: 5px;
                 border-radius: 15px;
             }
@@ -259,8 +261,12 @@ def sidebar():
         "Manage Programs": "manage_programs",
         "Reports": "reports",
         "Employee Scheduling": "scheduling",
-        "Field Team Management": "field_team_management",  # New section for field teams
-        "Live Dashboard": "live_dashboard",  # New section for live dashboard
+        "Field Team Management": "field_team_management",
+        "Live Dashboard": "live_dashboard",
+        "Heritage Survey": "heritage_survey",
+        "Cotton Baseline Survey": "cotton_baseline_survey",
+        "Plant Population Tool": "plant_population_tool",
+        "Training": "training",
         "Settings": "settings",
         "Logout": "logout"
     }
@@ -282,14 +288,10 @@ def dashboard(user):
     for tab in dashboard_tabs:
         with tab:
             st.subheader(f"📊 {tab.label}")
-            # Here you can add specific content for each dashboard
-            # For example, you can display progress for each section
             st.write("This is where you can display progress and other metrics.")
-
-            # Example of displaying employee progress
             employees = db.query(Employee).all()
             for emp in employees:
-                st.markdown(f"**{emp.name}**: Progress details here...")  # Replace with actual progress data
+                st.markdown(f"**{emp.name}**: Progress details here...")
 
 def live_dashboard():
     db = get_db()
@@ -304,7 +306,7 @@ def live_dashboard():
     # Prepare data for display
     total_farmers = len(farmer_data)
     total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
-    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
+    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)
     yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
 
     # Display metrics
@@ -336,7 +338,7 @@ def settings():
             "project_timeline": "Weekly",
             "units": "Hours",
             "progress_metric": "% Complete",
-            "role": "Admin",  # Default role
+            "role": "Admin",
             "report_frequency": "Weekly",
             "report_format": "PDF",
             "auto_email_summary": False
@@ -447,6 +449,570 @@ def scheduling(user):
     for schedule in schedules:
         st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
 
+def heritage_survey():
+    # Heritage Program - SNF Survey Code
+    SAVE_DIR = 'survey_responses'
+    os.makedirs(SAVE_DIR, exist_ok=True)
+
+    dict_translations = {
+        'English': {
+            'Language': 'Language', 'Farmer Profile': 'Farmer Profile', 'VLCC Name': 'VLCC Name',
+            'HPC/MCC Code': 'HPC/MCC Code', 'Types': 'Type', 'HPC': 'HPC', 'MCC': 'MCC',
+            'Farmer Name': 'Farmer Name', 'Farmer Code': 'Farmer Code / Pourer ID', 'Gender': 'Gender',
+            'Male': 'Male', 'Female': 'Female', 'Farm Details': 'Farm Details',
+            'Number of Cows': 'Number of Cows', 'No. of Cattle in Milk': 'No. of Cattle in Milk',
+            'No. of Calves/Heifers': 'No. of Calves/Heifers', 'No. of Desi cows': 'No. of Desi cows',
+            'No. of Cross breed cows': 'No. of Cross breed cows', 'No. of Buffalo': 'No. of Buffalo',
+            'Milk Production': 'Milk Production (liters/day)', 'Specific Questions': 'Specific Questions',
+            'Green Fodder': 'Green Fodder', 'Type of Green Fodder': 'Type of Green Fodder (Multiple Select)',
+            'Quantity of Green Fodder': 'Quantity of Green Fodder (Kg/day)',
+            'Dry Fodder': 'Dry Fodder', 'Type of Dry Fodder': 'Type of Dry Fodder (Multiple Select)',
+            'Quantity of Dry Fodder': 'Quantity of Dry Fodder (Kg/day)',
+            'Pellet Feed': 'Pellet Feed', 'Pellet Feed Brand': 'Pellet Feed Brand (Multiple Select)',
+            'Quantity of Pellet Feed': 'Quantity of Pellet Feed (Kg/day)',
+            'Mineral Mixture': 'Mineral Mixture',
+            'Mineral Mixture Brand': 'Mineral Mixture Brand',
+            'Quantity of Mineral Mixture': 'Quantity of Mineral Mixture (gm/day)',
+            'Silage': 'Silage', 'Source and Price of Silage': 'Source and Price of Silage',
+            'Quantity of Silage': 'Quantity of Silage (Kg/day)', 'Source of Water': 'Source of Water (Multiple Select)',
+            'Name of Surveyor': 'Name of Surveyor', 'Date of Visit': 'Date of Visit',
+            'Submit': 'Submit', 'Yes': 'Yes', 'No': 'No', 'Download CSV': 'Download CSV'
+        },
+        # Add other languages as needed...
+    }
+
+    # Streamlit Page Config
+    st.set_page_config(page_title="Heritage Dairy Survey", page_icon="🐄", layout="centered")
+
+    # Language Selection
+    lang = st.selectbox("Language / भाषा / భाषा", ("English", "Hindi", "Telugu"))
+    labels = dict_translations.get(lang, dict_translations['English'])
+
+    # Title
+    st.title(labels['Farmer Profile'])
+
+    VLCC_NAMES = ["3025-K.V.PALLE", "3026-KOTHA PALLE", "3028-BONAMVARIPALLE", "3029-BOMMAICHERUVUPALLI", "3030-BADDALAVARIPALLI"]
+    GREEN_FODDER_OPTIONS = ["Napier", "Maize", "Sorghum"]
+    DRY_FODDER_OPTIONS = ["Paddy Straw", "Maize Straw", "Ragi Straw", "Ground Nut Crop Residues"]
+    PELLET_FEED_BRANDS = ["Heritage Milk Rich", "Heritage Milk Joy", "Heritage Power Plus", "Kamadhenu", "Godrej"]
+    MINERAL_MIXTURE_BRANDS = ["Herita Vit", "Herita Min", "Other (Specify)"]
+    WATER_SOURCE_OPTIONS = ["Panchayat", "Borewell", "Water Streams"]
+    SURVEYOR_NAMES = ["Shiva Shankaraiah", "Reddisekhar", "Balakrishna", "Somasekhar", "Mahesh Kumar"]
+
+    # Form Start
+    with st.form("survey_form"):
+        st.header(labels['Farmer Profile'])
+        vlcc_name = st.selectbox(labels['VLCC Name'], VLCC_NAMES)
+        hpc_code = st.text_input(labels['HPC/MCC Code'])
+        types = st.selectbox(labels['Types'], (labels['HPC'], labels['MCC']))
+        farmer_name = st.text_input(labels['Farmer Name'])
+        farmer_code = st.text_input(labels['Farmer Code'])
+        gender = st.selectbox(labels['Gender'], (labels['Male'], labels['Female']))
+
+        st.header(labels['Farm Details'])
+        cows = st.number_input(labels['Number of Cows'], min_value=0)
+        cattle_in_milk = st.number_input(labels['No. of Cattle in Milk'], min_value=0)
+        calves = st.number_input(labels['No. of Calves/Heifers'], min_value=0)
+        desi_cows = st.number_input(labels['No. of Desi cows'], min_value=0)
+        crossbreed_cows = st.number_input(labels['No. of Cross breed cows'], min_value=0)
+        buffalo = st.number_input(labels['No. of Buffalo'], min_value=0)
+        milk_production = st.number_input(labels['Milk Production'], min_value=0.0)
+
+        st.header(labels['Specific Questions'])
+        green_fodder = st.selectbox(labels['Green Fodder'], (labels['Yes'], labels['No']))
+        green_fodder_types = st.multiselect(labels['Type of Green Fodder'], GREEN_FODDER_OPTIONS)
+        green_fodder_qty = st.number_input(labels['Quantity of Green Fodder'], min_value=0.0)
+        dry_fodder = st.selectbox(labels['Dry Fodder'], (labels['Yes'], labels['No']))
+        dry_fodder_types = st.multiselect(labels['Type of Dry Fodder'], DRY_FODDER_OPTIONS)
+        dry_fodder_qty = st.number_input(labels['Quantity of Dry Fodder'], min_value=0.0)
+
+        pellet_feed = st.selectbox(labels['Pellet Feed'], (labels['Yes'], labels['No']))
+        pellet_feed_brands = st.multiselect(labels['Pellet Feed Brand'], PELLET_FEED_BRANDS)
+        pellet_feed_qty = st.number_input(labels['Quantity of Pellet Feed'], min_value=0.0)
+
+        mineral_mixture = st.selectbox(labels['Mineral Mixture'], (labels['Yes'], labels['No']))
+        mineral_brand = st.selectbox(labels['Mineral Mixture Brand'], MINERAL_MIXTURE_BRANDS)
+        mineral_qty = st.number_input(labels['Quantity of Mineral Mixture'], min_value=0.0)
+
+        silage = st.selectbox(labels['Silage'], (labels['Yes'], labels['No']))
+        silage_source = st.text_input(labels['Source and Price of Silage'])
+        silage_qty = st.number_input(labels['Quantity of Silage'], min_value=0.0)
+
+        water_sources = st.multiselect(labels['Source of Water'], WATER_SOURCE_OPTIONS)
+        surveyor_name = st.selectbox(labels['Name of Surveyor'], SURVEYOR_NAMES)
+        visit_date = st.date_input(labels['Date of Visit'])
+        submit = st.form_submit_button(labels['Submit'])
+
+    if submit:
+        data = {
+            'VLCC Name': vlcc_name,
+            'HPC/MCC Code': hpc_code,
+            'Types': types,
+            'Farmer Name': farmer_name,
+            'Farmer Code': farmer_code,
+            'Gender': gender,
+            'Number of Cows': cows,
+            'No. of Cattle in Milk': cattle_in_milk,
+            'No. of Calves/Heifers': calves,
+            'No. of Desi cows': desi_cows,
+            'No. of Cross breed cows': crossbreed_cows,
+            'No. of Buffalo': buffalo,
+            'Milk Production (liters/day)': milk_production,
+            'Green Fodder': green_fodder,
+            'Type of Green Fodder': ", ".join(green_fodder_types),
+            'Quantity of Green Fodder (Kg/day)': green_fodder_qty,
+            'Dry Fodder': dry_fodder,
+            'Type of Dry Fodder': ", ".join(dry_fodder_types),
+            'Quantity of Dry Fodder (Kg/day)': dry_fodder_qty,
+            'Pellet Feed': pellet_feed,
+            'Pellet Feed Brand': ", ".join(pellet_feed_brands),
+            'Quantity of Pellet Feed (Kg/day)': pellet_feed_qty,
+            'Mineral Mixture': mineral_mixture,
+            'Mineral Mixture Brand': mineral_brand,
+            'Quantity of Mineral Mixture (gm/day)': mineral_qty,
+            'Silage': silage,
+            'Source and Price of Silage': silage_source,
+            'Quantity of Silage (Kg/day)': silage_qty,
+            'Source of Water': ", ".join(water_sources),
+            'Surveyor Name': surveyor_name,
+            'Date of Visit': visit_date.isoformat()
+        }
+
+        # Save CSV
+        df = pd.DataFrame([data])
+        filename = f"survey_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        df.to_csv(os.path.join(SAVE_DIR, filename), index=False, encoding='utf-8')
+        st.success("✅ Survey Submitted and Saved!")
+
+def cotton_baseline_survey():
+    # Cotton Baseline Survey Code
+    SAVE_DIR = "responses"
+    os.makedirs(SAVE_DIR, exist_ok=True)
+
+    st.set_page_config(page_title="Cotton Farming Questionnaire", layout="wide")
+    st.title("🌾 Cotton Farming Questionnaire (किसान सर्वे)")
+
+    language = st.selectbox("Select Language / भाषा निवडा / ભાષા પસંદ કરો", ["English", "Hindi", "Marathi", "Gujarati"])
+
+    dict_translations = {
+        "English": {
+            "1": "Farmer Tracenet Code",
+            "2": "Farmer Full Name",
+            "3": "Mobile no.",
+            "4": "Gender",
+            "5": "Highest education",
+            "6": "Village",
+            "7": "Taluka/Block",
+            "8": "District",
+            "9": "State",
+            "10": "Pincode",
+            "11": "No. of males (adult) in household",
+            "12": "No. of females (adult) in household",
+            "13": "Children (<16) in household",
+            "14": "Total Member of Household",
+            "15": "No. of school-going children",
+            "16": "No. of earning members in the family",
+            "17": "Total Landholding (in acres)",
+            "18": "Primary crop",
+            "19": "Secondary crops",
+            "20": "Non-organic Cotton land (in acre) (if any)",
+            "21": "Organic Cotton land (in acre)",
+            "22": "Years since practicing organic cotton (#)",
+            "23": "Certification status (certified/IC1..)",
+            "24": "Source of irrigation",
+            "25": "Cultivable area (acre)",
+            "26": "No. of cattle (cow and Buffalo)",
+            "27": "Source of drinking water",
+            "28": "Preferred selling point (Aggregator/Suminter/APMC/other Gin)",
+            "29": "Has space for harvested cotton storage (Y/N)",
+            "30": "Receives any agro advisory (Y/N)",
+            "31": "Received any training on best practices for organic cotton?",
+            "32": "Membership in FPO/FPC/SHG",
+            "33": "Maintaining any Diary or Register for record keeping (Y/N)",
+            "34": "Annual household income(in Rs)",
+            "35": "Primary source of income",
+            "36": "Secondary source of income",
+            "37": "Income from Primary source (Rs.)",
+            "38": "Certification cost per annum/acre",
+            "39": "Avg. production of organic cotton/acre (Kg)",
+            "40": "Cost of cultivation/acre (Rs)",
+            "41": "Quantity sold of organic cotton (in kg)",
+            "42": "Selling price per kg (Rs.)",
+            "43": "Material cost for bio-inputs",
+            "44": "Name of bio-input used for pest and disease management",
+            "45": "Name of bio-fertilizer/compost used",
+            "46": "No. of pheromone traps used / acre",
+            "47": "Cost per pheromone trap",
+            "48": "No. of Yellow sticky traps used / acre",
+            "49": "Cost per yellow sticky trap",
+            "50": "No. of Blue sticky traps used / acre",
+            "51": "Cost per blue sticky trap",
+            "52": "No. of bird perches used / acre",
+            "53": "Irrigation cost/acre",
+            "54": "No. of irrigation required for organic cotton",
+            "55": "Irrigation method used",
+            "56": "Any farm machinery hired (Y/N)",
+            "57": "Cost of machinery hiring (Rs.)/acre",
+            "58": "Local labour cost per day",
+            "59": "Migrant labour cost per day",
+            "60": "No. of workers required during sowing/acre",
+            "61": "No. of workers required during harvesting/acre",
+            "62": "Harvesting time (1st, 2nd & 3rd picking) (month)",
+            "63": "Weeding method used (manual/mechanical)",
+            "64": "Weeding cost/acre",
+            "65": "Cost of mulching/acre",
+            "66": "No. of tillage practiced",
+            "67": "Tillage cost/acre",
+            "68": "Land preparation cost/acre",
+            "69": "Seed rate of organic cotton/acre",
+            "70": "Variety of organic cotton seed (Name)",
+            "71": "Name of border crop used",
+            "72": "Name of the inter crop used",
+            "73": "Name of cover crop",
+            "74": "Name of trap crop",
+            "75": "Mulching used (Y/N)",
+            "76": "Type of mulching used (Bio-plastic/green/dry)",
+            "77": "What precautions used during storage",
+            "78": "Hired vehicle used for transportation of seed cotton (Y/N)",
+            "79": "Transportation cost (Rs.)/Kg of seed cotton",
+            "80": "Any quantity rejection due to contamination/impurities (Kg)",
+            "81": "Price discovery mechanism",
+            "82": "Payment Transaction type (Cash/online)",
+            "83": "Days of credit after sell",
+            "84": "Availing any govt. scheme or subsidy benefits (Y/N)",
+            "85": "Opted for crop insurance (Y/N)",
+            "86": "Cost of crop insurance per acre",
+            "87": "Possess KCC (Y/N)",
+            "88": "Possess active bank account (Y/N)",
+            "89": "Crop rotation used (Y/N)",
+            "90": "Crops used for rotation",
+            "91": "Using any water tracking devices (Y/N)",
+            "92": "Capacity of pump (in HP)",
+            "93": "Maintaining Buffer zone (Y/N)",
+            "94": "Utilization of crop residue (Fuel/cattle feed/biochar/in-situ composting/burning)",
+            "95": "Mode of payment to workers (cash/online)",
+            "96": "Any wage difference for Men and Women workers (Y/N)",
+            "97": "Using any labour register (Y/N)",
+            "98": "Any arrangement of safety-kit / first-aid for workers",
+            "99": "Any provision of shelter & safe drinking water for workers",
+            "100": "Any provision for lavatory for workers",
+            "101": "Involve family members (Women) in agricultural operations",
+            "102": "Any community water harvesting structure (Y/N)",
+            "103": "Use of soil moisture meter (Y/N)",
+        },
+        # Add other languages as needed...
+    }
+
+    questions = [str(i) for i in range(1, 104)]
+    labels = dict_translations.get(language, dict_translations["English"])
+
+    responses = {}
+    PHOTOS_DIR = "photos"
+    os.makedirs(PHOTOS_DIR, exist_ok=True)
+
+    with st.form("questionnaire_form"):
+        for question_key in questions:
+            question_text = labels.get(question_key, f"Question {question_key} (No translation)")
+            if question_key == "4":
+                responses[question_key] = st.selectbox(question_text, ["Male", "Female", "Others"], key=f"question_{question_key}")
+                if responses[question_key] == "Others":
+                    responses["others_gender"] = st.text_input("If selected Others, please specify:", key="others_gender")
+            elif question_key == "24":
+                responses[question_key] = st.selectbox(question_text, ["Canal", "Well", "Borewell", "River", "Farm Pond", "Community Pond", "Rain-fed not irrigated"], key=f"question_{question_key}")
+            elif question_key in ["29", "30", "33", "56", "75", "78", "84", "85", "87", "88", "89", "91", "93", "96", "97", "102", "103"]:
+                responses[question_key] = st.selectbox(question_text, ["Yes", "No"], key=f"question_{question_key}")
+            elif question_key == "55":
+                responses[question_key] = st.selectbox(question_text, ["Drip irrigation", "Sprinkler irrigation", "Flood irrigation", "Ridge and Furrow Irrigation", "Other"], key=f"question_{question_key}")
+            elif question_key == "62":
+                responses[question_key] = st.text_input(question_text, placeholder="e.g., month 1, month 2, month 3", key=f"question_{question_key}")
+            else:
+                responses[question_key] = st.text_input(question_text, key=f"question_{question_key}")
+
+        uploaded_photo = st.file_uploader("Upload a photo (optional):", type=["jpg", "jpeg", "png"], key="uploaded_photo")
+        submitted = st.form_submit_button("Submit")
+
+    if submitted:
+        required_fields = ["1", "2", "3", "4", "6", "8", "9", "10", "34", "35", "37", "39", "41", "42"]
+        for field in required_fields:
+            if not responses.get(field):
+                st.error(f"Field '{labels[field]}' is required.")
+                break
+        else:
+            phone_number = responses.get("3")
+            if phone_number and (len(phone_number) != 10 or not phone_number.isdigit()):
+                st.error("Mobile no. must be exactly 10 digits.")
+            else:
+                numeric_fields = ["11", "12", "13", "14", "15", "16", "17", "34", "37", "39", "41"]
+                for field in numeric_fields:
+                    if not str(responses.get(field)).isdigit() or int(responses.get(field)) < 0:
+                        st.error(f"Field '{labels[field]}' must be a non-negative number.")
+                        break
+                else:
+                    if uploaded_photo:
+                        photo_path = os.path.join(PHOTOS_DIR, uploaded_photo.name)
+                        with open(photo_path, "wb") as f:
+                            f.write(uploaded_photo.getbuffer())
+                        st.success(f"Photo uploaded and saved as {uploaded_photo.name}.")
+
+                    data = {labels.get(k, k): v for k, v in responses.items()}
+                    now = datetime.datetime.now()
+                    filename = f"survey_{now.strftime('%Y%m%d_%H%M%S')}.csv"
+                    df = pd.DataFrame([data])
+                    df.to_csv(os.path.join(SAVE_DIR, filename), index=False, encoding="utf-8")
+                    st.success("✅ Survey Submitted and Saved!")
+
+def plant_population_tool():
+    # Plant Population Tool Code
+    excel_file = "plant_population_data.xlsx"
+    if os.path.exists(excel_file):
+        saved_data = pd.read_excel(excel_file)
+    else:
+        saved_data = pd.DataFrame()
+
+    st.set_page_config(page_title="Plant Population Dashboard", layout="wide")
+    st.title("🌱 Plant Population Tool")
+    st.markdown("---")
+
+    st.subheader("Field Input Parameters")
+
+    with st.form("plant_population_form"):
+        cols1 = st.columns(6)
+        farmer_name = cols1[0].text_input("Farmer Name")
+        field_id = cols1[1].text_input("Field ID")
+        area_acre = cols1[2].number_input("Area (acre)", min_value=0.0, step=0.01)
+        area_m = cols1[3].number_input("Area (m)", min_value=0.0, step=0.1)
+        spacing_cm = cols1[4].text_input("Row × Plant Spacing (cm)")
+        spacing_m = cols1[5].text_input("Row × Plant Spacing (m)")
+
+        cols2 = st.columns(5)
+        sowing_date = cols2[0].date_input("Sowing Date", value=date.today())
+        expected_plants = cols2[1].number_input("Expected Plants", min_value=0)
+        plants_emerged = cols2[2].number_input("Plants Emerged", min_value=0)
+        actual_stand = cols2[3].number_input("Actual Stand (%)", min_value=0.0, max_value=100.0, step=0.1)
+        missing_plants = cols2[4].number_input("Missing Plants", min_value=0)
+
+        cols3 = st.columns(5)
+        gaps_filled = cols3[0].number_input("Gaps filled", min_value=0)
+        total_gaps = cols3[1].number_input("Total Gaps", min_value=0)
+        gap_percent = cols3[2].number_input("Gap %", min_value=0.0, max_value=100.0, step=0.1)
+        gap_filling_date = cols3[3].date_input("Gap Filling Date", value=date.today())
+        success_rate = cols3[4].number_input("Success Rate (%)", min_value=0.0, max_value=100.0, step=0.1)
+
+        cols4 = st.columns(2)
+        labour_hours = cols4[0].number_input("Labour Hours", min_value=0.0, step=0.1)
+        labour_efficiency = cols4[1].number_input("Labour Efficiency (gaps/hr)", min_value=0.0, step=0.1)
+
+        submitted = st.form_submit_button("Submit")
+
+    if submitted:
+        new_entry = pd.DataFrame([{
+            "Farmer Name": farmer_name,
+            "Field ID": field_id,
+            "Area (acre)": area_acre,
+            "Area (m)": area_m,
+            "Row × Plant Spacing (cm)": spacing_cm,
+            "Row × Plant Spacing (m)": spacing_m,
+            "Sowing Date": sowing_date,
+            "Expected Plants": expected_plants,
+            "Plants Emerged": plants_emerged,
+            "Actual Stand (%)": actual_stand,
+            "Missing Plants": missing_plants,
+            "Gaps filled": gaps_filled,
+            "Total Gaps": total_gaps,
+            "Gap %": gap_percent,
+            "Gap Filling Date": gap_filling_date,
+            "Success Rate (%)": success_rate,
+            "Labour Hours": labour_hours,
+            "Labour Efficiency (gaps/hr)": labour_efficiency
+        }])
+
+        saved_data = pd.concat([saved_data, new_entry], ignore_index=True)
+        saved_data.to_excel(excel_file, index=False)
+        st.success("Data submitted and saved to Excel.")
+
+    st.markdown("---")
+    st.subheader("📊 Collected Submissions")
+
+    if not saved_data.empty:
+        with st.expander("🔍 Filter Data"):
+            farmers = saved_data["Farmer Name"].unique().tolist()
+            selected_farmers = st.multiselect("Farmer Name", options=farmers, default=farmers)
+
+            fields = saved_data["Field ID"].unique().tolist()
+            selected_fields = st.multiselect("Field ID", options=fields, default=fields)
+
+            filtered_data = saved_data[
+                saved_data["Farmer Name"].isin(selected_farmers) &
+                saved_data["Field ID"].isin(selected_fields)
+            ]
+
+        st.dataframe(filtered_data, use_container_width=True)
+
+        st.markdown("---")
+        st.subheader("📈 Summary Analysis")
+
+        avg_gap_percent = filtered_data["Gap %"].mean()
+        avg_success_rate = filtered_data["Success Rate (%)"].mean()
+        avg_efficiency = filtered_data["Labour Efficiency (gaps/hr)"].mean()
+        total_expected = filtered_data["Expected Plants"].sum()
+        total_emerged = filtered_data["Plants Emerged"].sum()
+        total_missing = filtered_data["Missing Plants"].sum()
+        total_filled = filtered_data["Gaps filled"].sum()
+
+        st.metric("Average Gap %", f"{avg_gap_percent:.2f}%")
+        st.metric("Average Success Rate", f"{avg_success_rate:.2f}%")
+        st.metric("Average Labour Efficiency", f"{avg_efficiency:.2f} gaps/hr")
+        st.metric("Total Expected Plants", total_expected)
+        st.metric("Total Emerged Plants", total_emerged)
+        st.metric("Total Missing Plants", total_missing)
+        st.metric("Total Gaps Filled", total_filled)
+
+        st.markdown("---")
+        st.subheader("📊 Charts")
+
+        chart_col1, chart_col2 = st.columns(2)
+
+        with chart_col1:
+            fig1 = px.bar(filtered_data, x="Farmer Name", y="Gap %", color="Field ID", title="Gap % by Farmer")
+            st.plotly_chart(fig1, use_container_width=True)
+
+        with chart_col2:
+            fig2 = px.line(filtered_data.sort_values("Sowing Date"), x="Sowing Date", y="Success Rate (%)", color="Farmer Name", title="Success Rate Over Time")
+            st.plotly_chart(fig2, use_container_width=True)
+
+        fig3 = px.scatter(filtered_data, x="Expected Plants", y="Plants Emerged", color="Farmer Name", size="Labour Efficiency (gaps/hr)", title="Expected vs Emerged Plants")
+        st.plotly_chart(fig3, use_container_width=True)
+
+def training():
+    # Training section code
+    BASE_DIR = "training_materials"
+    PROGRAMS = ["Cotton", "Dairy"]
+    CATEGORIES = ["Presentations", "Videos", "Audios", "Quizzes"]
+
+    for program in PROGRAMS:
+        for category in CATEGORIES:
+            Path(f"{BASE_DIR}/{program.lower()}/{category.lower()}").mkdir(parents=True, exist_ok=True)
+
+    st.set_page_config(page_title="TechnoServe Training Platform", layout="wide")
+
+    # Admin Authentication with Session State
+    if "is_admin" not in st.session_state:
+        st.session_state.is_admin = False
+
+    def admin_login():
+        if st.session_state.is_admin:
+            st.sidebar.success("✅ You are logged in as Admin.")
+            return True
+
+        st.sidebar.subheader("🔒 Admin Login")
+        admin_username = st.sidebar.text_input("Admin Username", type="default", key="admin_username")
+        admin_password = st.sidebar.text_input("Admin Password", type="password", key="admin_password")
+        if st.sidebar.button("Login"):
+            if admin_username == "admin" and admin_password == "admin123":
+                st.sidebar.success("✅ Login Successful!")
+                st.session_state.is_admin = True
+                return True
+            else:
+                st.sidebar.error("❌ Invalid credentials. Please try again.")
+        return False
+
+    is_admin = admin_login()
+
+    if is_admin:
+        st.sidebar.header("⚙️ Admin Panel")
+        st.sidebar.markdown("Welcome, Admin!")
+
+        # --- Admin Feature: Upload Content ---
+        st.header("📤 Upload Training Content")
+        selected_program = st.selectbox("🌟 Select Program", PROGRAMS, key="program_dropdown")
+        selected_category = st.selectbox("📂 Select Category", CATEGORIES, key="category_dropdown")
+        uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
+
+        if uploaded_file:
+            save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
+            Path(save_dir).mkdir(parents=True, exist_ok=True)
+            file_path = os.path.join(save_dir, uploaded_file.name)
+
+            if st.button("Upload"):
+                try:
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
+                except Exception as e:
+                    st.error(f"❌ Error uploading file: {e}")
+
+        # --- Admin Feature: Delete Content ---
+        st.header("🗑️ Delete Training Content")
+        delete_program = st.selectbox("🗂️ Select Program to View Files", PROGRAMS, key="delete_program_dropdown")
+        delete_category = st.selectbox("📂 Select Category to View Files", CATEGORIES, key="delete_category_dropdown")
+        delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
+
+        if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
+            delete_files = os.listdir(delete_folder_path)
+            delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
+
+            if st.button("Delete File"):
+                try:
+                    os.remove(delete_folder_path / delete_file)
+                    st.success(f"✅ File '{delete_file}' has been deleted!")
+                except Exception as e:
+                    st.error(f"❌ Error deleting file: {e}")
+        else:
+            st.warning(f"No files available in the **{delete_category}** category of the {delete_program} program.")
+
+    # --- Main Content ---
+    st.markdown("""
+    <div class="header">
+        🌾 <span style="font-weight: bold;">Farmer Training Program</span> 🌾
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### 🎮 Level Up Your Farming Skills!")
+    st.markdown("""
+        <p>Welcome to the Farmer Training Program! Complete tasks, learn new skills, and earn rewards to become a <b>Master Farmer</b>.</p>
+        <ul>
+            <li>📚 Access training materials</li>
+            <li>🎯 Complete quizzes</li>
+            <li>🏆 Earn badges</li>
+        </ul>
+    """, unsafe_allow_html=True)
+
+    if st.button("🌟 Start Your Journey"):
+        st.success("🎉 You're on your way to becoming a Master Farmer! Explore the training materials below.")
+
+    selected_program = st.sidebar.selectbox("🌟 Choose a Program", PROGRAMS, key="view_program_dropdown")
+    selected_category = st.sidebar.radio("📂 Select Training Material", CATEGORIES, key="view_category_radio")
+
+    folder_path = Path(BASE_DIR) / selected_program.lower() / selected_category.lower()
+
+    if not folder_path.exists() or not any(folder_path.iterdir()):
+        st.warning(f"No content available for the **{selected_category}** category in the {selected_program} program.")
+    else:
+        files = os.listdir(folder_path)
+        for file in files:
+            file_path = folder_path / file
+            if file.endswith(".pdf"):
+                st.markdown(f"📄 **{file}**")
+                with open(file_path, "rb") as f:
+                    st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
+            elif file.endswith(".mp4"):
+                st.markdown(f"🎥 **{file}**")
+                st.video(str(file_path))
+            elif file.endswith(".mp3"):
+                st.markdown(f"🎵 **{file}**")
+                st.audio(str(file_path))
+            elif file.endswith(".json"):
+                st.markdown(f"📝 **{file}** (Quiz File)")
+                with open(file_path, "r") as f:
+                    st.json(json.load(f))
+            elif file.endswith((".png", ".jpg", ".jpeg")):
+                st.markdown(f"🖼️ **{file}**")
+                st.image(str(file_path))
+            elif file.endswith(".pptx"):
+                st.markdown(f"📑 **{file} (PPTX)**")
+                with open(file_path, "rb") as f:
+                    st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
+
 def main():
     preload_users()
     db = get_db()
@@ -477,12 +1043,20 @@ def main():
         selected_tab = sidebar()
         if selected_tab == "dashboard":
             dashboard(st.session_state.user)
+        elif selected_tab == "heritage_survey":
+            heritage_survey()
+        elif selected_tab == "cotton_baseline_survey":
+            cotton_baseline_survey()
+        elif selected_tab == "plant_population_tool":
+            plant_population_tool()
+        elif selected_tab == "training":
+            training()
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
-            field_team_management()  # New section for field team management
+            field_team_management()
         elif selected_tab == "live_dashboard":
-            live_dashboard()  # New section for live dashboard
+            live_dashboard()
         elif selected_tab == "reports":
             reports()
         elif selected_tab == "settings":
