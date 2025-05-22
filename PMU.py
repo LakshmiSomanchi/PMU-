@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date
 import os
 import datetime
+import io
 from PIL import Image
-import plotly.express as px  # Ensure Plotly is imported correctly
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -265,7 +265,7 @@ def sidebar():
         "Live Dashboard": "live_dashboard",
         "Heritage Survey": "heritage_survey",
         "Cotton Baseline Survey": "cotton_baseline_survey",
-        "Tools": "tools",
+        "Plant Population Tool": "plant_population_tool",
         "Training": "training",
         "Settings": "settings",
         "Logout": "logout"
@@ -394,6 +394,61 @@ def settings():
         })
         st.success("Settings saved successfully!")
 
+def reports():
+    st.subheader("📊 Reports")
+    st.markdown("### Weekly Document Summary")
+    
+    # Initialize summary filename
+    summary_filename = ""
+
+    # Generate a weekly summary document
+    if st.button("Generate Weekly Summary"):
+        summary_data = {
+            "Project": [],
+            "Progress Overview": [],
+            "Milestones Completed": [],
+            "Delays": [],
+            "Blockers": [],
+            "Action Items": []
+        }
+        
+        # Simulate data generation
+        for i in range(1, 4):
+            summary_data["Project"].append(f"Project {i}")
+            summary_data["Progress Overview"].append(f"{i * 10}%")
+            summary_data["Milestones Completed"].append(f"{i} milestones")
+            summary_data["Delays"].append(f"{i} delays")
+            summary_data["Blockers"].append(f"{i} blockers")
+            summary_data["Action Items"].append(f"Action item {i}")
+
+        summary_df = pd.DataFrame(summary_data)
+        summary_filename = f"weekly_summary_{date.today()}.csv"
+        summary_df.to_csv(summary_filename, index=False)
+        st.success(f"Weekly summary generated: {summary_filename}")
+
+    # Display the summary if it exists
+    if summary_filename and os.path.exists(summary_filename):
+        summary_df = pd.read_csv(summary_filename)
+        st.dataframe(summary_df)
+
+def scheduling(user):
+    db = get_db()
+    st.subheader("🗓️ Employee Scheduling")
+
+    with st.form("add_schedule"):
+        schedule_date = st.date_input("Schedule Date", date.today())
+        start_time = st.time_input("Start Time")
+        end_time = st.time_input("End Time")
+        if st.form_submit_button("Add Schedule"):
+            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
+            db.commit()
+            st.success("Schedule added successfully!")
+
+    st.subheader("Your Schedules")
+    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+    for schedule in schedules:
+        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+
 def heritage_survey():
     # Heritage Program - SNF Survey Code
     SAVE_DIR = 'survey_responses'
@@ -430,7 +485,7 @@ def heritage_survey():
     st.set_page_config(page_title="Heritage Dairy Survey", page_icon="🐄", layout="centered")
 
     # Language Selection
-    lang = st.selectbox("Language / भाषा / భाषా", ("English", "Hindi", "Telugu"))
+    lang = st.selectbox("Language / भाषा / భाषा", ("English", "Hindi", "Telugu"))
     labels = dict_translations.get(lang, dict_translations['English'])
 
     # Title
@@ -687,7 +742,7 @@ def cotton_baseline_survey():
             if phone_number and (len(phone_number) != 10 or not phone_number.isdigit()):
                 st.error("Mobile no. must be exactly 10 digits.")
             else:
-                numeric_fields = ["11", "12", "13", "14", "15", "16", "17", "34", "37", "39", "41", "42"]
+                numeric_fields = ["11", "12", "13", "14", "15", "16", "17", "34", "37", "39", "41"]
                 for field in numeric_fields:
                     if not str(responses.get(field)).isdigit() or int(responses.get(field)) < 0:
                         st.error(f"Field '{labels[field]}' must be a non-negative number.")
@@ -836,7 +891,7 @@ def training():
 
     for program in PROGRAMS:
         for category in CATEGORIES:
-            os.makedirs(f"{BASE_DIR}/{program.lower()}/{category.lower()}", exist_ok=True)
+            Path(f"{BASE_DIR}/{program.lower()}/{category.lower()}").mkdir(parents=True, exist_ok=True)
 
     st.set_page_config(page_title="TechnoServe Training Platform", layout="wide")
 
@@ -875,6 +930,7 @@ def training():
 
         if uploaded_file:
             save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
+            Path(save_dir).mkdir(parents=True, exist_ok=True)
             file_path = os.path.join(save_dir, uploaded_file.name)
 
             if st.button("Upload"):
@@ -889,15 +945,15 @@ def training():
         st.header("🗑️ Delete Training Content")
         delete_program = st.selectbox("🗂️ Select Program to View Files", PROGRAMS, key="delete_program_dropdown")
         delete_category = st.selectbox("📂 Select Category to View Files", CATEGORIES, key="delete_category_dropdown")
-        delete_folder_path = os.path.join(BASE_DIR, delete_program.lower(), delete_category.lower())
+        delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
 
-        if os.path.exists(delete_folder_path) and any(os.listdir(delete_folder_path)):
+        if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
             delete_files = os.listdir(delete_folder_path)
             delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
 
             if st.button("Delete File"):
                 try:
-                    os.remove(os.path.join(delete_folder_path, delete_file))
+                    os.remove(delete_folder_path / delete_file)
                     st.success(f"✅ File '{delete_file}' has been deleted!")
                 except Exception as e:
                     st.error(f"❌ Error deleting file: {e}")
@@ -927,31 +983,31 @@ def training():
     selected_program = st.sidebar.selectbox("🌟 Choose a Program", PROGRAMS, key="view_program_dropdown")
     selected_category = st.sidebar.radio("📂 Select Training Material", CATEGORIES, key="view_category_radio")
 
-    folder_path = os.path.join(BASE_DIR, selected_program.lower(), selected_category.lower())
+    folder_path = Path(BASE_DIR) / selected_program.lower() / selected_category.lower()
 
-    if not os.path.exists(folder_path) or not any(os.listdir(folder_path)):
+    if not folder_path.exists() or not any(folder_path.iterdir()):
         st.warning(f"No content available for the **{selected_category}** category in the {selected_program} program.")
     else:
         files = os.listdir(folder_path)
         for file in files:
-            file_path = os.path.join(folder_path, file)
+            file_path = folder_path / file
             if file.endswith(".pdf"):
                 st.markdown(f"📄 **{file}**")
                 with open(file_path, "rb") as f:
                     st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
             elif file.endswith(".mp4"):
                 st.markdown(f"🎥 **{file}**")
-                st.video(file_path)
+                st.video(str(file_path))
             elif file.endswith(".mp3"):
                 st.markdown(f"🎵 **{file}**")
-                st.audio(file_path)
+                st.audio(str(file_path))
             elif file.endswith(".json"):
                 st.markdown(f"📝 **{file}** (Quiz File)")
                 with open(file_path, "r") as f:
                     st.json(json.load(f))
             elif file.endswith((".png", ".jpg", ".jpeg")):
                 st.markdown(f"🖼️ **{file}**")
-                st.image(file_path)
+                st.image(str(file_path))
             elif file.endswith(".pptx"):
                 st.markdown(f"📑 **{file} (PPTX)**")
                 with open(file_path, "rb") as f:
@@ -991,7 +1047,7 @@ def main():
             heritage_survey()
         elif selected_tab == "cotton_baseline_survey":
             cotton_baseline_survey()
-        elif selected_tab == "tools":
+        elif selected_tab == "plant_population_tool":
             plant_population_tool()
         elif selected_tab == "training":
             training()
