@@ -9,6 +9,7 @@ import os
 import datetime
 import io
 from PIL import Image
+import plotly.express as px
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -265,7 +266,7 @@ def sidebar():
         "Live Dashboard": "live_dashboard",
         "Heritage Survey": "heritage_survey",
         "Cotton Baseline Survey": "cotton_baseline_survey",
-        "Plant Population Tool": "plant_population_tool",
+        "Tools": "tools",
         "Training": "training",
         "Settings": "settings",
         "Logout": "logout"
@@ -393,61 +394,6 @@ def settings():
             "auto_email_summary": auto_email_summary
         })
         st.success("Settings saved successfully!")
-
-def reports():
-    st.subheader("📊 Reports")
-    st.markdown("### Weekly Document Summary")
-    
-    # Initialize summary filename
-    summary_filename = ""
-
-    # Generate a weekly summary document
-    if st.button("Generate Weekly Summary"):
-        summary_data = {
-            "Project": [],
-            "Progress Overview": [],
-            "Milestones Completed": [],
-            "Delays": [],
-            "Blockers": [],
-            "Action Items": []
-        }
-        
-        # Simulate data generation
-        for i in range(1, 4):
-            summary_data["Project"].append(f"Project {i}")
-            summary_data["Progress Overview"].append(f"{i * 10}%")
-            summary_data["Milestones Completed"].append(f"{i} milestones")
-            summary_data["Delays"].append(f"{i} delays")
-            summary_data["Blockers"].append(f"{i} blockers")
-            summary_data["Action Items"].append(f"Action item {i}")
-
-        summary_df = pd.DataFrame(summary_data)
-        summary_filename = f"weekly_summary_{date.today()}.csv"
-        summary_df.to_csv(summary_filename, index=False)
-        st.success(f"Weekly summary generated: {summary_filename}")
-
-    # Display the summary if it exists
-    if summary_filename and os.path.exists(summary_filename):
-        summary_df = pd.read_csv(summary_filename)
-        st.dataframe(summary_df)
-
-def scheduling(user):
-    db = get_db()
-    st.subheader("🗓️ Employee Scheduling")
-
-    with st.form("add_schedule"):
-        schedule_date = st.date_input("Schedule Date", date.today())
-        start_time = st.time_input("Start Time")
-        end_time = st.time_input("End Time")
-        if st.form_submit_button("Add Schedule"):
-            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
-            db.commit()
-            st.success("Schedule added successfully!")
-
-    st.subheader("Your Schedules")
-    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    for schedule in schedules:
-        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
 
 def heritage_survey():
     # Heritage Program - SNF Survey Code
@@ -1047,7 +993,7 @@ def main():
             heritage_survey()
         elif selected_tab == "cotton_baseline_survey":
             cotton_baseline_survey()
-        elif selected_tab == "plant_population_tool":
+        elif selected_tab == "tools":
             plant_population_tool()
         elif selected_tab == "training":
             training()
