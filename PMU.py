@@ -7,7 +7,6 @@ import pandas as pd
 from datetime import date
 import os
 import datetime
-import io
 from PIL import Image
 import plotly.express as px  # Ensure Plotly is imported correctly
 
@@ -688,7 +687,7 @@ def cotton_baseline_survey():
             if phone_number and (len(phone_number) != 10 or not phone_number.isdigit()):
                 st.error("Mobile no. must be exactly 10 digits.")
             else:
-                numeric_fields = ["11", "12", "13", "14", "15", "16", "17", "34", "37", "39", "41"]
+                numeric_fields = ["11", "12", "13", "14", "15", "16", "17", "34", "37", "39", "41", "42"]
                 for field in numeric_fields:
                     if not str(responses.get(field)).isdigit() or int(responses.get(field)) < 0:
                         st.error(f"Field '{labels[field]}' must be a non-negative number.")
