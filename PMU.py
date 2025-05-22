@@ -9,6 +9,7 @@ import os
 import datetime
 import io
 from PIL import Image
+import plotly
 import plotly.express as px  # Ensure Plotly is imported correctly
 
 # Set Streamlit page config (must be first)
