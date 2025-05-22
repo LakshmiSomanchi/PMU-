@@ -9,9 +9,7 @@ import os
 import datetime
 import io
 from PIL import Image
-import plotly
-print(plotly.__version__)
-import plotly.express as px
+import plotly.express as px  # Ensure Plotly is imported correctly
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -839,7 +837,7 @@ def training():
 
     for program in PROGRAMS:
         for category in CATEGORIES:
-            Path(f"{BASE_DIR}/{program.lower()}/{category.lower()}").mkdir(parents=True, exist_ok=True)
+            os.makedirs(f"{BASE_DIR}/{program.lower()}/{category.lower()}", exist_ok=True)
 
     st.set_page_config(page_title="TechnoServe Training Platform", layout="wide")
 
@@ -878,7 +876,6 @@ def training():
 
         if uploaded_file:
             save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
-            Path(save_dir).mkdir(parents=True, exist_ok=True)
             file_path = os.path.join(save_dir, uploaded_file.name)
 
             if st.button("Upload"):
@@ -893,15 +890,15 @@ def training():
         st.header("🗑️ Delete Training Content")
         delete_program = st.selectbox("🗂️ Select Program to View Files", PROGRAMS, key="delete_program_dropdown")
         delete_category = st.selectbox("📂 Select Category to View Files", CATEGORIES, key="delete_category_dropdown")
-        delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
+        delete_folder_path = os.path.join(BASE_DIR, delete_program.lower(), delete_category.lower())
 
-        if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
+        if os.path.exists(delete_folder_path) and any(os.listdir(delete_folder_path)):
             delete_files = os.listdir(delete_folder_path)
             delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
 
             if st.button("Delete File"):
                 try:
-                    os.remove(delete_folder_path / delete_file)
+                    os.remove(os.path.join(delete_folder_path, delete_file))
                     st.success(f"✅ File '{delete_file}' has been deleted!")
                 except Exception as e:
                     st.error(f"❌ Error deleting file: {e}")
@@ -931,31 +928,31 @@ def training():
     selected_program = st.sidebar.selectbox("🌟 Choose a Program", PROGRAMS, key="view_program_dropdown")
     selected_category = st.sidebar.radio("📂 Select Training Material", CATEGORIES, key="view_category_radio")
 
-    folder_path = Path(BASE_DIR) / selected_program.lower() / selected_category.lower()
+    folder_path = os.path.join(BASE_DIR, selected_program.lower(), selected_category.lower())
 
-    if not folder_path.exists() or not any(folder_path.iterdir()):
+    if not os.path.exists(folder_path) or not any(os.listdir(folder_path)):
         st.warning(f"No content available for the **{selected_category}** category in the {selected_program} program.")
     else:
         files = os.listdir(folder_path)
         for file in files:
-            file_path = folder_path / file
+            file_path = os.path.join(folder_path, file)
             if file.endswith(".pdf"):
                 st.markdown(f"📄 **{file}**")
                 with open(file_path, "rb") as f:
                     st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
             elif file.endswith(".mp4"):
                 st.markdown(f"🎥 **{file}**")
-                st.video(str(file_path))
+                st.video(file_path)
             elif file.endswith(".mp3"):
                 st.markdown(f"🎵 **{file}**")
-                st.audio(str(file_path))
+                st.audio(file_path)
             elif file.endswith(".json"):
                 st.markdown(f"📝 **{file}** (Quiz File)")
                 with open(file_path, "r") as f:
                     st.json(json.load(f))
             elif file.endswith((".png", ".jpg", ".jpeg")):
                 st.markdown(f"🖼️ **{file}**")
-                st.image(str(file_path))
+                st.image(file_path)
             elif file.endswith(".pptx"):
                 st.markdown(f"📑 **{file} (PPTX)**")
                 with open(file_path, "rb") as f:
