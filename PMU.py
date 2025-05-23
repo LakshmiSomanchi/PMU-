@@ -282,7 +282,7 @@ def dashboard(user):
 
     for tab in dashboard_tabs:
         with tab:
-            st.subheader(f"📊 Dashboard")
+            st.subheader(f"📊 Progress")
             # Here you can add specific content for each dashboard
             # For example, you can display progress for each section
             st.write("This is where you can display progress and other metrics.")
@@ -290,7 +290,7 @@ def dashboard(user):
             # Example of displaying employee progress
             employees = db.query(Employee).all()
             for emp in employees:
-                st.markdown(f"**{emp.name}**: Progress details here...")  # Replace with actual progress data
+                st.markdown(f"**{emp.name}**:Status")  # Replace with actual progress data
 
 def live_dashboard():
     db = get_db()
