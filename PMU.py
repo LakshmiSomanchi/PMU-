@@ -456,19 +456,22 @@ def field_team_management():
     with st.form("add_field_team"):
         team_name = st.text_input("Field Team Name")
         if st.form_submit_button("Add Field Team"):
-            new_team = FieldTeam(name=team_name)
-            db.add(new_team)
-            db.commit()
-            st.success(f"Field Team '{team_name}' added successfully!")
+            if team_name:
+                new_team = FieldTeam(name=team_name)
+                db.add(new_team)
+                db.commit()
+                st.success(f"Field Team '{team_name}' added successfully!")
+            else:
+                st.error("Field Team Name cannot be empty.")
 
     # Display Existing Field Teams
     st.subheader("Existing Field Teams")
     field_teams = db.query(FieldTeam).all()
     if field_teams:
         for team in field_teams:
-            st.markdown(f"**Team Name**: {team.name}")
-            # Optionally, add functionality to delete or edit teams
-            if st.button(f"Delete {team.name}"):
+            col1, col2 = st.columns([3, 1])
+            col1.markdown(f"**Team Name**: {team.name}")
+            if col2.button(f"Delete {team.name}", key=team.id):
                 db.delete(team)
                 db.commit()
                 st.success(f"Field Team '{team.name}' deleted successfully!")
