@@ -277,18 +277,20 @@ def dashboard(user):
         st.session_state.user = None
         st.experimental_rerun()
 
-tab_labels = ["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"]
-dashboard_tabs = st.tabs(tab_labels)
+    # Tabs for different dashboards
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
 
-for i, tab in enumerate(dashboard_tabs):
-    with tab:
-        st.subheader(f"📊 {tab_labels[i]}")
-        st.write("This is where you can display progress and other metrics.")
+    for tab in dashboard_tabs:
+        with tab:
+            st.subheader(f"📊 {tab.label}")
+            # Here you can add specific content for each dashboard
+            # For example, you can display progress for each section
+            st.write("This is where you can display progress and other metrics.")
 
-        employees = db.query(Employee).all()
-        for emp in employees:
-            st.markdown(f"**{emp.name}**: Progress details here...")  # Add actual logic here
-
+            # Example of displaying employee progress
+            employees = db.query(Employee).all()
+            for emp in employees:
+                st.markdown(f"**{emp.name}**: Progress details here...")  # Replace with actual progress data
 
 def live_dashboard():
     db = get_db()
