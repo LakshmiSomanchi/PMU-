@@ -480,7 +480,7 @@ def main():
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
-            field_team_management()  # New section for field team management
+            field_team_management() 
         elif selected_tab == "live_dashboard":
             live_dashboard()  # New section for live dashboard
         elif selected_tab == "reports":
