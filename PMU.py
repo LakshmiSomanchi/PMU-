@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 import os
+from pathlib import Path  # Import Path for directory creation
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -446,6 +447,34 @@ def scheduling(user):
     schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
     for schedule in schedules:
         st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+
+def field_team_management():
+    db = get_db()
+    st.subheader("👥 Field Team Management")
+
+    # Add Field Team
+    with st.form("add_field_team"):
+        team_name = st.text_input("Field Team Name")
+        if st.form_submit_button("Add Field Team"):
+            new_team = FieldTeam(name=team_name)
+            db.add(new_team)
+            db.commit()
+            st.success(f"Field Team '{team_name}' added successfully!")
+
+    # Display Existing Field Teams
+    st.subheader("Existing Field Teams")
+    field_teams = db.query(FieldTeam).all()
+    if field_teams:
+        for team in field_teams:
+            st.markdown(f"**Team Name**: {team.name}")
+            # Optionally, add functionality to delete or edit teams
+            if st.button(f"Delete {team.name}"):
+                db.delete(team)
+                db.commit()
+                st.success(f"Field Team '{team.name}' deleted successfully!")
+                st.experimental_rerun()  # Refresh the page to update the list
+    else:
+        st.write("No field teams available.")
 
 def main():
     preload_users()
