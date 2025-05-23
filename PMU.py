@@ -282,7 +282,7 @@ def dashboard(user):
 
     for tab in dashboard_tabs:
         with tab:
-            st.subheader(f"📊 {tab.label}")
+            st.subheader(f"📊 Dashboard{tab.label}")
             # Here you can add specific content for each dashboard
             # For example, you can display progress for each section
             st.write("This is where you can display progress and other metrics.")
