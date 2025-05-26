@@ -288,7 +288,7 @@ def dashboard(user):
             if tab == "PMU Dashboard":
                 pmu_dashboard(user)
             else:
-                st.subheader(f"📊 Progress in {tab}")
+                st.subheader(f"📊Progress")
                 # Here you can add specific content for each dashboard
                 # For example, you can display progress for each section
                 st.write("This is where you can display progress and other metrics.")
