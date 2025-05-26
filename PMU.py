@@ -7,6 +7,7 @@ import pandas as pd
 from datetime import date
 import os
 from pathlib import Path  # Import Path for directory creation
+from math import floor
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -280,29 +281,31 @@ def dashboard(user):
         st.experimental_rerun()
 
     # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
 
     for tab in dashboard_tabs:
         with tab:
-            if tab == "SAKSHAM Dashboard":
-                saksham_dashboard()
-            else:
-                st.subheader(f"📊 Progress in {tab}")
-                # Here you can add specific content for each dashboard
-                # For example, you can display progress for each section
-                st.write("This is where you can display progress and other metrics.")
+            st.subheader(f"📊Progress")
+            # Here you can add specific content for each dashboard
+            # For example, you can display progress for each section
+            st.write("This is where you can display progress and other metrics.")
 
-                # Example of displaying employee progress
-                employees = db.query(Employee).all()
-                for emp in employees:
-                    st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+            # Example of displaying employee progress
+            employees = db.query(Employee).all()
+            for emp in employees:
+                st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
     st.write("This dashboard includes tools and resources for plant population management.")
 
-    # Plant Population Tool
+    # Tools Section
+    st.header("🛠️ Tools")
     plant_population_tool()
+
+    # Samriddh Sakhi Section
+    st.header("🌼 Samriddh Sakhi")
+    st.write("This section provides information and resources related to the Samriddh Sakhi program.")
 
 def plant_population_tool():
     st.write("This tool will help you calculate plant population.")
@@ -312,6 +315,60 @@ def plant_population_tool():
     if st.button("Calculate Total Plants"):
         total_plants = area * plants_per_acre
         st.success(f"Total Plants: {total_plants}")
+
+    # Farmer Survey Entry
+    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+    st.header("📥 Farmer Survey Entry")
+    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
+
+    with st.form("survey_form"):
+        col0, col1, col2 = st.columns(3)
+        farmer_name = col0.text_input("👤 Farmer Name")
+        farmer_id = col1.text_input("🆔 Farmer ID")
+        state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
+
+        spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
+        col3, col4, col5 = st.columns(3)
+        row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
+        plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
+        land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
+
+        submitted = st.form_submit_button("🔍 Calculate")
+
+    if submitted and farmer_name and farmer_id:
+        st.markdown("---")
+
+        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
+        confidence_interval = 0.90
+        seeds_per_packet = 7500
+        acre_to_m2 = 4046.86
+
+        if spacing_unit == "cm":
+            row_spacing /= 100
+            plant_spacing /= 100
+
+        plant_area_m2 = row_spacing * plant_spacing
+        plants_per_m2 = 1 / plant_area_m2
+        field_area_m2 = land_acres * acre_to_m2
+        calculated_plants = plants_per_m2 * field_area_m2
+
+        target_plants = germination_rate_per_acre[state] * land_acres
+        required_seeds = target_plants / confidence_interval
+        required_packets = floor(required_seeds / seeds_per_packet)
+
+        st.subheader("📊 Output Summary")
+        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
+        col6, col7, col8, col9 = st.columns(4)
+        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
+        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
+        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
+        col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
+
+        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+        st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
+
+    elif submitted:
+        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
 def live_dashboard():
     db = get_db()
