@@ -299,32 +299,64 @@ def dashboard(user):
                     st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
 
 def pmu_dashboard(user):
+    db = get_db()
     st.subheader("📋 PMU Work Plans")
-    
-    # Work Plan Form
-    with st.form("work_plan_form"):
-        title = st.text_input("Work Plan Title")
-        details = st.text_area("Details")
-        deadline = st.date_input("Deadline")
-        status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
 
-        submitted = st.form_submit_button("Save Work Plan")
-        
-        if submitted:
-            new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id)
-            db = get_db()
-            db.add(new_workplan)
-            db.commit()
-            st.success("Work Plan saved successfully!")
+    with st.expander("➕ Add New Work Plan"):
+        with st.form("work_plan_form"):
+            title = st.text_input("Work Plan Title")
+            details = st.text_area("Details")
+            deadline = st.date_input("Deadline")
+            status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
 
-    # Display Existing Work Plans
-    st.subheader("Existing Work Plans")
+            submitted = st.form_submit_button("Save Work Plan")
+            if submitted:
+                new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id)
+                db.add(new_workplan)
+                db.commit()
+                st.success("✅ Work Plan saved successfully!")
+
+    with st.expander("➕ Add New Work Stream"):
+        with st.form("workstream_form"):
+            title = st.text_input("WorkStream Title")
+            description = st.text_area("Description")
+            category = st.text_input("Category")
+
+            if st.form_submit_button("Save Work Stream"):
+                new_ws = WorkStream(title=title, description=description, category=category, employee_id=user.id)
+                db.add(new_ws)
+                db.commit()
+                st.success("✅ Work Stream created.")
+
+    with st.expander("➕ Add New Target"):
+        with st.form("target_form"):
+            description = st.text_area("Target Description")
+            deadline = st.date_input("Target Deadline")
+            status = st.selectbox("Target Status", ["Not Started", "In Progress", "Completed"])
+
+            if st.form_submit_button("Save Target"):
+                new_target = Target(description=description, deadline=str(deadline), status=status, employee_id=user.id)
+                db.add(new_target)
+                db.commit()
+                st.success("✅ Target saved.")
+
+    # Display Work Plans
+    st.subheader("📌 Your Work Plans")
     workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
-    if workplans:
-        for plan in workplans:
-            st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
-    else:
-        st.write("No work plans available.")
+    for plan in workplans:
+        st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+
+    # Display WorkStreams
+    st.subheader("🧩 Your Work Streams")
+    workstreams = db.query(WorkStream).filter_by(employee_id=user.id).all()
+    for ws in workstreams:
+        st.markdown(f"**Title**: {ws.title} | **Category**: {ws.category} | **Desc**: {ws.description}")
+
+    # Display Targets
+    st.subheader("🎯 Your Targets")
+    targets = db.query(Target).filter_by(employee_id=user.id).all()
+    for tgt in targets:
+        st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
