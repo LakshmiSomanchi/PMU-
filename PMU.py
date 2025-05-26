@@ -396,6 +396,27 @@ def is_valid_file(file_name, category):
         return True
     return False
 
+# --- Placeholder Functions for Other Sections ---
+def scheduling(user):
+    st.subheader("🗓️ Employee Scheduling")
+    st.write("This section will allow you to manage employee schedules.")
+
+def field_team_management():
+    st.subheader("👥 Field Team Management")
+    st.write("This section will allow you to manage field teams.")
+
+def live_dashboard():
+    st.subheader("📈 Live Monitoring Dashboard")
+    st.write("This section will provide live monitoring of various metrics.")
+
+def reports():
+    st.subheader("📊 Reports")
+    st.write("This section will allow you to generate and view reports.")
+
+def settings():
+    st.subheader("⚙️ Settings")
+    st.write("This section will allow you to manage application settings.")
+
 def main():
     preload_users()
     db = get_db()
