@@ -443,8 +443,10 @@ def settings():
     st.write("This section will allow you to manage application settings.")
 
 def main():
-    preload_users()
+    # Only preload users if the database is empty
     db = get_db()
+    if db.query(Employee).count() == 0:
+        preload_users()
     
     # Initialize session state for user if not already done
     if "user" not in st.session_state:
