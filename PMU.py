@@ -1,25 +1,91 @@
 import streamlit as st
-import os
-from pathlib import Path
-import json
 from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
-from math import floor
+import pandas as pd
+from datetime import date
+import os
+from pathlib import Path  # Import Path for directory creation
+import json
 
-# Set the Streamlit page configuration
+# Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# Define the base directory for training materials
-BASE_DIR = "training_materials"
-PROGRAMS = ["Cotton", "Dairy"]
-CATEGORIES = ["Presentations", "Videos", "Audios", "Quizzes"]
+# Custom CSS with sidebar background image and global page background image
+st.markdown("""
+    <style>
+        body {
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right%20side_corner.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-position: center;
+        }
 
-# Ensure the directory structure exists
-for program in PROGRAMS:
-    for category in CATEGORIES:
-        Path(f"{BASE_DIR}/{program.lower()}/{category.lower()}").mkdir(parents=True, exist_ok=True)
+        .stApp {
+            background-color: rgba(255, 255, 255, 0.1); /* Increased transparency for better visibility */
+        }
+
+        section[data-testid="stSidebar"] > div:first-child {
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20green%20plain%20background.jpg");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            color: white;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+        }
+       
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] h4,
+        section[data-testid="stSidebar"] h5,
+        section[data-testid="stSidebar"] h6,
+        section[data-testid="stSidebar"] .stRadio label {
+            color: white !important;
+        }
+
+        h1, h2, h3, h4 {
+            color: #003566;
+        }
+
+        .streamlit-expanderHeader {
+            background-color: #dceefb;
+            border: 1px solid #cce0ff;
+            border-radius: 10px;
+        }
+
+        .stButton > button {
+            background-color: #0077b6;
+            color: white;
+            border-radius: 8px;
+            padding: 0.5em 1em;
+        }
+        .stButton > button:hover {
+            background-color: #0096c7;
+        }
+
+        .stDataFrame {
+            background-color: #ffffff;
+            border: 5px solid #ccc;
+        }
+
+        .stTabs [role="tab"] {
+            background-color: #edf6ff;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            border: 1px solid #b6d4fe;
+        }
+
+        .stTabs [role="tab"][aria-selected="true"] {
+            background-color: #0077b6;
+            color: white;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
@@ -198,184 +264,36 @@ def sidebar():
         "Field Team Management": "field_team_management",
         "Live Dashboard": "live_dashboard",
         "Settings": "settings",
-        "Tools": "tools",  # New Tools section
-        "SAKSHAM": "saksham",  # New SAKSHAM section
-        "Samriddh Sakhi": "samriddh_sakhi",  # New Samriddh Sakhi section
-        "Training": "training",  # New Training section
-        "Logout": "logout"
+        "Logout": "logout",
+        "Training": "training"  # New Training section
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
     return menu_options[selection]
 
-def tools():
-    st.subheader("🛠️ Tools")
-    tool_options = {
-        "Cotton": "cotton_tools",
-        "Dairy": "dairy_tools"
-    }
-    selected_tool = st.selectbox("Select a Tool", list(tool_options.keys()))
-    
-    if selected_tool == "Cotton":
-        cotton_tools()
-    elif selected_tool == "Dairy":
-        dairy_tools()
+# --- Dashboard Section ---
+def dashboard(user):
+    db = get_db()
+    st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
+    st.sidebar.markdown("### Logged in as")
+    st.sidebar.success(user.name)
+    if st.sidebar.button("🔓 Logout"):
+        st.session_state.user = None
+        st.experimental_rerun()
 
-def cotton_tools():
-    st.subheader("🌾 Cotton Tools")
-    if st.button("Open Plant Population Tool"):
-        st.session_state.tool = "plant_population_tool"
-        st.experimental_rerun()  # Redirect to the Plant Population Tool
+    # Tabs for different dashboards
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
 
-def dairy_tools():
-    st.subheader("🥛 Dairy Tools")
-    st.write("Dairy tools will be added here in the future.")
+    for tab in dashboard_tabs:
+        with tab:
+            st.subheader(f"📊 Progress")
+            # Here you can add specific content for each dashboard
+            # For example, you can display progress for each section
+            st.write("This is where you can display progress and other metrics.")
 
-def saksham():
-    st.subheader("🌟 SAKSHAM")
-    st.write("Welcome to the SAKSHAM section.")
-    if st.button("Open Plant Population Tool"):
-        st.session_state.tool = "plant_population_tool"
-        st.experimental_rerun()  # Redirect to the Plant Population Tool
-
-def plant_population_tool():
-    st.set_page_config(page_title="Plant Population Tool", layout="wide")
-
-    # Detect dark mode for adaptive styling
-    is_dark = st.get_option("theme.base") == "dark"
-
-    text_color = "#f8f9fa" if is_dark else "#0A0A0A"
-    bg_color = "#0A9396" if is_dark else "#e0f2f1"
-
-    # Apply full page background color
-    st.markdown(f"""
-    <style>
-        html, body, [class*="css"]  {{
-            background-color: {bg_color};
-            font-family: 'Helvetica', sans-serif;
-        }}
-        .block-container {{
-            padding-top: 3rem;
-            padding-bottom: 3rem;
-        }}
-        .stMetricValue {{
-            font-size: 1.5rem !important;
-            color: {text_color};
-        }}
-        .stMetricLabel {{
-            font-weight: bold;
-            color: {text_color};
-        }}
-        h1, h2, h3, h4, h5 {{
-            color: {text_color};
-        }}
-        .stButton>button {{
-            background-color: #0A9396;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 0.6em 1.5em;
-        }}
-        .stButton>button:hover {{
-            background-color: #007f86;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.title("🌿 Plant Population & Seed Requirement Tool")
-    st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
-
-    with st.container():
-        st.header("📥 Farmer Survey Entry")
-        st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
-
-        with st.form("survey_form"):
-            col0, col1, col2 = st.columns(3)
-            farmer_name = col0.text_input("👤 Farmer Name")
-            farmer_id = col1.text_input("🆔 Farmer ID")
-            state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
-
-            spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-            col3, col4, col5 = st.columns(3)
-            row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
-            plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-            land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
-
-            submitted = st.form_submit_button("🔍 Calculate")
-
-    if submitted and farmer_name and farmer_id:
-        st.markdown("---")
-
-        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
-        confidence_interval = 0.90
-        seeds_per_packet = 7500
-        acre_to_m2 = 4046.86
-
-        if spacing_unit == "cm":
-            row_spacing /= 100
-            plant_spacing /= 100
-
-        plant_area_m2 = row_spacing * plant_spacing
-        plants_per_m2 = 1 / plant_area_m2
-        field_area_m2 = land_acres * acre_to_m2
-        calculated_plants = plants_per_m2 * field_area_m2
-
-        target_plants = germination_rate_per_acre[state] * land_acres
-        required_seeds = target_plants / confidence_interval
-        required_packets = floor(required_seeds / seeds_per_packet)
-
-        st.subheader("📊 Output Summary")
-        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
-        col6, col7, col8, col9 = st.columns(4)
-        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-        col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
-
-        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-        st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
-
-    elif submitted:
-        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
-
-def samriddh_sakhi():
-    st.subheader("🌼 Samriddh Sakhi")
-    st.write("Welcome to the Samriddh Sakhi section. This section will contain resources and tools for empowerment.")
-
-def admin_login():
-    """Admin login for restricted access."""
-    if st.session_state.is_admin:
-        st.sidebar.success("✅ You are logged in as Admin.")
-        return True
-
-    st.sidebar.subheader("🔒 Admin Login")
-    admin_username = st.sidebar.text_input("Admin Username", type="default", key="admin_username")
-    admin_password = st.sidebar.text_input("Admin Password", type="password", key="admin_password")
-    if st.sidebar.button("Login"):
-        if admin_username == "admin" and admin_password == "admin123":
-            st.sidebar.success("✅ Login Successful!")
-            st.session_state.is_admin = True
-            return True
-        else:
-            st.sidebar.error("❌ Invalid credentials. Please try again.")
-    return False
-
-# File type validation based on category
-def is_valid_file(file_name, category):
-    valid_extensions = {
-        "Presentations": [".pptx"],
-        "Videos": [".mp4"],
-        "Audios": [".mp3"],
-        "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"]
-    }
-    # Allow Excel and Images in all categories
-    extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
-    file_extension = os.path.splitext(file_name)[1].lower()
-
-    if file_extension in extra_extensions:
-        return True
-    if category in valid_extensions and file_extension in valid_extensions[category]:
-        return True
-    return False
+            # Example of displaying employee progress
+            employees = db.query(Employee).all()
+            for emp in employees:
+                st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
 
 # --- Training Section ---
 def training():
@@ -475,13 +393,41 @@ def training():
                 with open(file_path, "rb") as f:
                     st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
 
-# --- Dashboard Section ---
-def dashboard(user):
-    st.title("📊 Dashboard")
-    st.markdown("Welcome to the Dashboard!")
+def admin_login():
+    """Admin login for restricted access."""
+    if st.session_state.is_admin:
+        st.sidebar.success("✅ You are logged in as Admin.")
+        return True
 
-    # Add original dashboard content here
-    # ...
+    st.sidebar.subheader("🔒 Admin Login")
+    admin_username = st.sidebar.text_input("Admin Username", type="default", key="admin_username")
+    admin_password = st.sidebar.text_input("Admin Password", type="password", key="admin_password")
+    if st.sidebar.button("Login"):
+        if admin_username == "admin" and admin_password == "admin123":
+            st.sidebar.success("✅ Login Successful!")
+            st.session_state.is_admin = True
+            return True
+        else:
+            st.sidebar.error("❌ Invalid credentials. Please try again.")
+    return False
+
+# File type validation based on category
+def is_valid_file(file_name, category):
+    valid_extensions = {
+        "Presentations": [".pptx"],
+        "Videos": [".mp4"],
+        "Audios": [".mp3"],
+        "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"]
+    }
+    # Allow Excel and Images in all categories
+    extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
+    file_extension = os.path.splitext(file_name)[1].lower()
+
+    if file_extension in extra_extensions:
+        return True
+    if category in valid_extensions and file_extension in valid_extensions[category]:
+        return True
+    return False
 
 def main():
     preload_users()
@@ -525,19 +471,9 @@ def main():
             reports()
         elif selected_tab == "settings":
             settings()
-        elif selected_tab == "tools":
-            tools()  # New tools section
-        elif selected_tab == "saksham":
-            saksham()  # New SAKSHAM section
-        elif selected_tab == "samriddh_sakhi":
-            samriddh_sakhi()  # New Samriddh Sakhi section
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
-
-    # Check if the Plant Population Tool should be displayed
-    if "tool" in st.session_state and st.session_state.tool == "plant_population_tool":
-        plant_population_tool()  # Call the Plant Population Tool function
 
 if __name__ == "__main__":
     main()
