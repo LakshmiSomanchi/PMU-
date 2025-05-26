@@ -299,7 +299,7 @@ def dashboard(user):
 def training():
     st.title("📚 Training Materials")
     
-    # --- Admin Feature: Upload Content ---
+    # --- Upload Content ---
     st.header("📤 Upload Training Content")
     selected_program = st.selectbox("🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown")
     selected_category = st.selectbox("📂 Select Category", ["Presentations", "Videos", "Audios", "Quizzes"], key="category_dropdown")
@@ -307,7 +307,7 @@ def training():
 
     if uploaded_file:
         if selected_program and selected_category:  # Ensure selections are made
-            save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
+            save_dir = f"training_materials/{selected_program.lower()}/{selected_category.lower()}"
             Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
             file_path = os.path.join(save_dir, uploaded_file.name)
 
@@ -325,11 +325,11 @@ def training():
         else:
             st.error("Please select a program and category before uploading.")
 
-    # --- Admin Feature: Delete Content ---
+    # --- Delete Content ---
     st.header("🗑️ Delete Training Content")
     delete_program = st.selectbox("🗂️ Select Program to View Files", ["Cotton", "Dairy"], key="delete_program_dropdown")
     delete_category = st.selectbox("📂 Select Category to View Files", ["Presentations", "Videos", "Audios", "Quizzes"], key="delete_category_dropdown")
-    delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
+    delete_folder_path = Path(f"training_materials/{delete_program.lower()}/{delete_category.lower()}")
 
     if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
         delete_files = os.listdir(delete_folder_path)
@@ -348,7 +348,7 @@ def training():
     selected_category = st.sidebar.radio("📂 Select Training Material", ["Presentations", "Videos", "Audios", "Quizzes"], key="view_category_radio")
 
     # Get the folder path for the selected program and category
-    folder_path = Path(BASE_DIR) / selected_program.lower() / selected_category.lower()
+    folder_path = Path(f"training_materials/{selected_program.lower()}/{selected_category.lower()}")
 
     # Check if the folder exists and display its contents
     if not folder_path.exists() or not any(folder_path.iterdir()):
