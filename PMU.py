@@ -265,6 +265,7 @@ def sidebar():
         "Live Dashboard": "live_dashboard",
         "Settings": "settings",
         "Tools": "tools",  # New Tools section
+        "SAKSHAM": "saksham",  # New SAKSHAM section
         "Logout": "logout"
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
@@ -292,6 +293,13 @@ def cotton_tools():
 def dairy_tools():
     st.subheader("🥛 Dairy Tools")
     st.write("Dairy tools will be added here in the future.")
+
+def saksham():
+    st.subheader("🌟 SAKSHAM")
+    st.write("Welcome to the SAKSHAM section.")
+    if st.button("Open Plant Population Tool"):
+        st.session_state.tool = "plant_population_tool"
+        st.experimental_rerun()  # Redirect to the Plant Population Tool
 
 def plant_population_tool():
     st.set_page_config(page_title="Plant Population Tool", layout="wide")
@@ -393,6 +401,10 @@ def plant_population_tool():
     elif submitted:
         st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
+def samriddh_sakhi():
+    st.subheader("🌼 Samriddh Sakhi")
+    st.write("Welcome to the Samriddh Sakhi section. This section will contain resources and tools for empowerment.")
+
 def main():
     preload_users()
     db = get_db()
@@ -435,6 +447,10 @@ def main():
             settings()
         elif selected_tab == "tools":
             tools()  # New tools section
+        elif selected_tab == "saksham":
+            saksham()  # New SAKSHAM section
+        elif selected_tab == "samriddh_sakhi":
+            samriddh_sakhi()  # New Samriddh Sakhi section
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
