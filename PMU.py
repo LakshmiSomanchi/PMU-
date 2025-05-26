@@ -21,45 +21,6 @@ for program in PROGRAMS:
     for category in CATEGORIES:
         Path(f"{BASE_DIR}/{program.lower()}/{category.lower()}").mkdir(parents=True, exist_ok=True)
 
-# Custom CSS for agriculture theme
-st.markdown("""
-    <style>
-        /* Sidebar Styling */
-        [data-testid="stSidebar"] {
-            background-color: #D1F5D4; /* Green for nature */
-        }
-        [data-testid="stSidebar"] .css-qrbaxs {
-            color: #ffffff; /* White text for sidebar */
-            font-weight: bold;
-            font-size: 16px;
-        }
-        /* Header Styling */
-        .header {
-            text-align: center;
-            font-size: 42px;
-            color: #6B4226; /* Soil Brown */
-            padding: 20px;
-            background-color: #EEE8AA; /* Wheat Color */
-            border-radius: 15px;
-            border: 2px solid #6B4226;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        /* Page Background */
-        .stApp {
-            background-color: #F5F5DC; /* Beige for natural tones */
-        }
-        /* Links */
-        a {
-            color: #4caf50; /* Green for links */
-            font-weight: bold;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
 Base = declarative_base()
@@ -240,6 +201,7 @@ def sidebar():
         "Tools": "tools",  # New Tools section
         "SAKSHAM": "saksham",  # New SAKSHAM section
         "Samriddh Sakhi": "samriddh_sakhi",  # New Samriddh Sakhi section
+        "Training": "training",  # New Training section
         "Logout": "logout"
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
@@ -415,33 +377,10 @@ def is_valid_file(file_name, category):
         return True
     return False
 
-# --- Main Content ---
-def dashboard(user):
-    st.title("📊 Dashboard")
-    st.markdown("Welcome to the Dashboard!")
-
-    # Add a Gamified Header for the Main Page
-    st.markdown("""
-    <div class="header">
-        🌾 <span style="font-weight: bold;">Farmer Training Program</span> 🌾
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Add Interactive Gamification Elements
-    st.markdown("### 🎮 Level Up Your Farming Skills!")
-    st.markdown("""
-        <p>Welcome to the Farmer Training Program! Complete tasks, learn new skills, and earn rewards to become a <b>Master Farmer</b>.</p>
-        <ul>
-            <li>📚 Access training materials</li>
-            <li>🎯 Complete quizzes</li>
-            <li>🏆 Earn badges</li>
-        </ul>
-    """, unsafe_allow_html=True)
-
-    # Add a Button for a Gamified Start
-    if st.button("🌟 Start Your Journey"):
-        st.success("🎉 You're on your way to becoming a Master Farmer! Explore the training materials below.")
-
+# --- Training Section ---
+def training():
+    st.title("📚 Training Materials")
+    
     # Admin Authentication with Session State
     if "is_admin" not in st.session_state:
         st.session_state.is_admin = False  # Initialize admin state
@@ -536,6 +475,14 @@ def dashboard(user):
                 with open(file_path, "rb") as f:
                     st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
 
+# --- Dashboard Section ---
+def dashboard(user):
+    st.title("📊 Dashboard")
+    st.markdown("Welcome to the Dashboard!")
+
+    # Add original dashboard content here
+    # ...
+
 def main():
     preload_users()
     db = get_db()
@@ -566,6 +513,8 @@ def main():
         selected_tab = sidebar()
         if selected_tab == "dashboard":
             dashboard(st.session_state.user)
+        elif selected_tab == "training":
+            training()  # Call the training section
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
