@@ -262,6 +262,8 @@ def sidebar():
         "Employee Scheduling": "scheduling",
         "Field Team Management": "field_team_management",  # New section for field teams
         "Live Dashboard": "live_dashboard",  # New section for live dashboard
+        "SAKSHAM Dashboard": "saksham_dashboard",  # New section for SAKSHAM Dashboard
+        "Training": "training",  # New section for Training
         "Settings": "settings",
         "Logout": "logout"
     }
@@ -278,7 +280,7 @@ def dashboard(user):
         st.experimental_rerun()
 
     # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
 
     for tab in dashboard_tabs:
         with tab:
@@ -291,6 +293,22 @@ def dashboard(user):
             employees = db.query(Employee).all()
             for emp in employees:
                 st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+
+def saksham_dashboard():
+    st.subheader("🌱 SAKSHAM Dashboard")
+    st.write("This dashboard includes tools and resources for plant population management.")
+
+    # Plant Population Tool
+    plant_population_tool()
+
+def plant_population_tool():
+    st.write("This tool will help you calculate plant population.")
+    area = st.number_input("Enter the area (in acres):", min_value=0.0)
+    plants_per_acre = st.number_input("Enter the number of plants per acre:", min_value=0)
+
+    if st.button("Calculate Total Plants"):
+        total_plants = area * plants_per_acre
+        st.success(f"Total Plants: {total_plants}")
 
 def live_dashboard():
     db = get_db()
@@ -479,6 +497,63 @@ def field_team_management():
     else:
         st.write("No field teams available.")
 
+def training():
+    st.subheader("📚 Training Module")
+    st.write("This section provides training materials and resources.")
+
+    # Upload Training Content
+    st.header("📤 Upload Training Content")
+    selected_program = st.selectbox("🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown")
+    selected_category = st.selectbox("📂 Select Category", ["Presentations", "Videos", "Audios", "Quizzes"], key="category_dropdown")
+    uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
+
+    if uploaded_file:
+        if selected_program and selected_category:  # Ensure selections are made
+            save_dir = f"training_materials/{selected_program.lower()}/{selected_category.lower()}"
+            Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+            file_path = os.path.join(save_dir, uploaded_file.name)
+
+            # Validate file type
+            if not is_valid_file(uploaded_file.name, selected_category):
+                st.error(f"❌ Invalid file type for the **{selected_category}** category.")
+            else:
+                if st.button("Upload"):
+                    try:
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
+                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
+                    except Exception as e:
+                        st.error(f"❌ Error uploading file: {e}")
+        else:
+            st.error("Please select a program and category before uploading.")
+
+    # Display Uploaded Training Content
+    st.header("📂 Uploaded Training Content")
+    for program in ["Cotton", "Dairy"]:
+        for category in ["Presentations", "Videos", "Audios", "Quizzes"]:
+            folder_path = Path(f"training_materials/{program.lower()}/{category.lower()}")
+            if folder_path.exists() and any(folder_path.iterdir()):
+                st.subheader(f"{program} - {category}")
+                for file in os.listdir(folder_path):
+                    st.markdown(f"- {file}")
+
+def is_valid_file(file_name, category):
+    valid_extensions = {
+        "Presentations": [".pptx"],
+        "Videos": [".mp4"],
+        "Audios": [".mp3"],
+        "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"]
+    }
+    # Allow Excel and Images in all categories
+    extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
+    file_extension = os.path.splitext(file_name)[1].lower()
+
+    if file_extension in extra_extensions:
+        return True
+    if category in valid_extensions and file_extension in valid_extensions[category]:
+        return True
+    return False
+
 def main():
     preload_users()
     db = get_db()
@@ -519,6 +594,10 @@ def main():
             reports()
         elif selected_tab == "settings":
             settings()
+        elif selected_tab == "saksham_dashboard":
+            saksham_dashboard()  # New section for SAKSHAM Dashboard
+        elif selected_tab == "training":
+            training()  # New section for Training
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
