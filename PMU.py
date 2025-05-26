@@ -6,7 +6,8 @@ from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 import os
-from pathlib import Path  # Import Path for directory creation
+from pathlib import Path
+from math import floor
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -260,224 +261,137 @@ def sidebar():
         "Manage Programs": "manage_programs",
         "Reports": "reports",
         "Employee Scheduling": "scheduling",
-        "Field Team Management": "field_team_management",  # New section for field teams
-        "Live Dashboard": "live_dashboard",  # New section for live dashboard
+        "Field Team Management": "field_team_management",
+        "Live Dashboard": "live_dashboard",
         "Settings": "settings",
+        "Tools": "tools",  # New Tools section
         "Logout": "logout"
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
     return menu_options[selection]
 
-def dashboard(user):
-    db = get_db()
-    st.markdown("<<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
-    st.sidebar.markdown("### Logged in as")
-    st.sidebar.success(user.name)
-    if st.sidebar.button("🔓 Logout"):
-        st.session_state.user = None
-        st.experimental_rerun()
-
-    # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
-
-    for tab in dashboard_tabs:
-        with tab:
-            st.subheader(f"📊 Progress")
-            # Here you can add specific content for each dashboard
-            # For example, you can display progress for each section
-            st.write("This is where you can display progress and other metrics.")
-
-            # Example of displaying employee progress
-            employees = db.query(Employee).all()
-            for emp in employees:
-                st.markdown(f"**{emp.name}**:Status")  # Replace with actual progress data
-
-def live_dashboard():
-    db = get_db()
-    st.subheader("📈 Live Monitoring Dashboard")
-
-    # Fetch farmer data
-    farmer_data = db.query(FarmerData).all()
-    if not farmer_data:
-        st.warning("No farmer data available.")
-        return
-
-    # Prepare data for display
-    total_farmers = len(farmer_data)
-    total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
-    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
-    yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
-
-    # Display metrics
-    st.metric("🧮 Total Farmers", total_farmers)
-    st.metric("🐄 Total Cows", total_cows)
-    st.metric("🍼 Total Yield (L)", total_yield)
-    st.metric("📊 Yield per Cow (L)", round(yield_per_cow, 2))
-
-    # Create a DataFrame for detailed view
-    df = pd.DataFrame({
-        "Farmer Name": [farmer.farmer_name for farmer in farmer_data],
-        "Number of Cows": [farmer.number_of_cows for farmer in farmer_data],
-        "Yield per Cow (L)": [farmer.yield_per_cow for farmer in farmer_data]
-    })
-
-    st.subheader("📊 Farmer Data Overview")
-    st.dataframe(df)
-
-def settings():
-    db = get_db()
-    st.subheader("⚙️ Settings")
+def tools():
+    st.subheader("🛠️ Tools")
+    tool_options = {
+        "Cotton": "cotton_tools",
+        "Dairy": "dairy_tools"
+    }
+    selected_tool = st.selectbox("Select a Tool", list(tool_options.keys()))
     
-    # Initialize settings in session state if not already done
-    if "settings" not in st.session_state:
-        st.session_state.settings = {
-            "theme": "Light",
-            "notification": "Email",
-            "language": "English",
-            "project_timeline": "Weekly",
-            "units": "Hours",
-            "progress_metric": "% Complete",
-            "role": "Admin",  # Default role
-            "report_frequency": "Weekly",
-            "report_format": "PDF",
-            "auto_email_summary": False
-        }
+    if selected_tool == "Cotton":
+        cotton_tools()
+    elif selected_tool == "Dairy":
+        dairy_tools()
 
-    # User Preferences
-    st.markdown("### User Preferences")
-    theme = st.selectbox("Theme", ["Light", "Dark"], index=["Light", "Dark"].index(st.session_state.settings["theme"]))
-    notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]))
-    language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=["English", "Spanish", "French"].index(st.session_state.settings["language"]))
+def cotton_tools():
+    st.subheader("🌾 Cotton Tools")
+    if st.button("Open Plant Population Tool"):
+        st.session_state.tool = "plant_population_tool"
+        st.experimental_rerun()  # Redirect to the Plant Population Tool
 
-    # Project Preferences
-    st.markdown("### Project Preferences")
-    project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]))
-    units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]))
-    progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]))
+def dairy_tools():
+    st.subheader("🥛 Dairy Tools")
+    st.write("Dairy tools will be added here in the future.")
 
-    # Access Control
-    st.markdown("### Access Control")
-    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]))
+def plant_population_tool():
+    st.set_page_config(page_title="Plant Population Tool", layout="wide")
 
-    # Report Configuration
-    st.markdown("### Report Configuration")
-    report_frequency = st.selectbox("Default Report Frequency", ["Weekly", "Bi-weekly", "Monthly"], index=["Weekly", "Bi-weekly", "Monthly"].index(st.session_state.settings["report_frequency"]))
-    report_format = st.selectbox("Report Formats", ["PDF", "Excel", "JSON"], index=["PDF", "Excel", "JSON"].index(st.session_state.settings["report_format"]))
-    auto_email_summary = st.checkbox("Auto-email Summary", value=st.session_state.settings["auto_email_summary"])
+    # Detect dark mode for adaptive styling
+    is_dark = st.get_option("theme.base") == "dark"
 
-    # Change Password Section
-    st.markdown("### Change Password")
-    new_password = st.text_input("New Password", type="password")
-    confirm_password = st.text_input("Confirm New Password", type="password")
-    if st.button("Change Password"):
-        if new_password == confirm_password:
-            user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
-            user.password = new_password
-            db.commit()
-            st.success("Password changed successfully!")
-        else:
-            st.error("Passwords do not match.")
+    text_color = "#f8f9fa" if is_dark else "#0A0A0A"
+    bg_color = "#0A9396" if is_dark else "#e0f2f1"
 
-    if st.button("Save Settings"):
-        st.session_state.settings.update({
-            "theme": theme,
-            "notification": notification,
-            "language": language,
-            "project_timeline": project_timeline,
-            "units": units,
-            "progress_metric": progress_metric,
-            "role": role,
-            "report_frequency": report_frequency,
-            "report_format": report_format,
-            "auto_email_summary": auto_email_summary
-        })
-        st.success("Settings saved successfully!")
+    # Apply full page background color
+    st.markdown(f"""
+    <style>
+        html, body, [class*="css"]  {{
+            background-color: {bg_color};
+            font-family: 'Helvetica', sans-serif;
+        }}
+        .block-container {{
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }}
+        .stMetricValue {{
+            font-size: 1.5rem !important;
+            color: {text_color};
+        }}
+        .stMetricLabel {{
+            font-weight: bold;
+            color: {text_color};
+        }}
+        h1, h2, h3, h4, h5 {{
+            color: {text_color};
+        }}
+        .stButton>button {{
+            background-color: #0A9396;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 0.6em 1.5em;
+        }}
+        .stButton>button:hover {{
+            background-color: #007f86;
+        }}
+    </style>
+    """, unsafe_allow_html=True)
 
-def reports():
-    st.subheader("📊 Reports")
-    st.markdown("### Weekly Document Summary")
-    
-    # Initialize summary filename
-    summary_filename = ""
+    st.title("🌿 Plant Population & Seed Requirement Tool")
+    st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
 
-    # Generate a weekly summary document
-    if st.button("Generate Weekly Summary"):
-        summary_data = {
-            "Project": [],
-            "Progress Overview": [],
-            "Milestones Completed": [],
-            "Delays": [],
-            "Blockers": [],
-            "Action Items": []
-        }
-        
-        # Simulate data generation
-        for i in range(1, 4):
-            summary_data["Project"].append(f"Project {i}")
-            summary_data["Progress Overview"].append(f"{i * 10}%")
-            summary_data["Milestones Completed"].append(f"{i} milestones")
-            summary_data["Delays"].append(f"{i} delays")
-            summary_data["Blockers"].append(f"{i} blockers")
-            summary_data["Action Items"].append(f"Action item {i}")
+    with st.container():
+        st.header("📥 Farmer Survey Entry")
+        st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
-        summary_df = pd.DataFrame(summary_data)
-        summary_filename = f"weekly_summary_{date.today()}.csv"
-        summary_df.to_csv(summary_filename, index=False)
-        st.success(f"Weekly summary generated: {summary_filename}")
+        with st.form("survey_form"):
+            col0, col1, col2 = st.columns(3)
+            farmer_name = col0.text_input("👤 Farmer Name")
+            farmer_id = col1.text_input("🆔 Farmer ID")
+            state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
 
-    # Display the summary if it exists
-    if summary_filename and os.path.exists(summary_filename):
-        summary_df = pd.read_csv(summary_filename)
-        st.dataframe(summary_df)
+            spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
+            col3, col4, col5 = st.columns(3)
+            row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
+            plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
+            land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-def scheduling(user):
-    db = get_db()
-    st.subheader("🗓️ Employee Scheduling")
+            submitted = st.form_submit_button("🔍 Calculate")
 
-    with st.form("add_schedule"):
-        schedule_date = st.date_input("Schedule Date", date.today())
-        start_time = st.time_input("Start Time")
-        end_time = st.time_input("End Time")
-        if st.form_submit_button("Add Schedule"):
-            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
-            db.commit()
-            st.success("Schedule added successfully!")
+    if submitted and farmer_name and farmer_id:
+        st.markdown("---")
 
-    st.subheader("Your Schedules")
-    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    for schedule in schedules:
-        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
+        confidence_interval = 0.90
+        seeds_per_packet = 7500
+        acre_to_m2 = 4046.86
 
-def field_team_management():
-    db = get_db()
-    st.subheader("👥 Field Team Management")
+        if spacing_unit == "cm":
+            row_spacing /= 100
+            plant_spacing /= 100
 
-    # Add Field Team
-    with st.form("add_field_team"):
-        team_name = st.text_input("Field Team Name")
-        if st.form_submit_button("Add Field Team"):
-            if team_name:
-                new_team = FieldTeam(name=team_name)
-                db.add(new_team)
-                db.commit()
-                st.success(f"Field Team '{team_name}' added successfully!")
-            else:
-                st.error("Field Team Name cannot be empty.")
+        plant_area_m2 = row_spacing * plant_spacing
+        plants_per_m2 = 1 / plant_area_m2
+        field_area_m2 = land_acres * acre_to_m2
+        calculated_plants = plants_per_m2 * field_area_m2
 
-    # Display Existing Field Teams
-    st.subheader("Existing Field Teams")
-    field_teams = db.query(FieldTeam).all()
-    if field_teams:
-        for team in field_teams:
-            col1, col2 = st.columns([3, 1])
-            col1.markdown(f"**Team Name**: {team.name}")
-            if col2.button(f"Delete {team.name}", key=team.id):
-                db.delete(team)
-                db.commit()
-                st.success(f"Field Team '{team.name}' deleted successfully!")
-                st.experimental_rerun()  # Refresh the page to update the list
-    else:
-        st.write("No field teams available.")
+        target_plants = germination_rate_per_acre[state] * land_acres
+        required_seeds = target_plants / confidence_interval
+        required_packets = floor(required_seeds / seeds_per_packet)
+
+        st.subheader("📊 Output Summary")
+        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
+        col6, col7, col8, col9 = st.columns(4)
+        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
+        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
+        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
+        col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
+
+        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+        st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
+
+    elif submitted:
+        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
 def main():
     preload_users()
@@ -514,14 +428,20 @@ def main():
         elif selected_tab == "field_team_management":
             field_team_management() 
         elif selected_tab == "live_dashboard":
-            live_dashboard()  # New section for live dashboard
+            live_dashboard()
         elif selected_tab == "reports":
             reports()
         elif selected_tab == "settings":
             settings()
+        elif selected_tab == "tools":
+            tools()  # New tools section
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
+
+    # Check if the Plant Population Tool should be displayed
+    if "tool" in st.session_state and st.session_state.tool == "plant_population_tool":
+        plant_population_tool()  # Call the Plant Population Tool function
 
 if __name__ == "__main__":
     main()
