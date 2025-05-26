@@ -7,7 +7,6 @@ import pandas as pd
 from datetime import date
 import os
 from pathlib import Path  # Import Path for directory creation
-import json
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -261,16 +260,14 @@ def sidebar():
         "Manage Programs": "manage_programs",
         "Reports": "reports",
         "Employee Scheduling": "scheduling",
-        "Field Team Management": "field_team_management",
-        "Live Dashboard": "live_dashboard",
+        "Field Team Management": "field_team_management",  # New section for field teams
+        "Live Dashboard": "live_dashboard",  # New section for live dashboard
         "Settings": "settings",
-        "Logout": "logout",
-        "Training": "training"  # New Training section
+        "Logout": "logout"
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
     return menu_options[selection]
 
-# --- Dashboard Section ---
 def dashboard(user):
     db = get_db()
     st.markdown("<h1 style='text-align:center; color:#1a73e8;'>🚀 Project Management Dashboard</h1>", unsafe_allow_html=True)
@@ -281,172 +278,210 @@ def dashboard(user):
         st.experimental_rerun()
 
     # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard", "Samriddh Sakhi"])
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
 
     for tab in dashboard_tabs:
         with tab:
-            if tab == "SAKSHAM Dashboard":
-                st.subheader("🌱 Plant Population Tool")
-                # Add functionality for Plant Population Tool
-                plant_population_tool()
-            elif tab == "Samriddh Sakhi":
-                st.subheader("🌼 Samriddh Sakhi")
-                # Add functionality for Samriddh Sakhi
-                samriddh_sakhi()
-            else:
-                st.subheader(f"📊 Progress in {tab}")
-                # Here you can add specific content for each dashboard
-                st.write("This is where you can display progress and other metrics.")
+            st.subheader(f"📊 Progress in {tab}")
+            # Here you can add specific content for each dashboard
+            # For example, you can display progress for each section
+            st.write("This is where you can display progress and other metrics.")
 
-                # Example of displaying employee progress
-                employees = db.query(Employee).all()
-                for emp in employees:
-                    st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
-
-# --- Plant Population Tool ---
-def plant_population_tool():
-    st.write("This tool will help you calculate plant population.")
-    # Add your tool logic here
-    area = st.number_input("Enter the area (in acres):", min_value=0.0)
-    plants_per_acre = st.number_input("Enter the number of plants per acre:", min_value=0)
-    
-    if st.button("Calculate Total Plants"):
-        total_plants = area * plants_per_acre
-        st.success(f"Total Plants: {total_plants}")
-
-# --- Samriddh Sakhi ---
-def samriddh_sakhi():
-    st.write("This section is dedicated to the Samriddh Sakhi program.")
-    # Add your Samriddh Sakhi logic here
-    st.info("Details about the Samriddh Sakhi program will be displayed here.")
-
-# --- Training Section ---
-def training():
-    st.title("📚 Training Materials")
-    
-    # --- Upload Content ---
-    st.header("📤 Upload Training Content")
-    selected_program = st.selectbox("🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown")
-    selected_category = st.selectbox("📂 Select Category", ["Presentations", "Videos", "Audios", "Quizzes"], key="category_dropdown")
-    uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
-
-    if uploaded_file:
-        if selected_program and selected_category:  # Ensure selections are made
-            save_dir = f"training_materials/{selected_program.lower()}/{selected_category.lower()}"
-            Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
-            file_path = os.path.join(save_dir, uploaded_file.name)
-
-            # Validate file type
-            if not is_valid_file(uploaded_file.name, selected_category):
-                st.error(f"❌ Invalid file type for the **{selected_category}** category.")
-            else:
-                if st.button("Upload"):
-                    try:
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
-                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
-                    except Exception as e:
-                        st.error(f"❌ Error uploading file: {e}")
-        else:
-            st.error("Please select a program and category before uploading.")
-
-    # --- Delete Content ---
-    st.header("🗑️ Delete Training Content")
-    delete_program = st.selectbox("🗂️ Select Program to View Files", ["Cotton", "Dairy"], key="delete_program_dropdown")
-    delete_category = st.selectbox("📂 Select Category to View Files", ["Presentations", "Videos", "Audios", "Quizzes"], key="delete_category_dropdown")
-    delete_folder_path = Path(f"training_materials/{delete_program.lower()}/{delete_category.lower()}")
-
-    if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
-        delete_files = os.listdir(delete_folder_path)
-        delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
-
-        if st.button("Delete File"):
-            try:
-                os.remove(delete_folder_path / delete_file)
-                st.success(f"✅ File '{delete_file}' has been deleted!")
-            except Exception as e:
-                st.error(f"❌ Error deleting file: {e}")
-    else:
-        st.warning(f"No files available in the **{delete_category}** category of the {delete_program} program.")
-
-    selected_program = st.sidebar.selectbox("🌟 Choose a Program", ["Cotton", "Dairy"], key="view_program_dropdown")
-    selected_category = st.sidebar.radio("📂 Select Training Material", ["Presentations", "Videos", "Audios", "Quizzes"], key="view_category_radio")
-
-    # Get the folder path for the selected program and category
-    folder_path = Path(f"training_materials/{selected_program.lower()}/{selected_category.lower()}")
-
-    # Check if the folder exists and display its contents
-    if not folder_path.exists() or not any(folder_path.iterdir()):
-        st.warning(f"No content available for the **{selected_category}** category in the {selected_program} program.")
-    else:
-        files = os.listdir(folder_path)
-        for file in files:
-            file_path = folder_path / file
-            if file.endswith(".pdf"):
-                st.markdown(f"📄 **{file}**")
-                with open(file_path, "rb") as f:
-                    st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
-            elif file.endswith(".mp4"):
-                st.markdown(f"🎥 **{file}**")
-                st.video(str(file_path))
-            elif file.endswith(".mp3"):
-                st.markdown(f"🎵 **{file}**")
-                st.audio(str(file_path))
-            elif file.endswith(".json"):
-                st.markdown(f"📝 **{file}** (Quiz File)")
-                with open(file_path, "r") as f:
-                    st.json(json.load(f))
-            elif file.endswith((".png", ".jpg", ".jpeg")):
-                st.markdown(f"🖼️ **{file}**")
-                st.image(str(file_path))
-            elif file.endswith(".pptx"):
-                st.markdown(f"📑 **{file} (PPTX)**")
-                with open(file_path, "rb") as f:
-                    st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
-
-def is_valid_file(file_name, category):
-    valid_extensions = {
-        "Presentations": [".pptx"],
-        "Videos": [".mp4"],
-        "Audios": [".mp3"],
-        "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"]
-    }
-    # Allow Excel and Images in all categories
-    extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
-    file_extension = os.path.splitext(file_name)[1].lower()
-
-    if file_extension in extra_extensions:
-        return True
-    if category in valid_extensions and file_extension in valid_extensions[category]:
-        return True
-    return False
-
-# --- Placeholder Functions for Other Sections ---
-def scheduling(user):
-    st.subheader("🗓️ Employee Scheduling")
-    st.write("This section will allow you to manage employee schedules.")
-
-def field_team_management():
-    st.subheader("👥 Field Team Management")
-    st.write("This section will allow you to manage field teams.")
+            # Example of displaying employee progress
+            employees = db.query(Employee).all()
+            for emp in employees:
+                st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
 
 def live_dashboard():
+    db = get_db()
     st.subheader("📈 Live Monitoring Dashboard")
-    st.write("This section will provide live monitoring of various metrics.")
+
+    # Fetch farmer data
+    farmer_data = db.query(FarmerData).all()
+    if not farmer_data:
+        st.warning("No farmer data available.")
+        return
+
+    # Prepare data for display
+    total_farmers = len(farmer_data)
+    total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
+    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
+    yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
+
+    # Display metrics
+    st.metric("🧮 Total Farmers", total_farmers)
+    st.metric("🐄 Total Cows", total_cows)
+    st.metric("🍼 Total Yield (L)", total_yield)
+    st.metric("📊 Yield per Cow (L)", round(yield_per_cow, 2))
+
+    # Create a DataFrame for detailed view
+    df = pd.DataFrame({
+        "Farmer Name": [farmer.farmer_name for farmer in farmer_data],
+        "Number of Cows": [farmer.number_of_cows for farmer in farmer_data],
+        "Yield per Cow (L)": [farmer.yield_per_cow for farmer in farmer_data]
+    })
+
+    st.subheader("📊 Farmer Data Overview")
+    st.dataframe(df)
+
+def settings():
+    db = get_db()
+    st.subheader("⚙️ Settings")
+    
+    # Initialize settings in session state if not already done
+    if "settings" not in st.session_state:
+        st.session_state.settings = {
+            "theme": "Light",
+            "notification": "Email",
+            "language": "English",
+            "project_timeline": "Weekly",
+            "units": "Hours",
+            "progress_metric": "% Complete",
+            "role": "Admin",  # Default role
+            "report_frequency": "Weekly",
+            "report_format": "PDF",
+            "auto_email_summary": False
+        }
+
+    # User Preferences
+    st.markdown("### User Preferences")
+    theme = st.selectbox("Theme", ["Light", "Dark"], index=["Light", "Dark"].index(st.session_state.settings["theme"]))
+    notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]))
+    language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=["English", "Spanish", "French"].index(st.session_state.settings["language"]))
+
+    # Project Preferences
+    st.markdown("### Project Preferences")
+    project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]))
+    units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]))
+    progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]))
+
+    # Access Control
+    st.markdown("### Access Control")
+    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]))
+
+    # Report Configuration
+    st.markdown("### Report Configuration")
+    report_frequency = st.selectbox("Default Report Frequency", ["Weekly", "Bi-weekly", "Monthly"], index=["Weekly", "Bi-weekly", "Monthly"].index(st.session_state.settings["report_frequency"]))
+    report_format = st.selectbox("Report Formats", ["PDF", "Excel", "JSON"], index=["PDF", "Excel", "JSON"].index(st.session_state.settings["report_format"]))
+    auto_email_summary = st.checkbox("Auto-email Summary", value=st.session_state.settings["auto_email_summary"])
+
+    # Change Password Section
+    st.markdown("### Change Password")
+    new_password = st.text_input("New Password", type="password")
+    confirm_password = st.text_input("Confirm New Password", type="password")
+    if st.button("Change Password"):
+        if new_password == confirm_password:
+            user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
+            user.password = new_password
+            db.commit()
+            st.success("Password changed successfully!")
+        else:
+            st.error("Passwords do not match.")
+
+    if st.button("Save Settings"):
+        st.session_state.settings.update({
+            "theme": theme,
+            "notification": notification,
+            "language": language,
+            "project_timeline": project_timeline,
+            "units": units,
+            "progress_metric": progress_metric,
+            "role": role,
+            "report_frequency": report_frequency,
+            "report_format": report_format,
+            "auto_email_summary": auto_email_summary
+        })
+        st.success("Settings saved successfully!")
 
 def reports():
     st.subheader("📊 Reports")
-    st.write("This section will allow you to generate and view reports.")
+    st.markdown("### Weekly Document Summary")
+    
+    # Initialize summary filename
+    summary_filename = ""
 
-def settings():
-    st.subheader("⚙️ Settings")
-    st.write("This section will allow you to manage application settings.")
+    # Generate a weekly summary document
+    if st.button("Generate Weekly Summary"):
+        summary_data = {
+            "Project": [],
+            "Progress Overview": [],
+            "Milestones Completed": [],
+            "Delays": [],
+            "Blockers": [],
+            "Action Items": []
+        }
+        
+        # Simulate data generation
+        for i in range(1, 4):
+            summary_data["Project"].append(f"Project {i}")
+            summary_data["Progress Overview"].append(f"{i * 10}%")
+            summary_data["Milestones Completed"].append(f"{i} milestones")
+            summary_data["Delays"].append(f"{i} delays")
+            summary_data["Blockers"].append(f"{i} blockers")
+            summary_data["Action Items"].append(f"Action item {i}")
+
+        summary_df = pd.DataFrame(summary_data)
+        summary_filename = f"weekly_summary_{date.today()}.csv"
+        summary_df.to_csv(summary_filename, index=False)
+        st.success(f"Weekly summary generated: {summary_filename}")
+
+    # Display the summary if it exists
+    if summary_filename and os.path.exists(summary_filename):
+        summary_df = pd.read_csv(summary_filename)
+        st.dataframe(summary_df)
+
+def scheduling(user):
+    db = get_db()
+    st.subheader("🗓️ Employee Scheduling")
+
+    with st.form("add_schedule"):
+        schedule_date = st.date_input("Schedule Date", date.today())
+        start_time = st.time_input("Start Time")
+        end_time = st.time_input("End Time")
+        if st.form_submit_button("Add Schedule"):
+            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
+            db.commit()
+            st.success("Schedule added successfully!")
+
+    st.subheader("Your Schedules")
+    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+    for schedule in schedules:
+        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+
+def field_team_management():
+    db = get_db()
+    st.subheader("👥 Field Team Management")
+
+    # Add Field Team
+    with st.form("add_field_team"):
+        team_name = st.text_input("Field Team Name")
+        if st.form_submit_button("Add Field Team"):
+            if team_name:
+                new_team = FieldTeam(name=team_name)
+                db.add(new_team)
+                db.commit()
+                st.success(f"Field Team '{team_name}' added successfully!")
+            else:
+                st.error("Field Team Name cannot be empty.")
+
+    # Display Existing Field Teams
+    st.subheader("Existing Field Teams")
+    field_teams = db.query(FieldTeam).all()
+    if field_teams:
+        for team in field_teams:
+            col1, col2 = st.columns([3, 1])
+            col1.markdown(f"**Team Name**: {team.name}")
+            if col2.button(f"Delete {team.name}", key=team.id):
+                db.delete(team)
+                db.commit()
+                st.success(f"Field Team '{team.name}' deleted successfully!")
+                st.experimental_rerun()  # Refresh the page to update the list
+    else:
+        st.write("No field teams available.")
 
 def main():
-    # Only preload users if the database is empty
+    preload_users()
     db = get_db()
-    if db.query(Employee).count() == 0:
-        preload_users()
     
     # Initialize session state for user if not already done
     if "user" not in st.session_state:
@@ -474,14 +509,12 @@ def main():
         selected_tab = sidebar()
         if selected_tab == "dashboard":
             dashboard(st.session_state.user)
-        elif selected_tab == "training":
-            training()  # Call the training section
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
             field_team_management() 
         elif selected_tab == "live_dashboard":
-            live_dashboard()
+            live_dashboard()  # New section for live dashboard
         elif selected_tab == "reports":
             reports()
         elif selected_tab == "settings":
