@@ -280,19 +280,22 @@ def dashboard(user):
         st.experimental_rerun()
 
     # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
 
     for tab in dashboard_tabs:
         with tab:
-            st.subheader(f"📊Progress")
-            # Here you can add specific content for each dashboard
-            # For example, you can display progress for each section
-            st.write("This is where you can display progress and other metrics.")
+            if tab == "SAKSHAM Dashboard":
+                saksham_dashboard()
+            else:
+                st.subheader(f"📊 Progress in {tab}")
+                # Here you can add specific content for each dashboard
+                # For example, you can display progress for each section
+                st.write("This is where you can display progress and other metrics.")
 
-            # Example of displaying employee progress
-            employees = db.query(Employee).all()
-            for emp in employees:
-                st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+                # Example of displaying employee progress
+                employees = db.query(Employee).all()
+                for emp in employees:
+                    st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
