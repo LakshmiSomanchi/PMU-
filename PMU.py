@@ -285,15 +285,46 @@ def dashboard(user):
 
     for tab in dashboard_tabs:
         with tab:
-            st.subheader(f"📊Progress")
-            # Here you can add specific content for each dashboard
-            # For example, you can display progress for each section
-            st.write("This is where you can display progress and other metrics.")
+            if tab == "PMU Dashboard":
+                pmu_dashboard(user)
+            else:
+                st.subheader(f"📊 Progress in {tab}")
+                # Here you can add specific content for each dashboard
+                # For example, you can display progress for each section
+                st.write("This is where you can display progress and other metrics.")
 
-            # Example of displaying employee progress
-            employees = db.query(Employee).all()
-            for emp in employees:
-                st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+                # Example of displaying employee progress
+                employees = db.query(Employee).all()
+                for emp in employees:
+                    st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+
+def pmu_dashboard(user):
+    st.subheader("📋 PMU Work Plans")
+    
+    # Work Plan Form
+    with st.form("work_plan_form"):
+        title = st.text_input("Work Plan Title")
+        details = st.text_area("Details")
+        deadline = st.date_input("Deadline")
+        status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+
+        submitted = st.form_submit_button("Save Work Plan")
+        
+        if submitted:
+            new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id)
+            db = get_db()
+            db.add(new_workplan)
+            db.commit()
+            st.success("Work Plan saved successfully!")
+
+    # Display Existing Work Plans
+    st.subheader("Existing Work Plans")
+    workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+    if workplans:
+        for plan in workplans:
+            st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+    else:
+        st.write("No work plans available.")
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
@@ -302,6 +333,10 @@ def saksham_dashboard():
     # Tools Section
     st.header("🛠️ Tools")
     plant_population_tool()
+
+    # Samriddh Sakhi Section
+    st.header("🌼 Samriddh Sakhi")
+    st.write("This section provides information and resources related to the Samriddh Sakhi program.")
 
 def plant_population_tool():
     st.write("This tool will help you calculate plant population.")
