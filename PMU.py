@@ -460,21 +460,24 @@ def dashboard(user):
         uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
 
         if uploaded_file:
-            save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
-            Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
-            file_path = os.path.join(save_dir, uploaded_file.name)
+            if selected_program and selected_category:  # Ensure selections are made
+                save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
+                Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+                file_path = os.path.join(save_dir, uploaded_file.name)
 
-            # Validate file type
-            if not is_valid_file(uploaded_file.name, selected_category):
-                st.error(f"❌ Invalid file type for the **{selected_category}** category.")
+                # Validate file type
+                if not is_valid_file(uploaded_file.name, selected_category):
+                    st.error(f"❌ Invalid file type for the **{selected_category}** category.")
+                else:
+                    if st.button("Upload"):
+                        try:
+                            with open(file_path, "wb") as f:
+                                f.write(uploaded_file.getbuffer())
+                            st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
+                        except Exception as e:
+                            st.error(f"❌ Error uploading file: {e}")
             else:
-                if st.button("Upload"):
-                    try:
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
-                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
-                    except Exception as e:
-                        st.error(f"❌ Error uploading file: {e}")
+                st.error("Please select a program and category before uploading.")
 
         # --- Admin Feature: Delete Content ---
         st.header("🗑️ Delete Training Content")
