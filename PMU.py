@@ -299,67 +299,53 @@ def dashboard(user):
 def training():
     st.title("📚 Training Materials")
     
-    # Admin Authentication with Session State
-    if "is_admin" not in st.session_state:
-        st.session_state.is_admin = False  # Initialize admin state
+    # --- Admin Feature: Upload Content ---
+    st.header("📤 Upload Training Content")
+    selected_program = st.selectbox("🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown")
+    selected_category = st.selectbox("📂 Select Category", ["Presentations", "Videos", "Audios", "Quizzes"], key="category_dropdown")
+    uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
 
-    # Check if the user is an admin
-    is_admin = admin_login()
+    if uploaded_file:
+        if selected_program and selected_category:  # Ensure selections are made
+            save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
+            Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+            file_path = os.path.join(save_dir, uploaded_file.name)
 
-    if is_admin:
-        st.sidebar.header("⚙️ Admin Panel")
-        st.sidebar.markdown("Welcome, Admin!")
-
-        # --- Admin Feature: Upload Content ---
-        st.header("📤 Upload Training Content")
-        selected_program = st.selectbox("🌟 Select Program", PROGRAMS, key="program_dropdown")
-        selected_category = st.selectbox("📂 Select Category", CATEGORIES, key="category_dropdown")
-        uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
-
-        if uploaded_file:
-            if selected_program and selected_category:  # Ensure selections are made
-                save_dir = f"{BASE_DIR}/{selected_program.lower()}/{selected_category.lower()}"
-                Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
-                file_path = os.path.join(save_dir, uploaded_file.name)
-
-                # Validate file type
-                if not is_valid_file(uploaded_file.name, selected_category):
-                    st.error(f"❌ Invalid file type for the **{selected_category}** category.")
-                else:
-                    if st.button("Upload"):
-                        try:
-                            with open(file_path, "wb") as f:
-                                f.write(uploaded_file.getbuffer())
-                            st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
-                        except Exception as e:
-                            st.error(f"❌ Error uploading file: {e}")
+            # Validate file type
+            if not is_valid_file(uploaded_file.name, selected_category):
+                st.error(f"❌ Invalid file type for the **{selected_category}** category.")
             else:
-                st.error("Please select a program and category before uploading.")
-
-        # --- Admin Feature: Delete Content ---
-        st.header("🗑️ Delete Training Content")
-        delete_program = st.selectbox("🗂️ Select Program to View Files", PROGRAMS, key="delete_program_dropdown")
-        delete_category = st.selectbox("📂 Select Category to View Files", CATEGORIES, key="delete_category_dropdown")
-        delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
-
-        if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
-            delete_files = os.listdir(delete_folder_path)
-            delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
-
-            if st.button("Delete File"):
-                try:
-                    os.remove(delete_folder_path / delete_file)
-                    st.success(f"✅ File '{delete_file}' has been deleted!")
-                except Exception as e:
-                    st.error(f"❌ Error deleting file: {e}")
+                if st.button("Upload"):
+                    try:
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
+                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
+                    except Exception as e:
+                        st.error(f"❌ Error uploading file: {e}")
         else:
-            st.warning(f"No files available in the **{delete_category}** category of the {delete_program} program.")
+            st.error("Please select a program and category before uploading.")
 
+    # --- Admin Feature: Delete Content ---
+    st.header("🗑️ Delete Training Content")
+    delete_program = st.selectbox("🗂️ Select Program to View Files", ["Cotton", "Dairy"], key="delete_program_dropdown")
+    delete_category = st.selectbox("📂 Select Category to View Files", ["Presentations", "Videos", "Audios", "Quizzes"], key="delete_category_dropdown")
+    delete_folder_path = Path(BASE_DIR) / delete_program.lower() / delete_category.lower()
+
+    if delete_folder_path.exists() and any(delete_folder_path.iterdir()):
+        delete_files = os.listdir(delete_folder_path)
+        delete_file = st.selectbox("🗑️ Select a File to Delete", delete_files, key="delete_file_dropdown")
+
+        if st.button("Delete File"):
+            try:
+                os.remove(delete_folder_path / delete_file)
+                st.success(f"✅ File '{delete_file}' has been deleted!")
+            except Exception as e:
+                st.error(f"❌ Error deleting file: {e}")
     else:
-        st.warning("You must be an admin to upload or delete training materials.")
+        st.warning(f"No files available in the **{delete_category}** category of the {delete_program} program.")
 
-    selected_program = st.sidebar.selectbox("🌟 Choose a Program", PROGRAMS, key="view_program_dropdown")
-    selected_category = st.sidebar.radio("📂 Select Training Material", CATEGORIES, key="view_category_radio")
+    selected_program = st.sidebar.selectbox("🌟 Choose a Program", ["Cotton", "Dairy"], key="view_program_dropdown")
+    selected_category = st.sidebar.radio("📂 Select Training Material", ["Presentations", "Videos", "Audios", "Quizzes"], key="view_category_radio")
 
     # Get the folder path for the selected program and category
     folder_path = Path(BASE_DIR) / selected_program.lower() / selected_category.lower()
@@ -393,25 +379,6 @@ def training():
                 with open(file_path, "rb") as f:
                     st.download_button(label=f"⬇️ Download {file}", data=f, file_name=file)
 
-def admin_login():
-    """Admin login for restricted access."""
-    if st.session_state.is_admin:
-        st.sidebar.success("✅ You are logged in as Admin.")
-        return True
-
-    st.sidebar.subheader("🔒 Admin Login")
-    admin_username = st.sidebar.text_input("Admin Username", type="default", key="admin_username")
-    admin_password = st.sidebar.text_input("Admin Password", type="password", key="admin_password")
-    if st.sidebar.button("Login"):
-        if admin_username == "admin" and admin_password == "admin123":
-            st.sidebar.success("✅ Login Successful!")
-            st.session_state.is_admin = True
-            return True
-        else:
-            st.sidebar.error("❌ Invalid credentials. Please try again.")
-    return False
-
-# File type validation based on category
 def is_valid_file(file_name, category):
     valid_extensions = {
         "Presentations": [".pptx"],
