@@ -281,19 +281,44 @@ def dashboard(user):
         st.experimental_rerun()
 
     # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard"])
+    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard", "SAKSHAM Dashboard", "Samriddh Sakhi"])
 
     for tab in dashboard_tabs:
         with tab:
-            st.subheader(f"📊 Progress")
-            # Here you can add specific content for each dashboard
-            # For example, you can display progress for each section
-            st.write("This is where you can display progress and other metrics.")
+            if tab == "SAKSHAM Dashboard":
+                st.subheader("🌱 Plant Population Tool")
+                # Add functionality for Plant Population Tool
+                plant_population_tool()
+            elif tab == "Samriddh Sakhi":
+                st.subheader("🌼 Samriddh Sakhi")
+                # Add functionality for Samriddh Sakhi
+                samriddh_sakhi()
+            else:
+                st.subheader(f"📊 Progress in {tab}")
+                # Here you can add specific content for each dashboard
+                st.write("This is where you can display progress and other metrics.")
 
-            # Example of displaying employee progress
-            employees = db.query(Employee).all()
-            for emp in employees:
-                st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+                # Example of displaying employee progress
+                employees = db.query(Employee).all()
+                for emp in employees:
+                    st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
+
+# --- Plant Population Tool ---
+def plant_population_tool():
+    st.write("This tool will help you calculate plant population.")
+    # Add your tool logic here
+    area = st.number_input("Enter the area (in acres):", min_value=0.0)
+    plants_per_acre = st.number_input("Enter the number of plants per acre:", min_value=0)
+    
+    if st.button("Calculate Total Plants"):
+        total_plants = area * plants_per_acre
+        st.success(f"Total Plants: {total_plants}")
+
+# --- Samriddh Sakhi ---
+def samriddh_sakhi():
+    st.write("This section is dedicated to the Samriddh Sakhi program.")
+    # Add your Samriddh Sakhi logic here
+    st.info("Details about the Samriddh Sakhi program will be displayed here.")
 
 # --- Training Section ---
 def training():
