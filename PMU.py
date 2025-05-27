@@ -293,11 +293,7 @@ def dashboard(user):
                 # For example, you can display progress for each section
                 st.write("This is where you can display progress and other metrics.")
 
-                # Example of displaying employee progress
-                employees = db.query(Employee).all()
-                for emp in employees:
-                    st.markdown(f"**{emp.name}**: Status")  # Replace with actual progress data
-
+        
 def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans")
