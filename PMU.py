@@ -311,10 +311,14 @@ def pmu_dashboard(user):
 
             submitted = st.form_submit_button("Save Work Plan")
             if submitted:
-                new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id)
-                db.add(new_workplan)
-                db.commit()
-                st.success("✅ Work Plan saved successfully!")
+                try:
+                    new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id)
+                    db.add(new_workplan)
+                    db.commit()
+                    st.success("✅ Work Plan saved successfully!")
+                except Exception as e:
+                    db.rollback()
+                    st.error(f"Error saving work plan: {e}")
 
     with st.expander("➕ Add New Work Stream"):
         with st.form("workstream_form"):
@@ -323,10 +327,14 @@ def pmu_dashboard(user):
             category = st.text_input("Category")
 
             if st.form_submit_button("Save Work Stream"):
-                new_ws = WorkStream(title=title, description=description, category=category, employee_id=user.id)
-                db.add(new_ws)
-                db.commit()
-                st.success("✅ Work Stream created.")
+                try:
+                    new_ws = WorkStream(title=title, description=description, category=category, employee_id=user.id)
+                    db.add(new_ws)
+                    db.commit()
+                    st.success("✅ Work Stream created.")
+                except Exception as e:
+                    db.rollback()
+                    st.error(f"Error saving work stream: {e}")
 
     with st.expander("➕ Add New Target"):
         with st.form("target_form"):
@@ -335,28 +343,50 @@ def pmu_dashboard(user):
             status = st.selectbox("Target Status", ["Not Started", "In Progress", "Completed"])
 
             if st.form_submit_button("Save Target"):
-                new_target = Target(description=description, deadline=str(deadline), status=status, employee_id=user.id)
-                db.add(new_target)
-                db.commit()
-                st.success("✅ Target saved.")
+                try:
+                    new_target = Target(description=description, deadline=str(deadline), status=status, employee_id=user.id)
+                    db.add(new_target)
+                    db.commit()
+                    st.success("✅ Target saved.")
+                except Exception as e:
+                    db.rollback()
+                    st.error(f"Error saving target: {e}")
 
     # Display Work Plans
     st.subheader("📌 Your Work Plans")
-    workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
-    for plan in workplans:
-        st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+    try:
+        workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+        if workplans:
+            for plan in workplans:
+                st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+        else:
+            st.info("No work plans found for this user.")
+    except Exception as e:
+        st.error(f"Error fetching work plans: {e}")
 
     # Display WorkStreams
     st.subheader("🧩 Your Work Streams")
-    workstreams = db.query(WorkStream).filter_by(employee_id=user.id).all()
-    for ws in workstreams:
-        st.markdown(f"**Title**: {ws.title} | **Category**: {ws.category} | **Desc**: {ws.description}")
+    try:
+        workstreams = db.query(WorkStream).filter_by(employee_id=user.id).all()
+        if workstreams:
+            for ws in workstreams:
+                st.markdown(f"**Title**: {ws.title} | **Category**: {ws.category} | **Desc**: {ws.description}")
+        else:
+            st.info("No work streams found for this user.")
+    except Exception as e:
+        st.error(f"Error fetching work streams: {e}")
 
     # Display Targets
     st.subheader("🎯 Your Targets")
-    targets = db.query(Target).filter_by(employee_id=user.id).all()
-    for tgt in targets:
-        st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
+    try:
+        targets = db.query(Target).filter_by(employee_id=user.id).all()
+        if targets:
+            for tgt in targets:
+                st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
+        else:
+            st.info("No targets found for this user.")
+    except Exception as e:
+        st.error(f"Error fetching targets: {e}")
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
@@ -438,32 +468,35 @@ def live_dashboard():
     st.subheader("📈 Live Monitoring Dashboard")
 
     # Fetch farmer data
-    farmer_data = db.query(FarmerData).all()
-    if not farmer_data:
-        st.warning("No farmer data available.")
-        return
+    try:
+        farmer_data = db.query(FarmerData).all()
+        if not farmer_data:
+            st.warning("No farmer data available.")
+            return
 
-    # Prepare data for display
-    total_farmers = len(farmer_data)
-    total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
-    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
-    yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
+        # Prepare data for display
+        total_farmers = len(farmer_data)
+        total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
+        total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
+        yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
 
-    # Display metrics
-    st.metric("🧮 Total Farmers", total_farmers)
-    st.metric("🐄 Total Cows", total_cows)
-    st.metric("🍼 Total Yield (L)", total_yield)
-    st.metric("📊 Yield per Cow (L)", round(yield_per_cow, 2))
+        # Display metrics
+        st.metric("🧮 Total Farmers", total_farmers)
+        st.metric("🐄 Total Cows", total_cows)
+        st.metric("🍼 Total Yield (L)", total_yield)
+        st.metric("📊 Yield per Cow (L)", round(yield_per_cow, 2))
 
-    # Create a DataFrame for detailed view
-    df = pd.DataFrame({
-        "Farmer Name": [farmer.farmer_name for farmer in farmer_data],
-        "Number of Cows": [farmer.number_of_cows for farmer in farmer_data],
-        "Yield per Cow (L)": [farmer.yield_per_cow for farmer in farmer_data]
-    })
+        # Create a DataFrame for detailed view
+        df = pd.DataFrame({
+            "Farmer Name": [farmer.farmer_name for farmer in farmer_data],
+            "Number of Cows": [farmer.number_of_cows for farmer in farmer_data],
+            "Yield per Cow (L)": [farmer.yield_per_cow for farmer in farmer_data]
+        })
 
-    st.subheader("📊 Farmer Data Overview")
-    st.dataframe(df)
+        st.subheader("📊 Farmer Data Overview")
+        st.dataframe(df)
+    except Exception as e:
+        st.error(f"Error fetching or displaying live data: {e}")
 
 def settings():
     db = get_db()
@@ -512,10 +545,14 @@ def settings():
     confirm_password = st.text_input("Confirm New Password", type="password")
     if st.button("Change Password"):
         if new_password == confirm_password:
-            user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
-            user.password = new_password
-            db.commit()
-            st.success("Password changed successfully!")
+            try:
+                user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
+                user.password = new_password
+                db.commit()
+                st.success("Password changed successfully!")
+            except Exception as e:
+                db.rollback()
+                st.error(f"Error changing password: {e}")
         else:
             st.error("Passwords do not match.")
 
@@ -563,13 +600,19 @@ def reports():
 
         summary_df = pd.DataFrame(summary_data)
         summary_filename = f"weekly_summary_{date.today()}.csv"
-        summary_df.to_csv(summary_filename, index=False)
-        st.success(f"Weekly summary generated: {summary_filename}")
+        try:
+            summary_df.to_csv(summary_filename, index=False)
+            st.success(f"Weekly summary generated: {summary_filename}")
+        except Exception as e:
+            st.error(f"Error generating summary: {e}")
 
     # Display the summary if it exists
     if summary_filename and os.path.exists(summary_filename):
-        summary_df = pd.read_csv(summary_filename)
-        st.dataframe(summary_df)
+        try:
+            summary_df = pd.read_csv(summary_filename)
+            st.dataframe(summary_df)
+        except Exception as e:
+            st.error(f"Error reading summary file: {e}")
 
 def scheduling(user):
     db = get_db()
@@ -580,14 +623,21 @@ def scheduling(user):
         start_time = st.time_input("Start Time")
         end_time = st.time_input("End Time")
         if st.form_submit_button("Add Schedule"):
-            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
-            db.commit()
-            st.success("Schedule added successfully!")
+            try:
+                db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
+                db.commit()
+                st.success("Schedule added successfully!")
+            except Exception as e:
+                db.rollback()
+                st.error(f"Error adding schedule: {e}")
 
     st.subheader("Your Schedules")
-    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    for schedule in schedules:
-        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+    try:
+        schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+        for schedule in schedules:
+            st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+    except Exception as e:
+        st.error(f"Error fetching schedules: {e}")
 
 def field_team_management():
     db = get_db()
@@ -598,27 +648,38 @@ def field_team_management():
         team_name = st.text_input("Field Team Name")
         if st.form_submit_button("Add Field Team"):
             if team_name:
-                new_team = FieldTeam(name=team_name)
-                db.add(new_team)
-                db.commit()
-                st.success(f"Field Team '{team_name}' added successfully!")
+                try:
+                    new_team = FieldTeam(name=team_name)
+                    db.add(new_team)
+                    db.commit()
+                    st.success(f"Field Team '{team_name}' added successfully!")
+                except Exception as e:
+                    db.rollback()
+                    st.error(f"Error adding field team: {e}")
             else:
                 st.error("Field Team Name cannot be empty.")
 
     # Display Existing Field Teams
     st.subheader("Existing Field Teams")
-    field_teams = db.query(FieldTeam).all()
-    if field_teams:
-        for team in field_teams:
-            col1, col2 = st.columns([3, 1])
-            col1.markdown(f"**Team Name**: {team.name}")
-            if col2.button(f"Delete {team.name}", key=team.id):
-                db.delete(team)
-                db.commit()
-                st.success(f"Field Team '{team.name}' deleted successfully!")
-                st.experimental_rerun()  # Refresh the page to update the list
-    else:
-        st.write("No field teams available.")
+    try:
+        field_teams = db.query(FieldTeam).all()
+        if field_teams:
+            for team in field_teams:
+                col1, col2 = st.columns([3, 1])
+                col1.markdown(f"**Team Name**: {team.name}")
+                if col2.button(f"Delete {team.name}", key=team.id):
+                    try:
+                        db.delete(team)
+                        db.commit()
+                        st.success(f"Field Team '{team.name}' deleted successfully!")
+                        st.experimental_rerun()  # Refresh the page to update the list
+                    except Exception as e:
+                        db.rollback()
+                        st.error(f"Error deleting field team: {e}")
+        else:
+            st.write("No field teams available.")
+    except Exception as e:
+        st.error(f"Error fetching field teams: {e}")
 
 def training():
     st.subheader("📚 Training Module")
@@ -648,82 +709,4 @@ def training():
                     except Exception as e:
                         st.error(f"❌ Error uploading file: {e}")
         else:
-            st.error("Please select a program and category before uploading.")
-
-    # Display Uploaded Training Content
-    st.header("📂 Uploaded Training Content")
-    for program in ["Cotton", "Dairy"]:
-        for category in ["Presentations", "Videos", "Audios", "Quizzes"]:
-            folder_path = Path(f"training_materials/{program.lower()}/{category.lower()}")
-            if folder_path.exists() and any(folder_path.iterdir()):
-                st.subheader(f"{program} - {category}")
-                for file in os.listdir(folder_path):
-                    st.markdown(f"- {file}")
-
-def is_valid_file(file_name, category):
-    valid_extensions = {
-        "Presentations": [".pptx"],
-        "Videos": [".mp4"],
-        "Audios": [".mp3"],
-        "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"]
-    }
-    # Allow Excel and Images in all categories
-    extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
-    file_extension = os.path.splitext(file_name)[1].lower()
-
-    if file_extension in extra_extensions:
-        return True
-    if category in valid_extensions and file_extension in valid_extensions[category]:
-        return True
-    return False
-
-def main():
-    preload_users()
-    db = get_db()
-    
-    # Initialize session state for user if not already done
-    if "user" not in st.session_state:
-        st.session_state.user = None
-
-    # Display the login section if no user is logged in
-    if st.session_state.user is None:
-        st.title("🔐 Login")
-        display_notice()
-        all_users = db.query(Employee).all()
-        emails = [u.email for u in all_users]
-        selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
-
-        if selected != "Select...":
-            user = db.query(Employee).filter_by(email=selected).first()
-            password = st.text_input("Password", type="password")
-            if user and user.password == password:
-                st.session_state.user = user
-                st.success(f"Welcome, {user.name}!")
-            elif user and user.password != password:
-                st.error("Incorrect password.")
-
-    # Display the dashboard if a user is logged in
-    if st.session_state.user is not None:
-        selected_tab = sidebar()
-        if selected_tab == "dashboard":
-            dashboard(st.session_state.user)
-        elif selected_tab == "scheduling":
-            scheduling(st.session_state.user)
-        elif selected_tab == "field_team_management":
-            field_team_management() 
-        elif selected_tab == "live_dashboard":
-            live_dashboard()  # New section for live dashboard
-        elif selected_tab == "reports":
-            reports()
-        elif selected_tab == "settings":
-            settings()
-        elif selected_tab == "saksham_dashboard":
-            saksham_dashboard()  # New section for SAKSHAM Dashboard
-        elif selected_tab == "training":
-            training()  # New section for Training
-        elif selected_tab == "logout":
-            st.session_state.user = None
-            st.success("You have been logged out.")
-
-if __name__ == "__main__":
-    main()
+            st.error("Please select a program and
