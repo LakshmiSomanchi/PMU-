@@ -310,8 +310,7 @@ def dashboard(user):
             elif tab == "Field Team Dashboard":
                 st.subheader(f"📊Progress")
                 # Here you can add specific content for each section
-                # For example, you can display progress for each section
-                st.write("This is where you can display progress and other metrics.")
+                # For example, you can display progress and other metrics.")
             elif tab == "Ksheersagar Dashboard":
                 st.subheader(f"📊Progress")
                 # Here you can add specific content for each section
@@ -700,7 +699,7 @@ def training():
     st.write("This section provides training materials and resources.")
 
     # Upload Training Content
-    st.header("📤 Upload Training Content")
+    st.header("📤Upload Training Content")
     selected_program = st.selectbox("🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown")
     selected_category = st.selectbox("📂 Select Category", ["Presentations", "Videos", "Audios", "Quizzes"], key="category_dropdown")
     uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
