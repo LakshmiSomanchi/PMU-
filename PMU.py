@@ -9,6 +9,12 @@ import os
 from pathlib import Path  # Import Path for directory creation
 from math import floor
 
+# Google Drive and Gmail imports
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from email.mime.text import MIMEText
+import base64
+
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -182,7 +188,7 @@ class FarmerData(Base):
     date = Column(String)  # Date of the record
 
 # Drop all tables and recreate them
-Base.metadata.drop_all(bind=engine)  # This will drop all tables
+#Base.metadata.drop_all(bind=engine)  # This will drop all tables
 Base.metadata.create_all(bind=engine)  # This will recreate the tables
 
 # Initialize session state for user if not already done
@@ -266,6 +272,8 @@ def sidebar():
         "SAKSHAM Dashboard": "saksham_dashboard",  # New section for SAKSHAM Dashboard
         "Training": "training",  # New section for Training
         "Settings": "settings",
+        "Google Drive": "google_drive", # New section for Google Drive
+        "Email": "email", # New section for Email
         "Logout": "logout"
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
@@ -289,7 +297,7 @@ def dashboard(user):
                 pmu_dashboard(user)
             else:
                 st.subheader(f"📊Progress")
-                # Here you can add specific content for each dashboard
+                # Here you can add specific content for each section
                 # For example, you can display progress for each section
                 st.write("This is where you can display progress and other metrics.")
 
@@ -665,6 +673,94 @@ def is_valid_file(file_name, category):
         return True
     return False
 
+# Google Drive Functionality
+def google_drive():
+    st.subheader("Google Drive Integration")
+
+    # Set the SCOPES.
+    SCOPES = ['https://www.googleapis.com/auth/drive']
+    # Set the path to the service account json file.
+    SERVICE_ACCOUNT_FILE = 'path/to/your/service_account.json' # Replace with your actual path
+
+    @st.cache_resource
+    def get_drive_service():
+        creds = None
+        creds = service_account.Credentials.from_service_account_file(
+                SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+        try:
+            service = build('drive', 'v3', credentials=creds)
+            return service
+        except Exception as e:
+            st.error(f"Error creating Drive service: {e}")
+            return None
+
+    drive_service = get_drive_service()
+
+    if drive_service:
+        st.success("Successfully connected to Google Drive!")
+
+        # List files in Drive
+        if st.button("List Files"):
+            try:
+                results = drive_service.files().list
+                ().execute()
+                items = results.get('files', [])
+                if not items:
+                    st.write('No files found.')
+                else:
+                    st.write('Files:')
+                    for item in items:
+                        st.write(f"{item['name']} ({item['mimeType']})")
+            except Exception as e:
+                st.error(f"Error listing files: {e}")
+
+# Gmail Functionality
+def email():
+    st.subheader("Email Integration")
+
+    # Set the SCOPES.
+    SCOPES = ['https://mail.google.com/']
+    # Set the path to the service account json file.
+    SERVICE_ACCOUNT_FILE = 'path/to/your/service_account.json' # Replace with your actual path
+
+    @st.cache_resource
+    def get_gmail_service():
+        creds = None
+        creds = service_account.Credentials.from_service_account_file(
+                SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+
+        try:
+            service = build('gmail', 'v1', credentials=creds)
+            return service
+        except Exception as e:
+            st.error(f"Error creating Gmail service: {e}")
+            return None
+
+    gmail_service = get_gmail_service()
+
+    if gmail_service:
+        st.success("Successfully connected to Gmail!")
+
+        # Send Email
+        with st.form("send_email_form"):
+            recipient = st.text_input("Recipient Email")
+            subject = st.text_input("Subject")
+            body = st.text_area("Body")
+            submitted = st.form_submit_button("Send Email")
+
+            if submitted:
+                try:
+                    message = MIMEText(body)
+                    message['to'] = recipient
+                    message['subject'] = subject
+                    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+                    send_message = {'raw': raw_message}
+                    message = (gmail_service.users().messages().send(userId="me", body=send_message).execute())
+                    st.success(f"Email sent to {recipient}!")
+                except Exception as e:
+                    st.error(f"Error sending email: {e}")
+
 def main():
     preload_users()
     db = get_db()
@@ -709,6 +805,10 @@ def main():
             saksham_dashboard()  # New section for SAKSHAM Dashboard
         elif selected_tab == "training":
             training()  # New section for Training
+        elif selected_tab == "google_drive":
+            google_drive() # New section for Google Drive
+        elif selected_tab == "email":
+            email() # New section for Email
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
