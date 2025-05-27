@@ -319,7 +319,11 @@ def dashboard(user):
 def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans and Targets")
-    # Summary View
+  # Fetch required data
+workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+targets = db.query(Target).filter_by(employee_id=user.id).all()
+
+# Summary View
 with st.expander("📌 Summary View"):
     st.markdown("### 🧾 Progress Overview")
     
@@ -345,8 +349,6 @@ with st.expander("📌 Summary View"):
         st.dataframe(schedule_df)
     else:
         st.info("No schedules available.")
-
-
     # Add New Work Plan
     with st.expander("➕ Add New Work Plan"):
         with st.form("work_plan_form"):
