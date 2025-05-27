@@ -298,24 +298,24 @@ def dashboard(user):
     # Tabs for different dashboards
     dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
 
-tab1, tab2, tab3, tab4 = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
+     tab1, tab2, tab3, tab4 = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
 
-with tab1:
+ with tab1:
     st.subheader("📊 Progress")
     st.write("This is where you can display field team progress and metrics.")
 
-with tab2:
+ with tab2:
     pmu_dashboard(user)
 
-with tab3:
+ with tab3:
     st.subheader("📊 Progress")
     st.write("This is where you can display heritage progress and metrics.")
 
-with tab4:
+ with tab4:
     st.subheader("📊 Progress")
     st.write("This is where you can display Ksheersagar progress and metrics.")
 
-def pmu_dashboard(user):
+ def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans and Targets")
 
