@@ -315,40 +315,44 @@ def dashboard(user):
                 st.subheader(f"📊Progress")
                 # Here you can add specific content for each section
                 # For example, you can display progress and other metrics.")
-
 def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans and Targets")
-  # Fetch required data
-workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
-targets = db.query(Target).filter_by(employee_id=user.id).all()
 
-# Summary View
-with st.expander("📌 Summary View"):
-    st.markdown("### 🧾 Progress Overview")
-    
-    # Workplan Summary
-    wp_status_df = pd.DataFrame([wp.status for wp in workplans], columns=["Status"])
-    wp_counts = wp_status_df["Status"].value_counts().reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
-    st.write("#### Workplans")
-    st.dataframe(wp_counts.reset_index().rename(columns={"index": "Status", "Status": "Count"}))
-
-    # Target Summary
-    tgt_status_df = pd.DataFrame([t.status for t in targets], columns=["Status"])
-    tgt_counts = tgt_status_df["Status"].value_counts().reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
-    st.write("#### Targets")
-    st.dataframe(tgt_counts.reset_index().rename(columns={"index": "Status", "Status": "Count"}))
-
-    # Schedule Overview
-    st.write("#### Schedules")
+    # Fetch all once at top
+    workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+    targets = db.query(Target).filter_by(employee_id=user.id).all()
     schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    schedule_df = pd.DataFrame([{
-        "Date": s.date, "Start": s.start_time, "End": s.end_time, "GMeet": s.gmeet_link or "N/A"
-    } for s in schedules])
-    if not schedule_df.empty:
-        st.dataframe(schedule_df)
-    else:
-        st.info("No schedules available.")
+
+    # Summary View
+    with st.expander("📌 Summary View"):
+        st.markdown("### 🧾 Progress Overview")
+
+        # Workplans Summary
+        wp_status_df = pd.DataFrame([wp.status for wp in workplans], columns=["Status"])
+        wp_counts = wp_status_df["Status"].value_counts().reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
+        st.write("#### Workplans")
+        st.dataframe(wp_counts.reset_index().rename(columns={"index": "Status", "Status": "Count"}))
+
+        # Targets Summary
+        tgt_status_df = pd.DataFrame([t.status for t in targets], columns=["Status"])
+        tgt_counts = tgt_status_df["Status"].value_counts().reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
+        st.write("#### Targets")
+        st.dataframe(tgt_counts.reset_index().rename(columns={"index": "Status", "Status": "Count"}))
+
+        # Schedules
+        st.write("#### Schedules")
+        schedule_df = pd.DataFrame([{
+            "Date": s.date,
+            "Start": s.start_time,
+            "End": s.end_time,
+            "GMeet": s.gmeet_link or "N/A"
+        } for s in schedules])
+        if not schedule_df.empty:
+            st.dataframe(schedule_df)
+        else:
+            st.info("No schedules available.")
+
     # Add New Work Plan
     with st.expander("➕ Add New Work Plan"):
         with st.form("work_plan_form"):
@@ -356,16 +360,22 @@ with st.expander("📌 Summary View"):
             details = st.text_area("Details")
             deadline = st.date_input("Deadline")
             status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
-            workstream = st.selectbox("Workstream", ["Select..."] + [ws.title for ws in db.query(WorkStream).filter_by(employee_id=user.id).all()], index=0)
+            workstream_titles = [ws.title for ws in db.query(WorkStream).filter_by(employee_id=user.id).all()]
+            workstream = st.selectbox("Workstream", ["Select..."] + workstream_titles, index=0)
 
             submitted = st.form_submit_button("Save Work Plan")
             if submitted:
                 if workstream != "Select...":
                     workstream_obj = db.query(WorkStream).filter_by(title=workstream, employee_id=user.id).first()
-                    new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id, workstream_id=workstream_obj.id)
+                    new_workplan = WorkPlan(
+                        title=title, details=details,
+                        deadline=str(deadline), status=status,
+                        supervisor_id=user.id, workstream_id=workstream_obj.id
+                    )
                     db.add(new_workplan)
                     db.commit()
                     st.success("✅ Work Plan saved successfully!")
+                    st.experimental_rerun()
                 else:
                     st.error("Please select a workstream.")
 
@@ -381,15 +391,11 @@ with st.expander("📌 Summary View"):
                 db.add(new_target)
                 db.commit()
                 st.success("✅ Target saved.")
-
-    # Display Work Plans and Targets with Progress
-    st.subheader("📌 Your Work Plans and Targets")
-
-    # Fetch workplans and targets for the logged-in user
-    workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
-    targets = db.query(Target).filter_by(employee_id=user.id).all()
+                st.experimental_rerun()
 
     # Display Work Plans
+    st.subheader("📌 Your Work Plans and Targets")
+
     if workplans:
         st.write("### Work Plans")
         for plan in workplans:
@@ -401,7 +407,6 @@ with st.expander("📌 Summary View"):
             with col2:
                 st.markdown(f"**Status**: {plan.status}")
             with col3:
-                # Add a progress update form for each workplan
                 with st.form(key=f"workplan_progress_{plan.id}"):
                     new_status = st.selectbox("Update Status", ["Not Started", "In Progress", "Completed"], index=["Not Started", "In Progress", "Completed"].index(plan.status))
                     submit_progress = st.form_submit_button("Update Progress")
@@ -424,7 +429,6 @@ with st.expander("📌 Summary View"):
             with col2:
                 st.markdown(f"**Status**: {tgt.status}")
             with col3:
-                # Add a progress update form for each target
                 with st.form(key=f"target_progress_{tgt.id}"):
                     new_status = st.selectbox("Update Status", ["Not Started", "In Progress", "Completed"], index=["Not Started", "In Progress", "Completed"].index(tgt.status))
                     submit_progress = st.form_submit_button("Update Progress")
@@ -435,6 +439,7 @@ with st.expander("📌 Summary View"):
                         st.experimental_rerun()
     else:
         st.info("No targets found.")
+
 
 def manage_programs():
     db = get_db()
