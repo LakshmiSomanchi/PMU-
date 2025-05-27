@@ -254,7 +254,6 @@ def display_notice():
             <h3>Meeting Coordination</h3>
             <p>Supervisors will upload relevant meeting links and schedules directly into the platform</p>
             <p>Individuals are expected to join these sessions as per the calendar updates</p>
-            <p>Target-setting and progress meetings will be documented within the system</p>
             <h3>Communication Guidelines</h3>
             <p>Any technical issues or submission challenges should be reported within the window</p>
             <p>Use official channels for queries to ensure swift response</p>
@@ -437,6 +436,7 @@ def pmu_dashboard(user):
     else:
         st.info("No targets found.")
 
+
 def manage_programs():
     db = get_db()
     st.subheader("Manage Programs")
@@ -468,109 +468,7 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-    st.write("This dashboard includes tools and resources for plant population management.")
-    # dashboard.py
-import streamlit as st
-from math import floor
-
-st.set_page_config(page_title="Plant Population Tool", layout="wide")
-
-# Detect dark mode for adaptive styling
-is_dark = st.get_option("theme.base") == "dark"
-
-text_color = "#f8f9fa" if is_dark else "#0A0A0A"
-bg_color = "#0A9396" if is_dark else "#e0f2f1"
-
-# Apply full page background color
-st.markdown(f"""
-<style>
-    html, body, [class*="css"]  {{
-        background-color: {bg_color};
-        font-family: 'Helvetica', sans-serif;
-    }}
-    .block-container {{
-        padding-top: 3rem;
-        padding-bottom: 3rem;
-    }}
-    .stMetricValue {{
-        font-size: 1.5rem !important;
-        color: {text_color};
-    }}
-    .stMetricLabel {{
-        font-weight: bold;
-        color: {text_color};
-    }}
-    h1, h2, h3, h4, h5 {{
-        color: {text_color};
-    }}
-    .stButton>button {{
-        background-color: #0A9396;
-        color: white;
-        font-weight: bold;
-        border-radius: 5px;
-        padding: 0.6em 1.5em;
-    }}
-    .stButton>button:hover {{
-        background-color: #007f86;
-    }}
-</style>
-""", unsafe_allow_html=True)
-
-st.title("🌿 Plant Population & Seed Requirement Tool")
-st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
-
-with st.container():
-    st.header("📥 Farmer Survey Entry")
-    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
-
-    with st.form("survey_form"):
-        col0, col1, col2 = st.columns(3)
-        farmer_name = col0.text_input("👤 Farmer Name")
-        farmer_id = col1.text_input("🆔 Farmer ID")
-        state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
-
-        spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-        col3, col4, col5 = st.columns(3)
-        row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
-        plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-        land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
-
-        submitted = st.form_submit_button("🔍 Calculate")
-
-if submitted and farmer_name and farmer_id:
-    st.markdown("---")
-
-    germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
-    confidence_interval = 0.90
-    seeds_per_packet = 7500
-    acre_to_m2 = 4046.86
-
-    if spacing_unit == "cm":
-        row_spacing /= 100
-        plant_spacing /= 100
-
-    plant_area_m2 = row_spacing * plant_spacing
-    plants_per_m2 = 1 / plant_area_m2
-    field_area_m2 = land_acres * acre_to_m2
-    calculated_plants = plants_per_m2 * field_area_m2
-
-    target_plants = germination_rate_per_acre[state] * land_acres
-    required_seeds = target_plants / confidence_interval
-    required_packets = floor(required_seeds / seeds_per_packet)
-
-    st.subheader("📊 Output Summary")
-    st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
-    col6, col7, col8, col9 = st.columns(4)
-    col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-    col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-    col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-    col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
-
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
-
-elif submitted:
-    st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
+    plant_population_tool()
 
 def plant_population_tool():
     st.write("This tool will help you calculate plant population.")
@@ -617,20 +515,18 @@ def plant_population_tool():
         field_area_m2 = land_acres * acre_to_m2
         calculated_plants = plants_per_m2 * field_area_m2
 
+        # Seed Calculation Logic
+        target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
+        required_seeds = target_plants
+        required_packets = (required_seeds / seeds_per_packet)
+
         st.subheader("📊 Output Summary")
         st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
         col6, col7, col8, col9 = st.columns(4)
         col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-        # The variables target_plants, required_seeds, and required_packets are not defined.
-        # You need to define them based on your calculation logic.
-        # For example:
-        target_plants = int(calculated_plants * 0.9)  # Assuming a 90% target
-        required_seeds = int(target_plants * 1.1)  # Assuming 10% seed loss
-        seeds_per_packet = 7500
-        required_packets = int(required_seeds / seeds_per_packet)
         col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
         col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-        col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
+        col9.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
 
         st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
         st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
@@ -713,8 +609,8 @@ def settings():
 
     # Change Password Section
     st.markdown("### Change Password")
-    new_password = st.text_input("New Password", type="password", key="new_password")
-    confirm_password = st.text_input("Confirm New Password", type="password", key="confirm_password")
+    new_password = st.text_input("New Password", type="password")
+    confirm_password = st.text_input("Confirm New Password", type="password")
     if st.button("Change Password"):
         if new_password == confirm_password:
             user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
@@ -784,17 +680,15 @@ def scheduling(user):
         schedule_date = st.date_input("Schedule Date", date.today())
         start_time = st.time_input("Start Time")
         end_time = st.time_input("End Time")
+        # GMeet Placeholder
         generate_gmeet = st.checkbox("Generate GMeet Link?")
-        gmeet_link = "https://meet.google.com/placeholder" if generate_gmeet else None
+        gmeet_link = None
+        if generate_gmeet:
+            gmeet_link = "https://meet.google.com/placeholder"  # Placeholder link
+            st.write(f"GMeet Link (Placeholder): {gmeet_link}")
 
         if st.form_submit_button("Add Schedule"):
-            new_schedule = Schedule(
-                employee_id=user.id,
-                date=str(schedule_date),
-                start_time=str(start_time),
-                end_time=str(end_time),
-                gmeet_link=gmeet_link
-            )
+            new_schedule = Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time), gmeet_link=gmeet_link)
             db.add(new_schedule)
             db.commit()
             st.success("Schedule added successfully!")
@@ -820,7 +714,8 @@ def field_team_management():
             else:
                 st.error("Field Team Name cannot be empty.")
 
-    # Display Existing Field Teams    st.subheader("Existing Field Teams")
+    # Display Existing Field Teams
+    st.subheader("Existing Field Teams")
     field_teams = db.query(FieldTeam).filter_by(pmu_id=st.session_state.user.id).all()
     if field_teams:
         for team in field_teams:
