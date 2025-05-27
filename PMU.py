@@ -9,12 +9,6 @@ import os
 from pathlib import Path  # Import Path for directory creation
 from math import floor
 
-# Google Drive and Gmail imports
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
-from email.mime.text import MIMEText
-import base64
-
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -673,99 +667,37 @@ def is_valid_file(file_name, category):
         return True
     return False
 
-# Google Drive Functionality
+# Placeholder Google Drive Functionality
 def google_drive():
-    st.subheader("Google Drive Integration")
+    st.subheader("Google Drive Integration (Placeholder)")
+    st.write("This section will eventually integrate with Google Drive.")
 
-    # Set the SCOPES.
-    SCOPES = ['https://www.googleapis.com/auth/drive']
-    # Set the path to the service account json file.
-    SERVICE_ACCOUNT_FILE = 'path/to/your/service_account.json' # Replace with your actual path
+    if st.button("List Files (Placeholder)"):
+        st.write("Simulating listing files from Google Drive...")
+        st.write("- File 1.txt")
+        st.write("- File 2.pdf")
+        st.write("- File 3.docx")
 
-    @st.cache_resource
-    def get_drive_service():
-        creds = None
-        creds = service_account.Credentials.from_service_account_file(
-                SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-
-        try:
-            service = build('drive', 'v3', credentials=creds)
-            return service
-        except Exception as e:
-            st.error(f"Error creating Drive service: {e}")
-            return None
-
-    drive_service = get_drive_service()
-
-    if drive_service:
-        st.success("Successfully connected to Google Drive!")
-
-        # List files in Drive
-        if st.button("List Files"):
-            try:
-                results = drive_service.files().list
-                ().execute()
-                items = results.get('files', [])
-                if not items:
-                    st.write('No files found.')
-                else:
-                    st.write('Files:')
-                    for item in items:
-                        st.write(f"{item['name']} ({item['mimeType']})")
-            except Exception as e:
-                st.error(f"Error listing files: {e}")
-
-# Gmail Functionality
+# Placeholder Gmail Functionality
 def email():
-    st.subheader("Email Integration")
+    st.subheader("Email Integration (Placeholder)")
+    st.write("This section will eventually integrate with Gmail.")
 
-    # Set the SCOPES.
-    SCOPES = ['https://mail.google.com/']
-    # Set the path to the service account json file.
-    SERVICE_ACCOUNT_FILE = 'path/to/your/service_account.json' # Replace with your actual path
+    with st.form("send_email_form"):
+        recipient = st.text_input("Recipient Email")
+        subject = st.text_input("Subject")
+        body = st.text_area("Body")
+        submitted = st.form_submit_button("Send Email (Placeholder)")
 
-    @st.cache_resource
-    def get_gmail_service():
-        creds = None
-        creds = service_account.Credentials.from_service_account_file(
-                SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-
-        try:
-            service = build('gmail', 'v1', credentials=creds)
-            return service
-        except Exception as e:
-            st.error(f"Error creating Gmail service: {e}")
-            return None
-
-    gmail_service = get_gmail_service()
-
-    if gmail_service:
-        st.success("Successfully connected to Gmail!")
-
-        # Send Email
-        with st.form("send_email_form"):
-            recipient = st.text_input("Recipient Email")
-            subject = st.text_input("Subject")
-            body = st.text_area("Body")
-            submitted = st.form_submit_button("Send Email")
-
-            if submitted:
-                try:
-                    message = MIMEText(body)
-                    message['to'] = recipient
-                    message['subject'] = subject
-                    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
-                    send_message = {'raw': raw_message}
-                    message = (gmail_service.users().messages().send(userId="me", body=send_message).execute())
-                    st.success(f"Email sent to {recipient}!")
-                except Exception as e:
-                    st.error(f"Error sending email: {e}")
+        if submitted:
+            st.write(f"Simulating sending email to {recipient} with subject '{subject}'.")
 
 def main():
     preload_users()
     db = get_db()
     
-    # Initialize session state for user if not already done
+    # Initialize session state for user
+    if not already done
     if "user" not in st.session_state:
         st.session_state.user = None
 
