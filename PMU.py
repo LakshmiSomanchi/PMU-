@@ -200,6 +200,9 @@ preloaded_users = [
     ("Pragya Bharati", "pbharati@tns.org", "password7")
 ]
 
+# Initial Programs
+initial_programs = ["Water Program", "Education Program", "Ksheersagar 2.0", "SAKSHAM"]
+
 def get_db():
     return SessionLocal()
 
@@ -208,6 +211,15 @@ def preload_users():
     for name, email, password in preloaded_users:
         try:
             db.add(Employee(name=name, email=email, password=password))
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+
+def preload_programs():
+    db = get_db()
+    for program_name in initial_programs:
+        try:
+            db.add(Program(name=program_name, description=f"Description for {program_name}", employee_id=1))  # Assuming employee_id 1 is the admin
             db.commit()
         except IntegrityError:
             db.rollback()
@@ -307,8 +319,9 @@ def dashboard(user):
 
 def pmu_dashboard(user):
     db = get_db()
-    st.subheader("📋 PMU Work Plans")
+    st.subheader("📋 PMU Work Plans and Targets")
 
+    # Add New Work Plan
     with st.expander("➕ Add New Work Plan"):
         with st.form("work_plan_form"):
             title = st.text_input("Work Plan Title")
@@ -328,18 +341,7 @@ def pmu_dashboard(user):
                 else:
                     st.error("Please select a workstream.")
 
-    with st.expander("➕ Add New Work Stream"):
-        with st.form("workstream_form"):
-            title = st.text_input("WorkStream Title")
-            description = st.text_area("Description")
-            category = st.text_input("Category")
-
-            if st.form_submit_button("Save Work Stream"):
-                new_ws = WorkStream(title=title, description=description, category=category, employee_id=user.id)
-                db.add(new_ws)
-                db.commit()
-                st.success("✅ Work Stream created.")
-
+    # Add New Target
     with st.expander("➕ Add New Target"):
         with st.form("target_form"):
             description = st.text_area("Target Description")
@@ -352,7 +354,7 @@ def pmu_dashboard(user):
                 db.commit()
                 st.success("✅ Target saved.")
 
-    # Display Work Plans
+    # Display Work Plans and Targets
     st.subheader("📌 Your Work Plans")
     workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
     if workplans:
@@ -361,16 +363,6 @@ def pmu_dashboard(user):
     else:
         st.info("No work plans found.")
 
-    # Display WorkStreams
-    st.subheader("🧩 Your Work Streams")
-    workstreams = db.query(WorkStream).filter_by(employee_id=user.id).all()
-    if workstreams:
-        for ws in workstreams:
-            st.markdown(f"**Title**: {ws.title} | **Category**: {ws.category} | **Desc**: {ws.description}")
-    else:
-        st.info("No work streams found.")
-
-    # Display Targets
     st.subheader("🎯 Your Targets")
     targets = db.query(Target).filter_by(employee_id=user.id).all()
     if targets:
@@ -378,6 +370,35 @@ def pmu_dashboard(user):
             st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
     else:
         st.info("No targets found.")
+
+def manage_programs():
+    db = get_db()
+    st.subheader("Manage Programs")
+
+    # Add New Program
+    with st.form("add_program_form"):
+        name = st.text_input("Program Name")
+        description = st.text_area("Program Description")
+        status = st.selectbox("Program Status", ["Active", "Inactive"])
+
+        if st.form_submit_button("Add Program"):
+            try:
+                new_program = Program(name=name, description=description, status=status, employee_id=st.session_state.user.id)
+                db.add(new_program)
+                db.commit()
+                st.success(f"Program '{name}' added successfully!")
+            except IntegrityError:
+                db.rollback()
+                st.error(f"Program '{name}' already exists.")
+
+    # Display Existing Programs
+    st.subheader("Existing Programs")
+    programs = db.query(Program).all()
+    if programs:
+        for program in programs:
+            st.markdown(f"**Name**: {program.name} | **Description**: {program.description} | **Status**: {program.status}")
+    else:
+        st.info("No programs found.")
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
@@ -659,7 +680,7 @@ def training():
             else:
                 if st.button("Upload"):
                     try:
-                        # Simulate uploading to Google Drive
+                        # Simulateuploading to Google Drive
                         st.write(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
                         st.write(f"File would be saved to: {save_dir} in Google Drive.")
                         # In a real implementation, you would use the Google Drive API here
@@ -711,15 +732,24 @@ def google_drive():
         st.write("- File 2.pdf")
         st.write("- File 3.docx")
 
-# Placeholder Team Chat Functionality
+# In-house Team Chat Functionality
 def team_chat():
-    st.subheader("Team Chat (Placeholder)")
-    st.write("This section will eventually integrate with a team chat service like Slack.")
+    st.subheader("Team Chat")
 
-    # Simulate a chat input and display
-    chat_input = st.text_input("Type your message here...")
+    # Initialize chat history in session state
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    # Input for new message
+    new_message = st.text_input("Enter your message:")
     if st.button("Send"):
-        st.write(f"**You:** {chat_input}")  # Display the sent message
+        if new_message:
+            st.session_state.chat_history.append(f"{st.session_state.user.name}: {new_message}")
+
+    # Display chat history
+    if st.session_state.chat_history:
+        for message in st.session_state.chat_history:
+            st.write(message)
 
 # Placeholder Gmail Functionality
 def email():
@@ -741,6 +771,10 @@ def main():
     # Initialize session state for user
     if "user" not in st.session_state:
         st.session_state.user = None
+
+    # Preload users and programs
+    preload_users()
+    preload_programs()
 
     # Display the login section if no user is logged in
     if st.session_state.user is None:
@@ -764,6 +798,8 @@ def main():
         selected_tab = sidebar()
         if selected_tab == "dashboard":
             dashboard(st.session_state.user)
+        elif selected_tab == "manage_programs":
+            manage_programs()
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
