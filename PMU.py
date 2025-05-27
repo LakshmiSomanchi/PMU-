@@ -92,6 +92,27 @@ Base = declarative_base()
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine)
 
+# Drop all tables and recreate them
+Base.metadata.drop_all(bind=engine)  # This will drop all tables
+Base.metadata.create_all(bind=engine)  # This will recreate the tables
+
+# Initialize session state for user if not already done
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+# Preloaded users
+preloaded_users = [
+    ("Somanchi", "rsomanchi@tns.org", "password1"),
+    ("Ranu", "rladdha@tns.org", "password2"),
+    ("Pari", "paris@tns.org", "password3"),
+    ("Muskan", "mkaushal@tns.org", "password4"),
+    ("Rupesh", "rmukherjee@tns.org", "password5"),
+    ("Shifali", "shifalis@tns.org", "password6"),
+    ("Pragya Bharati", "pbharati@tns.org", "password7")
+]
+
+# Initial Programs
+initial_programs = ["Water Program", "Education Program", "Ksheersagar 2.0", "SAKSHAM"]
 # Models
 class Employee(Base):
     __tablename__ = "employees"
@@ -181,27 +202,6 @@ class FarmerData(Base):
     yield_per_cow = Column(Float)  # Yield per cow
     date = Column(String)  # Date of the record
 
-# Drop all tables and recreate them
-Base.metadata.drop_all(bind=engine)  # This will drop all tables
-Base.metadata.create_all(bind=engine)  # This will recreate the tables
-
-# Initialize session state for user if not already done
-if "user" not in st.session_state:
-    st.session_state.user = None
-
-# Preloaded users
-preloaded_users = [
-    ("Somanchi", "rsomanchi@tns.org", "password1"),
-    ("Ranu", "rladdha@tns.org", "password2"),
-    ("Pari", "paris@tns.org", "password3"),
-    ("Muskan", "mkaushal@tns.org", "password4"),
-    ("Rupesh", "rmukherjee@tns.org", "password5"),
-    ("Shifali", "shifalis@tns.org", "password6"),
-    ("Pragya Bharati", "pbharati@tns.org", "password7")
-]
-
-# Initial Programs
-initial_programs = ["Water Program", "Education Program", "Ksheersagar 2.0", "SAKSHAM"]
 
 def get_db():
     return SessionLocal()
