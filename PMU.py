@@ -1,7 +1,7 @@
 import streamlit as st
 from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, joinedload
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
@@ -354,20 +354,57 @@ def pmu_dashboard(user):
                 db.commit()
                 st.success("✅ Target saved.")
 
-    # Display Work Plans and Targets
-    st.subheader("📌 Your Work Plans")
+    # Display Work Plans and Targets with Progress
+    st.subheader("📌 Your Work Plans and Targets")
+
+    # Fetch workplans and targets for the logged-in user
     workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+    targets = db.query(Target).filter_by(employee_id=user.id).all()
+
+    # Display Work Plans
     if workplans:
+        st.write("### Work Plans")
         for plan in workplans:
-            st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+            col1, col2, col3 = st.columns([4, 2, 2])
+            with col1:
+                st.markdown(f"**Title**: {plan.title}")
+                st.markdown(f"**Details**: {plan.details}")
+                st.markdown(f"**Deadline**: {plan.deadline}")
+            with col2:
+                st.markdown(f"**Status**: {plan.status}")
+            with col3:
+                # Add a progress update form for each workplan
+                with st.form(key=f"workplan_progress_{plan.id}"):
+                    new_status = st.selectbox("Update Status", ["Not Started", "In Progress", "Completed"], index=["Not Started", "In Progress", "Completed"].index(plan.status))
+                    submit_progress = st.form_submit_button("Update Progress")
+                    if submit_progress:
+                        plan.status = new_status
+                        db.commit()
+                        st.success("Progress updated!")
+                        st.experimental_rerun()
     else:
         st.info("No work plans found.")
 
-    st.subheader("🎯 Your Targets")
-    targets = db.query(Target).filter_by(employee_id=user.id).all()
+    # Display Targets
     if targets:
+        st.write("### Targets")
         for tgt in targets:
-            st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
+            col1, col2, col3 = st.columns([4, 2, 2])
+            with col1:
+                st.markdown(f"**Target**: {tgt.description}")
+                st.markdown(f"**Deadline**: {tgt.deadline}")
+            with col2:
+                st.markdown(f"**Status**: {tgt.status}")
+            with col3:
+                # Add a progress update form for each target
+                with st.form(key=f"target_progress_{tgt.id}"):
+                    new_status = st.selectbox("Update Status", ["Not Started", "In Progress", "Completed"], index=["Not Started", "In Progress", "Completed"].index(tgt.status))
+                    submit_progress = st.form_submit_button("Update Progress")
+                    if submit_progress:
+                        tgt.status = new_status
+                        db.commit()
+                        st.success("Progress updated!")
+                        st.experimental_rerun()
     else:
         st.info("No targets found.")
 
@@ -680,7 +717,7 @@ def training():
             else:
                 if st.button("Upload"):
                     try:
-                        # Simulateuploading to Google Drive
+                        # Simulate uploading to Google Drive
                         st.write(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
                         st.write(f"File would be saved to: {save_dir} in Google Drive.")
                         # In a real implementation, you would use the Google Drive API here
