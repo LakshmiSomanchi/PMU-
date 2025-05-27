@@ -181,7 +181,7 @@ class FarmerData(Base):
     yield_per_cow = Column(Float)  # Yield per cow
     date = Column(String)  # Date of the record
 
-# FIX: Drop all tables and recreate them
+# Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)  # This will drop all tables
 Base.metadata.create_all(bind=engine)  # This will recreate the tables
 
@@ -632,7 +632,7 @@ def field_team_management():
             if col2.button(f"Delete {team.name}", key=team.id):
                 db.delete(team)
                 db.commit()
-                st.success(f"Field Team '{team_name}' deleted successfully!")
+                st.success(f"Field Team '{team.name}' deleted successfully!")
                 st.experimental_rerun()  # Refresh the page to update the list
     else:
         st.write("No field teams available.")
@@ -667,7 +667,7 @@ def training():
                         # For now, just save locally
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
-                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to  {save_dir} (Simulated Google Drive)!")
+                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir} (Simulated Google Drive)!")
                     except Exception as e:
                         st.error(f"❌ Error uploading file: {e}")
         else:
