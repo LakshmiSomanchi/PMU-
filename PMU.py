@@ -1,18 +1,17 @@
 import streamlit as st
 from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, joinedload
+from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
 import os
-from pathlib import Path  # Import Path for directory creation
-from math import floor
+from pathlib import Path
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# Custom CSS with sidebar background image and global page background image
+# Custom CSS
 st.markdown("""
     <style>
         body {
@@ -24,7 +23,7 @@ st.markdown("""
         }
 
         .stApp {
-            background-color: rgba(255, 255, 255, 0.1); /* Increased transparency for better visibility */
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -92,47 +91,29 @@ Base = declarative_base()
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine)
 
-# Drop all tables and recreate them
-Base.metadata.drop_all(bind=engine)  # This will drop all tables
-Base.metadata.create_all(bind=engine)  # This will recreate the tables
+def get_db():
+    return SessionLocal()
 
-# Initialize session state for user if not already done
-if "user" not in st.session_state:
-    st.session_state.user = None
-
-# Preloaded users
-preloaded_users = [
-    ("Somanchi", "rsomanchi@tns.org", "password1"),
-    ("Ranu", "rladdha@tns.org", "password2"),
-    ("Pari", "paris@tns.org", "password3"),
-    ("Muskan", "mkaushal@tns.org", "password4"),
-    ("Rupesh", "rmukherjee@tns.org", "password5"),
-    ("Shifali", "shifalis@tns.org", "password6"),
-    ("Pragya Bharati", "pbharati@tns.org", "password7")
-]
-
-# Initial Programs
-initial_programs = ["Water Program", "Education Program", "Ksheersagar 2.0", "SAKSHAM"]
 # Models
 class Employee(Base):
     __tablename__ = "employees"
     id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
+    name = Column(String)
     email = Column(String, unique=True)
-    password = Column(String)  # Added password field
+    password = Column(String)
     workstreams = relationship("WorkStream", back_populates="employee")
     targets = relationship("Target", back_populates="employee")
     programs = relationship("Program", back_populates="employee")
     schedules = relationship("Schedule", back_populates="employee")
-    workplans = relationship("WorkPlan", back_populates="supervisor")  # Added relationship for workplans
-    field_teams = relationship("FieldTeam", back_populates="pmu")  # Relationship to Field Teams
+    workplans = relationship("WorkPlan", back_populates="supervisor")
+    field_teams = relationship("FieldTeam", back_populates="pmu")
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
     id = Column(Integer, primary_key=True)
     title = Column(String)
     description = Column(Text)
-    category = Column(String)  # New field for category
+    category = Column(String)
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="workstreams")
     workplans = relationship("WorkPlan", back_populates="workstream")
@@ -146,8 +127,8 @@ class WorkPlan(Base):
     status = Column(String, default="Not Started")
     workstream_id = Column(Integer, ForeignKey("workstreams.id"))
     workstream = relationship("WorkStream", back_populates="workplans")
-    supervisor_id = Column(Integer, ForeignKey("employees.id"))  # Added supervisor relationship
-    supervisor = relationship("Employee", back_populates="workplans")  # Relationship to Employee
+    supervisor_id = Column(Integer, ForeignKey("employees.id"))
+    supervisor = relationship("Employee", back_populates="workplans")
 
 class Target(Base):
     __tablename__ = "targets"
@@ -162,8 +143,8 @@ class Program(Base):
     __tablename__ = "programs"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    description = Column(Text)  # New field for description
-    status = Column(String, default="Active")  # New field for status
+    description = Column(Text)
+    status = Column(String, default="Active")
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="programs")
 
@@ -175,15 +156,15 @@ class Schedule(Base):
     start_time = Column(String)
     end_time = Column(String)
     employee = relationship("Employee", back_populates="schedules")
-    gmeet_link = Column(String, nullable=True)  # Added gmeet_link
+    gmeet_link = Column(String, nullable=True)
 
 class FieldTeam(Base):
     __tablename__ = "field_teams"
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
-    pmu_id = Column(Integer, ForeignKey("employees.id"))  # PMU supervisor
+    pmu_id = Column(Integer, ForeignKey("employees.id"))
     pmu = relationship("Employee", back_populates="field_teams")
-    tasks = relationship("Task", back_populates="field_team")  # Relationship to tasks assigned to the field team
+    tasks = relationship("Task", back_populates="field_team")
 
 class Task(Base):
     __tablename__ = "tasks"
@@ -199,12 +180,22 @@ class FarmerData(Base):
     id = Column(Integer, primary_key=True)
     farmer_name = Column(String)
     number_of_cows = Column(Integer)
-    yield_per_cow = Column(Float)  # Yield per cow
-    date = Column(String)  # Date of the record
+    yield_per_cow = Column(Float)
+    date = Column(String)
 
+# Preloaded users
+preloaded_users = [
+    ("Somanchi", "rsomanchi@tns.org", "password1"),
+    ("Ranu", "rladdha@tns.org", "password2"),
+    ("Pari", "paris@tns.org", "password3"),
+    ("Muskan", "mkaushal@tns.org", "password4"),
+    ("Rupesh", "rmukherjee@tns.org", "password5"),
+    ("Shifali", "shifalis@tns.org", "password6"),
+    ("Pragya Bharati", "pbharati@tns.org", "password7")
+]
 
-def get_db():
-    return SessionLocal()
+# Initial Programs
+initial_programs = ["Water Program", "Education Program", "Ksheersagar 2.0", "SAKSHAM"]
 
 def preload_users():
     db = get_db()
@@ -219,16 +210,24 @@ def preload_programs():
     db = get_db()
     for program_name in initial_programs:
         try:
-            db.add(Program(name=program_name, description=f"Description for {program_name}", employee_id=1))  # Assuming employee_id 1 is the admin
+            db.add(Program(name=program_name, description=f"Description for {program_name}", employee_id=1))
             db.commit()
         except IntegrityError:
             db.rollback()
+
+# Drop and create tables
+Base.metadata.drop_all(engine)
+Base.metadata.create_all(engine)
+
+# Preload data
+preload_users()
+preload_programs()
 
 def display_notice():
     st.markdown("""
         <style>
             .notice {
-                background-color: rgba(255, 255, 255, 0.3); /* transparent white */
+                background-color: rgba(255, 255, 255, 0.3);
                 padding: 5px;
                 border-radius: 15px;
             }
@@ -273,14 +272,14 @@ def sidebar():
         "Manage Programs": "manage_programs",
         "Reports": "reports",
         "Employee Scheduling": "scheduling",
-        "Field Team Management": "field_team_management",  # New section for field teams
-        "Live Dashboard": "live_dashboard",  # New section for live dashboard
-        "SAKSHAM Dashboard": "saksham_dashboard",  # New section for SAKSHAM Dashboard
-        "Training": "training",  # New section for Training
+        "Field Team Management": "field_team_management",
+        "Live Dashboard": "live_dashboard",
+        "SAKSHAM Dashboard": "saksham_dashboard",
+        "Training": "training",
         "Settings": "settings",
-        "Google Drive": "google_drive", # New section for Google Drive
-        "Team Chat": "team_chat",  # New section for Team Chat
-        "Email": "email", # New section for Email
+        "Google Drive": "google_drive",
+        "Team Chat": "team_chat",
+        "Email": "email",
         "Logout": "logout"
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
@@ -296,26 +295,24 @@ def dashboard(user):
         st.experimental_rerun()
 
     # Tabs for different dashboards
-    dashboard_tabs = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
 
-     tab1, tab2, tab3, tab4 = st.tabs(["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"])
+    with tab1:
+        st.subheader("📊 Progress")
+        st.write("This is where you can display field team progress and metrics.")
 
- with tab1:
-    st.subheader("📊 Progress")
-    st.write("This is where you can display field team progress and metrics.")
+    with tab2:
+        pmu_dashboard(user)
 
- with tab2:
-    pmu_dashboard(user)
+    with tab3:
+        st.subheader("📊 Progress")
+        st.write("This is where you can display heritage progress and metrics.")
 
- with tab3:
-    st.subheader("📊 Progress")
-    st.write("This is where you can display heritage progress and metrics.")
+    with tab4:
+        st.subheader("📊 Progress")
+        st.write("This is where you can display Ksheersagar progress and metrics.")
 
- with tab4:
-    st.subheader("📊 Progress")
-    st.write("This is where you can display Ksheersagar progress and metrics.")
-
- def pmu_dashboard(user):
+def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans and Targets")
 
@@ -440,7 +437,6 @@ def dashboard(user):
     else:
         st.info("No targets found.")
 
-
 def manage_programs():
     db = get_db()
     st.subheader("Manage Programs")
@@ -523,6 +519,13 @@ def plant_population_tool():
         st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
         col6, col7, col8, col9 = st.columns(4)
         col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
+        # The variables target_plants, required_seeds, and required_packets are not defined.
+        # You need to define them based on your calculation logic.
+        # For example:
+        target_plants = int(calculated_plants * 0.9)  # Assuming a 90% target
+        required_seeds = int(target_plants * 1.1)  # Assuming 10% seed loss
+        seeds_per_packet = 7500
+        required_packets = int(required_seeds / seeds_per_packet)
         col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
         col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
         col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
@@ -546,7 +549,7 @@ def live_dashboard():
     # Prepare data for display
     total_farmers = len(farmer_data)
     total_cows = sum(farmer.number_of_cows for farmer in farmer_data)
-    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)  # Assuming yield_per_cow is daily yield
+    total_yield = sum(farmer.yield_per_cow for farmer in farmer_data)
     yield_per_cow = total_yield / total_cows if total_cows > 0 else 0
 
     # Display metrics
@@ -578,7 +581,7 @@ def settings():
             "project_timeline": "Weekly",
             "units": "Hours",
             "progress_metric": "% Complete",
-            "role": "Admin",  # Default role
+            "role": "Admin",
             "report_frequency": "Weekly",
             "report_format": "PDF",
             "auto_email_summary": False
@@ -608,8 +611,8 @@ def settings():
 
     # Change Password Section
     st.markdown("### Change Password")
-    new_password = st.text_input("New Password", type="password")
-    confirm_password = st.text_input("Confirm New Password", type="password")
+    new_password = st.text_input("New Password", type="password", key="new_password")
+    confirm_password = st.text_input("Confirm New Password", type="password", key="confirm_password")
     if st.button("Change Password"):
         if new_password == confirm_password:
             user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
@@ -679,15 +682,17 @@ def scheduling(user):
         schedule_date = st.date_input("Schedule Date", date.today())
         start_time = st.time_input("Start Time")
         end_time = st.time_input("End Time")
-        # GMeet Placeholder
         generate_gmeet = st.checkbox("Generate GMeet Link?")
-        gmeet_link = None
-        if generate_gmeet:
-            gmeet_link = "https://meet.google.com/placeholder"  # Placeholder link
-            st.write(f"GMeet Link (Placeholder): {gmeet_link}")
+        gmeet_link = "https://meet.google.com/placeholder" if generate_gmeet else None
 
         if st.form_submit_button("Add Schedule"):
-            new_schedule = Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time), gmeet_link=gmeet_link)
+            new_schedule = Schedule(
+                employee_id=user.id,
+                date=str(schedule_date),
+                start_time=str(start_time),
+                end_time=str(end_time),
+                gmeet_link=gmeet_link
+            )
             db.add(new_schedule)
             db.commit()
             st.success("Schedule added successfully!")
@@ -706,16 +711,15 @@ def field_team_management():
         team_name = st.text_input("Field Team Name")
         if st.form_submit_button("Add Field Team"):
             if team_name:
-                new_team = FieldTeam(name=team_name)
+                new_team = FieldTeam(name=team_name, pmu_id=st.session_state.user.id)
                 db.add(new_team)
                 db.commit()
                 st.success(f"Field Team '{team_name}' added successfully!")
             else:
                 st.error("Field Team Name cannot be empty.")
 
-    # Display Existing Field Teams
-    st.subheader("Existing Field Teams")
-    field_teams = db.query(FieldTeam).all()
+    # Display Existing Field Teams    st.subheader("Existing Field Teams")
+    field_teams = db.query(FieldTeam).filter_by(pmu_id=st.session_state.user.id).all()
     if field_teams:
         for team in field_teams:
             col1, col2 = st.columns([3, 1])
@@ -724,7 +728,7 @@ def field_team_management():
                 db.delete(team)
                 db.commit()
                 st.success(f"Field Team '{team.name}' deleted successfully!")
-                st.experimental_rerun()  # Refresh the page to update the list
+                st.experimental_rerun()
     else:
         st.write("No field teams available.")
 
@@ -733,29 +737,25 @@ def training():
     st.write("This section provides training materials and resources.")
 
     # Upload Training Content
-    st.header("📤Upload Training Content")
+    st.header("📤 Upload Training Content")
     selected_program = st.selectbox("🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown")
     selected_category = st.selectbox("📂 Select Category", ["Presentations", "Videos", "Audios", "Quizzes"], key="category_dropdown")
     uploaded_file = st.file_uploader("Choose a file to upload", type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"])
 
     if uploaded_file:
-        if selected_program and selected_category:  # Ensure selections are made
+        if selected_program and selected_category:
             save_dir = f"training_materials/{selected_program.lower()}/{selected_category.lower()}"
-            Path(save_dir).mkdir(parents=True, exist_ok=True)  # Ensure directory exists
+            Path(save_dir).mkdir(parents=True, exist_ok=True)
             file_path = os.path.join(save_dir, uploaded_file.name)
 
-            # Validate file type
             if not is_valid_file(uploaded_file.name, selected_category):
                 st.error(f"❌ Invalid file type for the **{selected_category}** category.")
             else:
                 if st.button("Upload"):
                     try:
-                        # Simulate uploading to Google Drive
                         st.write(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
                         st.write(f"File would be saved to: {save_dir} in Google Drive.")
-                        # In a real implementation, you would use the Google Drive API here
 
-                        # For now, just save locally
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
                         st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir} (Simulated Google Drive)!")
@@ -781,7 +781,6 @@ def is_valid_file(file_name, category):
         "Audios": [".mp3"],
         "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"]
     }
-    # Allow Excel and Images in all categories
     extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
     file_extension = os.path.splitext(file_name)[1].lower()
 
@@ -806,17 +805,14 @@ def google_drive():
 def team_chat():
     st.subheader("Team Chat")
 
-    # Initialize chat history in session state
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Input for new message
     new_message = st.text_input("Enter your message:")
     if st.button("Send"):
         if new_message:
             st.session_state.chat_history.append(f"{st.session_state.user.name}: {new_message}")
 
-    # Display chat history
     if st.session_state.chat_history:
         for message in st.session_state.chat_history:
             st.write(message)
@@ -856,7 +852,7 @@ def main():
 
         if selected != "Select...":
             user = db.query(Employee).filter_by(email=selected).first()
-            password = st.text_input("Password", type="password")
+            password = st.text_input("Password", type="password", key="password")
             if user and user.password == password:
                 st.session_state.user = user
                 st.success(f"Welcome, {user.name}!")
@@ -873,23 +869,23 @@ def main():
         elif selected_tab == "scheduling":
             scheduling(st.session_state.user)
         elif selected_tab == "field_team_management":
-            field_team_management() 
+            field_team_management()
         elif selected_tab == "live_dashboard":
-            live_dashboard()  # New section for live dashboard
+            live_dashboard()
         elif selected_tab == "reports":
             reports()
         elif selected_tab == "settings":
             settings()
         elif selected_tab == "saksham_dashboard":
-            saksham_dashboard()  # New section for SAKSHAM Dashboard
+            saksham_dashboard()
         elif selected_tab == "training":
-            training()  # New section for Training
+            training()
         elif selected_tab == "google_drive":
-            google_drive() # New section for Google Drive
+            google_drive()
         elif selected_tab == "team_chat":
-            team_chat()  # New section for Team Chat
+            team_chat()
         elif selected_tab == "email":
-            email() # New section for Email
+            email()
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
