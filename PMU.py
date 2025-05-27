@@ -319,6 +319,33 @@ def dashboard(user):
 def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans and Targets")
+    # Summary View
+with st.expander("📌 Summary View"):
+    st.markdown("### 🧾 Progress Overview")
+    
+    # Workplan Summary
+    wp_status_df = pd.DataFrame([wp.status for wp in workplans], columns=["Status"])
+    wp_counts = wp_status_df["Status"].value_counts().reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
+    st.write("#### Workplans")
+    st.dataframe(wp_counts.reset_index().rename(columns={"index": "Status", "Status": "Count"}))
+
+    # Target Summary
+    tgt_status_df = pd.DataFrame([t.status for t in targets], columns=["Status"])
+    tgt_counts = tgt_status_df["Status"].value_counts().reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
+    st.write("#### Targets")
+    st.dataframe(tgt_counts.reset_index().rename(columns={"index": "Status", "Status": "Count"}))
+
+    # Schedule Overview
+    st.write("#### Schedules")
+    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+    schedule_df = pd.DataFrame([{
+        "Date": s.date, "Start": s.start_time, "End": s.end_time, "GMeet": s.gmeet_link or "N/A"
+    } for s in schedules])
+    if not schedule_df.empty:
+        st.dataframe(schedule_df)
+    else:
+        st.info("No schedules available.")
+
 
     # Add New Work Plan
     with st.expander("➕ Add New Work Plan"):
