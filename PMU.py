@@ -154,6 +154,7 @@ class Schedule(Base):
     start_time = Column(String)
     end_time = Column(String)
     employee = relationship("Employee", back_populates="schedules")
+    gmeet_link = Column(String, nullable=True)  # Added gmeet_link
 
 class FieldTeam(Base):
     __tablename__ = "field_teams"
@@ -288,7 +289,17 @@ def dashboard(user):
         with tab:
             if tab == "PMU Dashboard":
                 pmu_dashboard(user)
-            else:
+            elif tab == "Heritage Dashboard":
+                st.subheader(f"📊Progress")
+                # Here you can add specific content for each section
+                # For example, you can display progress for each section
+                st.write("This is where you can display progress and other metrics.")
+            elif tab == "Field Team Dashboard":
+                st.subheader(f"📊Progress")
+                # Here you can add specific content for each section
+                # For example, you can display progress for each section
+                st.write("This is where you can display progress and other metrics.")
+            elif tab == "Ksheersagar Dashboard":
                 st.subheader(f"📊Progress")
                 # Here you can add specific content for each section
                 # For example, you can display progress for each section
@@ -340,20 +351,29 @@ def pmu_dashboard(user):
     # Display Work Plans
     st.subheader("📌 Your Work Plans")
     workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
-    for plan in workplans:
-        st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+    if workplans:
+        for plan in workplans:
+            st.markdown(f"**Title**: {plan.title} | **Details**: {plan.details} | **Deadline**: {plan.deadline} | **Status**: {plan.status}")
+    else:
+        st.info("No work plans found.")
 
     # Display WorkStreams
     st.subheader("🧩 Your Work Streams")
     workstreams = db.query(WorkStream).filter_by(employee_id=user.id).all()
-    for ws in workstreams:
-        st.markdown(f"**Title**: {ws.title} | **Category**: {ws.category} | **Desc**: {ws.description}")
+    if workstreams:
+        for ws in workstreams:
+            st.markdown(f"**Title**: {ws.title} | **Category**: {ws.category} | **Desc**: {ws.description}")
+    else:
+        st.info("No work streams found.")
 
     # Display Targets
     st.subheader("🎯 Your Targets")
     targets = db.query(Target).filter_by(employee_id=user.id).all()
-    for tgt in targets:
-        st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
+    if targets:
+        for tgt in targets:
+            st.markdown(f"**Target**: {tgt.description} | **Deadline**: {tgt.deadline} | **Status**: {tgt.status}")
+    else:
+        st.info("No targets found.")
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
@@ -564,15 +584,22 @@ def scheduling(user):
         schedule_date = st.date_input("Schedule Date", date.today())
         start_time = st.time_input("Start Time")
         end_time = st.time_input("End Time")
+        # GMeet Placeholder
+        generate_gmeet = st.checkbox("Generate GMeet Link?")
+        gmeet_link = None
+        if generate_gmeet:
+            gmeet_link = "https://meet.google.com/placeholder"  # Placeholder link
+            st.write(f"GMeet Link (Placeholder): {gmeet_link}")
+
         if st.form_submit_button("Add Schedule"):
-            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time)))
+            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time), gmeet_link=gmeet_link))
             db.commit()
             st.success("Schedule added successfully!")
 
     st.subheader("Your Schedules")
     schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
     for schedule in schedules:
-        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time}")
+        st.markdown(f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time} | **GMeet Link**: {schedule.gmeet_link if schedule.gmeet_link else 'N/A'}")
 
 def field_team_management():
     db = get_db()
@@ -627,9 +654,15 @@ def training():
             else:
                 if st.button("Upload"):
                     try:
+                        # Simulate uploading to Google Drive
+                        st.write(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
+                        st.write(f"File would be saved to: {save_dir} in Google Drive.")
+                        # In a real implementation, you would use the Google Drive API here
+
+                        # For now, just save locally
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
-                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir}!")
+                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir} (Simulated Google Drive)!")
                     except Exception as e:
                         st.error(f"❌ Error uploading file: {e}")
         else:
