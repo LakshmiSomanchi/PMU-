@@ -15,7 +15,7 @@ st.set_page_config(page_title="PMU Tracker", layout="wide")
 st.markdown("""
     <style>
         body {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the_right_side_corner.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right%20side_corner.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
