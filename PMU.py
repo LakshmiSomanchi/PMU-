@@ -16,7 +16,7 @@ st.set_page_config(page_title="PMU Tracker", layout="wide")
 st.markdown("""
     <style>
         body {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right%20side_corner.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right_side_corner.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -36,13 +36,12 @@ st.markdown("""
             padding: 20px;
             border-radius: 0 10px 10px 0;
         }
-       
+
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
         section[data-testid="stSidebar"] h3,
         section[data-testid="stSidebar"] h4,
         section[data-testid="stSidebar"] h5,
-        section[data-testid="stSidebar"] h6,
         section[data-testid="stSidebar"] .stRadio label {
             color: white !important;
         }
@@ -405,10 +404,6 @@ def plant_population_tool():
         field_area_m2 = land_acres * acre_to_m2
         calculated_plants = plants_per_m2 * field_area_m2
 
-        target_plants = germination_rate_per_acre[state] * land_acres
-        required_seeds = target_plants / confidence_interval
-        required_packets = floor(required_seeds / seeds_per_packet)
-
         st.subheader("📊 Output Summary")
         st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
         col6, col7, col8, col9 = st.columns(4)
@@ -696,14 +691,13 @@ def main():
     preload_users()
     db = get_db()
     
-# Initialize session state for user
-if not already done
-if "user" not in st.session_state:
-    st.session_state.user = None
+    # Initialize session state for user
+    if "user" not in st.session_state:
+        st.session_state.user = None
 
-# Display the login section if no user is logged in
+    # Display the login section if no user is logged in
     if st.session_state.user is None:
-       st.title("🔐 Login")
+        st.title("🔐 Login")
         display_notice()
         all_users = db.query(Employee).all()
         emails = [u.email for u in all_users]
