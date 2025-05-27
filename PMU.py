@@ -16,7 +16,7 @@ st.set_page_config(page_title="PMU Tracker", layout="wide")
 st.markdown("""
     <style>
         body {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right_side_corner.jpg");
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the_right_side_corner.jpg");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
@@ -181,8 +181,8 @@ class FarmerData(Base):
     yield_per_cow = Column(Float)  # Yield per cow
     date = Column(String)  # Date of the record
 
-# Drop all tables and recreate them
-#Base.metadata.drop_all(bind=engine)  # This will drop all tables
+# FIX: Drop all tables and recreate them
+Base.metadata.drop_all(bind=engine)  # This will drop all tables
 Base.metadata.create_all(bind=engine)  # This will recreate the tables
 
 # Initialize session state for user if not already done
@@ -267,6 +267,7 @@ def sidebar():
         "Training": "training",  # New section for Training
         "Settings": "settings",
         "Google Drive": "google_drive", # New section for Google Drive
+        "Team Chat": "team_chat",  # New section for Team Chat
         "Email": "email", # New section for Email
         "Logout": "logout"
     }
@@ -302,10 +303,8 @@ def dashboard(user):
             elif tab == "Ksheersagar Dashboard":
                 st.subheader(f"📊Progress")
                 # Here you can add specific content for each section
-                # For example, you can display progress for each section
-                st.write("This is where you can display progress and other metrics.")
+                # For example, you can display progress and other metrics.")
 
-        
 def pmu_dashboard(user):
     db = get_db()
     st.subheader("📋 PMU Work Plans")
@@ -316,13 +315,18 @@ def pmu_dashboard(user):
             details = st.text_area("Details")
             deadline = st.date_input("Deadline")
             status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+            workstream = st.selectbox("Workstream", ["Select..."] + [ws.title for ws in db.query(WorkStream).filter_by(employee_id=user.id).all()], index=0)
 
             submitted = st.form_submit_button("Save Work Plan")
             if submitted:
-                new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id)
-                db.add(new_workplan)
-                db.commit()
-                st.success("✅ Work Plan saved successfully!")
+                if workstream != "Select...":
+                    workstream_obj = db.query(WorkStream).filter_by(title=workstream, employee_id=user.id).first()
+                    new_workplan = WorkPlan(title=title, details=details, deadline=str(deadline), status=status, supervisor_id=user.id, workstream_id=workstream_obj.id)
+                    db.add(new_workplan)
+                    db.commit()
+                    st.success("✅ Work Plan saved successfully!")
+                else:
+                    st.error("Please select a workstream.")
 
     with st.expander("➕ Add New Work Stream"):
         with st.form("workstream_form"):
@@ -592,7 +596,8 @@ def scheduling(user):
             st.write(f"GMeet Link (Placeholder): {gmeet_link}")
 
         if st.form_submit_button("Add Schedule"):
-            db.add(Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time), gmeet_link=gmeet_link))
+            new_schedule = Schedule(employee_id=user.id, date=str(schedule_date), start_time=str(start_time), end_time=str(end_time), gmeet_link=gmeet_link)
+            db.add(new_schedule)
             db.commit()
             st.success("Schedule added successfully!")
 
@@ -627,7 +632,7 @@ def field_team_management():
             if col2.button(f"Delete {team.name}", key=team.id):
                 db.delete(team)
                 db.commit()
-                st.success(f"Field Team '{team.name}' deleted successfully!")
+                st.success(f"Field Team '{team_name}' deleted successfully!")
                 st.experimental_rerun()  # Refresh the page to update the list
     else:
         st.write("No field teams available.")
@@ -662,7 +667,7 @@ def training():
                         # For now, just save locally
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
-                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir} (Simulated Google Drive)!")
+                        st.success(f"✅ File '{uploaded_file.name}' uploaded successfully to  {save_dir} (Simulated Google Drive)!")
                     except Exception as e:
                         st.error(f"❌ Error uploading file: {e}")
         else:
@@ -706,6 +711,16 @@ def google_drive():
         st.write("- File 2.pdf")
         st.write("- File 3.docx")
 
+# Placeholder Team Chat Functionality
+def team_chat():
+    st.subheader("Team Chat (Placeholder)")
+    st.write("This section will eventually integrate with a team chat service like Slack.")
+
+    # Simulate a chat input and display
+    chat_input = st.text_input("Type your message here...")
+    if st.button("Send"):
+        st.write(f"**You:** {chat_input}")  # Display the sent message
+
 # Placeholder Gmail Functionality
 def email():
     st.subheader("Email Integration (Placeholder)")
@@ -721,7 +736,6 @@ def email():
             st.write(f"Simulating sending email to {recipient} with subject '{subject}'.")
 
 def main():
-    preload_users()
     db = get_db()
     
     # Initialize session state for user
@@ -766,6 +780,8 @@ def main():
             training()  # New section for Training
         elif selected_tab == "google_drive":
             google_drive() # New section for Google Drive
+        elif selected_tab == "team_chat":
+            team_chat()  # New section for Team Chat
         elif selected_tab == "email":
             email() # New section for Email
         elif selected_tab == "logout":
