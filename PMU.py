@@ -697,13 +697,13 @@ def main():
     db = get_db()
     
 # Initialize session state for user
-    if not already done
-    if "user" not in st.session_state:
-        st.session_state.user = None
+if not already done
+if "user" not in st.session_state:
+    st.session_state.user = None
 
-    # Display the login section if no user is logged in
+# Display the login section if no user is logged in
     if st.session_state.user is None:
-        st.title("🔐 Login")
+       st.title("🔐 Login")
         display_notice()
         all_users = db.query(Employee).all()
         emails = [u.email for u in all_users]
