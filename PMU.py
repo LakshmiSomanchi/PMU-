@@ -696,7 +696,7 @@ def main():
     preload_users()
     db = get_db()
     
-    # Initialize session state for user
+# Initialize session state for user
     if not already done
     if "user" not in st.session_state:
         st.session_state.user = None
