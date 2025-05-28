@@ -7,6 +7,8 @@ import pandas as pd
 from datetime import date
 import os
 from pathlib import Path
+import plotly.express as px
+import plotly.graph_objects as go
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -435,7 +437,6 @@ def pmu_dashboard(user):
                         st.experimental_rerun()
     else:
         st.info("No targets found.")
-
 
 def manage_programs():
     db = get_db()
