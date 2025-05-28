@@ -466,67 +466,6 @@ def manage_programs():
     else:
         st.info("No programs found.")
 
-# File: pmu_interactive_dashboard.py
-
-import plotly.express as px
-import plotly.graph_objects as go
-import streamlit as st
-import pandas as pd
-from datetime import datetime
-
-# Simulated data
-data = pd.DataFrame({
-    "datetime": pd.date_range(start="2025-05-01", periods=96, freq="H"),
-    "events": (abs(np.sin(np.linspace(0, 6.28, 96))) * 100).astype(int),
-    "revenue": [22]*96,
-    "volume": [9]*96,
-    "country": ["IN", "US", "CN", "DE"] * 24,
-})
-
-st.set_page_config(layout="wide")
-st.title("📊 PMU Monitoring Dashboard")
-
-col1, col2 = st.columns((2, 1))
-
-with col1:
-    st.subheader("Events Over Time")
-    fig_time = px.area(data, x="datetime", y="events", title="Event Trends", labels={"datetime": "Time", "events": "Event Count"})
-    fig_time.update_traces(line_color='#0077b6')
-    st.plotly_chart(fig_time, use_container_width=True)
-
-with col2:
-    st.subheader("Map Overview")
-    fig_map = px.choropleth(
-        data_frame=data,
-        locations="country",
-        locationmode="country names",
-        color="events",
-        title="Event Density by Country"
-    )
-    st.plotly_chart(fig_map, use_container_width=True)
-
-col3, col4, col5 = st.columns(3)
-
-with col3:
-    st.subheader("Revenue")
-    fig_rev = go.Figure(go.Pie(labels=["Achieved", "Remaining"], values=[22, 78], hole=.4))
-    st.plotly_chart(fig_rev, use_container_width=True)
-
-with col4:
-    st.subheader("Volume")
-    fig_vol = go.Figure(go.Pie(labels=["Processed", "Pending"], values=[9, 91], hole=.4))
-    st.plotly_chart(fig_vol, use_container_width=True)
-
-with col5:
-    st.subheader("Top Sources")
-    src_data = data['country'].value_counts().reset_index()
-    fig_src = px.pie(src_data, names='index', values='country', title='Top Sources')
-    st.plotly_chart(fig_src, use_container_width=True)
-
-st.subheader("📌 Event Records")
-st.dataframe(data.head(20))
-
-
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
     # Farmer Survey Entry
