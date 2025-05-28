@@ -468,18 +468,9 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-def plant_population_tool():
-    st.write("This tool will help you calculate plant population.")
-    area = st.number_input("Enter the area (in acres):", min_value=0.0)
-    plants_per_acre = st.number_input("Enter the number of plants per acre:", min_value=0)
-
-    if st.button("Calculate Total Plants"):
-        total_plants = area * plants_per_acre
-        st.success(f"Total Plants: {total_plants}")
-
     # Farmer Survey Entry
     st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("📥 Farmer Survey Entry")
+    st.header("📥 Seed Packet Calculation Tool")
     st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
     with st.form("survey_form"):
