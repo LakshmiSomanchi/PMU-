@@ -5,7 +5,6 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 from datetime import date
-from PMU import FarmerData, Employee, WorkPlan
 import os
 from pathlib import Path
 import plotly.express as px
