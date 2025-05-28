@@ -468,8 +468,6 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-    plant_population_tool()
-
 def plant_population_tool():
     st.write("This tool will help you calculate plant population.")
     area = st.number_input("Enter the area (in acres):", min_value=0.0)
