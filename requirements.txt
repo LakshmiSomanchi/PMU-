@@ -5,4 +5,3 @@ bcrypt
 pandas
 matplotlib
 plotly
-math
