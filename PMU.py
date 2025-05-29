@@ -481,12 +481,11 @@ with st.form("survey_form"):
     state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
 
     spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-    col3, col4, col5 = st.columns(3)
+    col3, col4, col5, col6 = st.columns(4)
     row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
     plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
     land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
-
-    mortality_rate = st.number_input("Mortality Rate (%)", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
+    mortality_rate = col6.number_input("Mortality Rate (%)", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
 
     submitted = st.form_submit_button("🔍 Calculate")
 
