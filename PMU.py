@@ -10,6 +10,7 @@ from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
 import json
+
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -307,10 +308,9 @@ def dashboard(user):
 
     with tab3:
         heritage_dashboard()
- 
+
     with tab4:
         ksheersagar_dashboard()
-
 
 def pmu_dashboard(user):
     db = get_db()
@@ -437,95 +437,8 @@ def pmu_dashboard(user):
     else:
         st.info("No targets found.")
 
-def manage_programs():
-    db = get_db()
-    st.subheader("Manage Programs")
-
-    # Add New Program
-    with st.form("add_program_form"):
-        name = st.text_input("Program Name")
-        description = st.text_area("Program Description")
-        status = st.selectbox("Program Status", ["Active", "Inactive"])
-
-        if st.form_submit_button("Add Program"):
-            try:
-                new_program = Program(name=name, description=description, status=status, employee_id=st.session_state.user.id)
-                db.add(new_program)
-                db.commit()
-                st.success(f"Program '{name}' added successfully!")
-            except IntegrityError:
-                db.rollback()
-                st.error(f"Program '{name}' already exists.")
-
-    # Display Existing Programs
-    st.subheader("Existing Programs")
-    programs = db.query(Program).all()
-    if programs:
-        for program in programs:
-            st.markdown(f"**Name**: {program.name} | **Description**: {program.description} | **Status**: {program.status}")
-    else:
-        st.info("No programs found.")
-
-def saksham_dashboard():
-    st.subheader("🌱 SAKSHAM Dashboard")
-    # Farmer Survey Entry
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("📥 Seed Packet Calculation Tool")
-    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
-
-    with st.form("survey_form"):
-        col0, col1, col2 = st.columns(3)
-        farmer_name = col0.text_input("👤 Farmer Name")
-        farmer_id = col1.text_input("🆔 Farmer ID")
-        state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
-
-        spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-        col3, col4, col5 = st.columns(3)
-        row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
-        plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-        land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
-
-        submitted = st.form_submit_button("🔍 Calculate")
-
-    if submitted and farmer_name and farmer_id:
-        st.markdown("---")
-
-        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
-        confidence_interval = 0.90
-        seeds_per_packet = 7500
-        acre_to_m2 = 4046.86
-
-        if spacing_unit == "cm":
-            row_spacing /= 100
-            plant_spacing /= 100
-
-        plant_area_m2 = row_spacing * plant_spacing
-        plants_per_m2 = 1 / plant_area_m2
-        field_area_m2 = land_acres * acre_to_m2
-        calculated_plants = plants_per_m2 * field_area_m2
-
-        # Seed Calculation Logic
-        target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
-        required_seeds = target_plants
-        required_packets = (required_seeds / seeds_per_packet)
-
-        st.subheader("📊 Output Summary")
-        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
-        col6, col7, col8, col9 = st.columns(4)
-        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-        col9.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
-
-        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-        st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
-
-    elif submitted:
-        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
-
-# --- Heritage Dashboard ---
-    def heritage_dashboard():
-       st.subheader("🏛️ Heritage Dashboard")
+def heritage_dashboard():
+    st.subheader("🏛️ Heritage Dashboard")
     
     col1, col2, col3 = st.columns(3)
     col1.metric("🧑‍🌾 Total Farmers", "12,450")
@@ -534,26 +447,26 @@ def saksham_dashboard():
 
     st.markdown("---")
     
-  with open("/mnt/data/india_states.geojson", "r") as f:
-    india_geo = json.load(f)
+    # Load the JSON file
+    with open("in.json", "r") as f:
+        india_geo = json.load(f)
 
-india_data = pd.DataFrame({
-    "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
-    "AdoptionRate": [78, 65, 83, 72, 69]
-})
+    india_data = pd.DataFrame({
+        "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
+        "AdoptionRate": [78, 65, 83, 72, 69]
+    })
 
-fig_map = px.choropleth(
-    india_data,
-    geojson=india_geo,
-    featureidkey="properties.st_nm",  # GeoJSON field for state names
-    locations="State",
-    color="AdoptionRate",
-    color_continuous_scale="Blues",
-    title="Adoption Rate by Indian State"
-)
-fig_map.update_geos(fitbounds="locations", visible=False)
-fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
-st.plotly_chart(fig_map, use_container_width=True)
+    fig_map = px.choropleth(
+        india_data,
+        geojson=india_geo,
+        featureidkey="properties.st_nm",  # GeoJSON field for state names
+        locations="State",
+        color="AdoptionRate",
+        color_continuous_scale="Blues",
+        title="Adoption Rate by Indian State"
+    )
+    fig_map.update_geos(fitbounds="locations", visible=False)
+    fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
     st.plotly_chart(fig_map, use_container_width=True)
 
     pie_data = pd.DataFrame({
@@ -588,13 +501,14 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-    prod_data = pd.DataFrame({
-        "State": ["Punjab", "Haryana", "MP", "Karnataka", "TN"],
-        "Code": ["PB", "HR", "MP", "KA", "TN"],
-        "MilkProd": [870, 760, 580, 600, 620]
-    })
+    # Load the JSON file for Ksheersagar
+    with open("in.json", "r") as f:
+        prod_data = json.load(f)  # Assuming this JSON contains relevant data for production
+
+    prod_data_df = pd.DataFrame(prod_data)  # Convert JSON data to DataFrame
+
     fig_map = px.choropleth(
-        prod_data,
+        prod_data_df,
         locations="Code",
         color="MilkProd",
         hover_name="State",
@@ -624,7 +538,6 @@ def ksheersagar_dashboard():
     })
     fig_class = px.bar(class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output")
     st.plotly_chart(fig_class, use_container_width=True)
-
 
 def live_dashboard():
     db = get_db()
