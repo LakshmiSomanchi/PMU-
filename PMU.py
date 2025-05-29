@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+from dashboards_heritage_ksheersagar import heritage_dashboard, ksheersagar_dashboard
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -305,13 +306,12 @@ def dashboard(user):
     with tab2:
         pmu_dashboard(user)
 
-    with tab3:
-        st.subheader("📊 Progress")
-        st.write("This is where you can display heritage progress and metrics.")
+with tab3:
+    heritage_dashboard()
 
-    with tab4:
-        st.subheader("📊 Progress")
-        st.write("This is where you can display Ksheersagar progress and metrics.")
+with tab4:
+    ksheersagar_dashboard()
+
 
 def pmu_dashboard(user):
     db = get_db()
