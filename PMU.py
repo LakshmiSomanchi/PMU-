@@ -9,8 +9,6 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
-from dashboards_heritage_ksheersagar import heritage_dashboard, ksheersagar_dashboard
-
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
