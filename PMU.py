@@ -306,11 +306,11 @@ def dashboard(user):
     with tab2:
         pmu_dashboard(user)
 
-with tab3:
-    heritage_dashboard()
-
-with tab4:
-    ksheersagar_dashboard()
+    with tab3:
+        heritage_dashboard()
+ 
+    with tab4:
+        ksheersagar_dashboard()
 
 
 def pmu_dashboard(user):
