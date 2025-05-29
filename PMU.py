@@ -524,10 +524,10 @@ def saksham_dashboard():
     elif submitted:
         st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
+# --- Heritage Dashboard ---
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
     
-    # KPIs
     col1, col2, col3 = st.columns(3)
     col1.metric("🧑‍🌾 Total Farmers", "12,450")
     col2.metric("🍼 Avg Yield (L/Cow)", "7.8")
@@ -535,7 +535,6 @@ def heritage_dashboard():
 
     st.markdown("---")
     
-    # India map choropleth
     india_data = pd.DataFrame({
         "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
         "Code": ["UP", "MH", "BR", "RJ", "GJ"],
@@ -547,12 +546,11 @@ def heritage_dashboard():
         color="AdoptionRate",
         hover_name="State",
         color_continuous_scale="Blues",
-        locationmode='ISO-3',  # placeholder until India GeoJSON used
+        locationmode='ISO-3',
         title="Adoption Rate by State"
     )
     st.plotly_chart(fig_map, use_container_width=True)
 
-    # Pie chart - category breakdown
     pie_data = pd.DataFrame({
         "Category": ["Small", "Medium", "Large"],
         "Farmers": [6000, 4000, 2450]
@@ -560,7 +558,6 @@ def heritage_dashboard():
     fig_pie = px.pie(pie_data, values='Farmers', names='Category', hole=0.5, title="Farmer Size Distribution")
     st.plotly_chart(fig_pie, use_container_width=True)
 
-    # Line chart - yearly impact trend
     line_data = pd.DataFrame({
         "Year": list(range(2015, 2024)),
         "ImpactScore": [50, 55, 61, 66, 70, 74, 78, 82, 84]
@@ -568,7 +565,6 @@ def heritage_dashboard():
     fig_line = px.line(line_data, x="Year", y="ImpactScore", title="Yearly Impact Score")
     st.plotly_chart(fig_line, use_container_width=True)
 
-    # Horizontal bar chart - gender wise participation
     bar_data = pd.DataFrame({
         "Gender": ["Female", "Male"],
         "Participation": [5200, 7250]
@@ -576,11 +572,10 @@ def heritage_dashboard():
     fig_bar = px.bar(bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-
+# --- Ksheersagar Dashboard ---
 def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
-    # KPIs
     col1, col2, col3 = st.columns(3)
     col1.metric("🧬 Breed Diversity", "21 types")
     col2.metric("🧮 Avg Daily Milk (L)", "9.3")
@@ -588,7 +583,6 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-    # State-wise production
     prod_data = pd.DataFrame({
         "State": ["Punjab", "Haryana", "MP", "Karnataka", "TN"],
         "Code": ["PB", "HR", "MP", "KA", "TN"],
@@ -600,12 +594,11 @@ def ksheersagar_dashboard():
         color="MilkProd",
         hover_name="State",
         color_continuous_scale="YlGnBu",
-        locationmode='ISO-3',  # placeholder until India GeoJSON used
+        locationmode='ISO-3',
         title="Milk Production by State (L/Day)"
     )
     st.plotly_chart(fig_map, use_container_width=True)
 
-    # Donut chart - breed types
     breed_data = pd.DataFrame({
         "Breed": ["Sahiwal", "Gir", "Jersey", "HF"],
         "Count": [3400, 2800, 1500, 900]
@@ -613,7 +606,6 @@ def ksheersagar_dashboard():
     fig_breed = px.pie(breed_data, names='Breed', values='Count', hole=0.5, title="Breed Composition")
     st.plotly_chart(fig_breed, use_container_width=True)
 
-    # Time trend - AI usage
     trend_data = pd.DataFrame({
         "Year": list(range(2016, 2024)),
         "AI_Usage": [40, 45, 48, 52, 56, 60, 65, 67]
@@ -621,7 +613,6 @@ def ksheersagar_dashboard():
     fig_trend = px.line(trend_data, x="Year", y="AI_Usage", title="Artificial Insemination Coverage Over Time")
     st.plotly_chart(fig_trend, use_container_width=True)
 
-    # Bar chart - production class
     class_data = pd.DataFrame({
         "Class": ["<5L", "5-10L", "10-15L", ">15L"],
         "Farms": [2200, 3800, 2700, 1100]
