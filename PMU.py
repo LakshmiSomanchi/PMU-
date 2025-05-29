@@ -193,7 +193,6 @@ preloaded_users = [
     ("Muskan", "mkaushal@tns.org", "password4"),
     ("Rupesh", "rmukherjee@tns.org", "password5"),
     ("Shifali", "shifalis@tns.org", "password6"),
-    ("Pragya Bharati", "pbharati@tns.org", "password7")
     ("Bhavya Kharoo", "bkharoo@tns.org", "password8")
 ]
 
