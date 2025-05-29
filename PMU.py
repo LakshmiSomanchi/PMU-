@@ -466,70 +466,61 @@ def manage_programs():
         st.info("No programs found.")
 
 def saksham_dashboard():
-st.subheader("🌱 SAKSHAM Dashboard")
-# Farmer Survey Entry
+    st.subheader("🌱 SAKSHAM Dashboard")
+    # Farmer Survey Entry
     st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
     st.header("📥 Seed Packet Calculation Tool")
     st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
-with st.form("survey_form"):
-    col0, col1, col2 = st.columns(3)
-    farmer_name = col0.text_input("👤 Farmer Name")
-    farmer_id = col1.text_input("🆔 Farmer ID")
-    state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
+    with st.form("survey_form"):
+        col0, col1, col2 = st.columns(3)
+        farmer_name = col0.text_input("👤 Farmer Name")
+        farmer_id = col1.text_input("🆔 Farmer ID")
+        state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
 
-    spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-    col3, col4, col5, col6 = st.columns(4)
-    row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
-    plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-    land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
-    mortality_rate = col6.number_input("Mortality Rate (%)", min_value=0.0, max_value=100.0, value=0.0, step=0.1)
+        spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
+        col3, col4, col5 = st.columns(3)
+        row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
+        plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
+        land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-    submitted = st.form_submit_button("🔍 Calculate")
+        submitted = st.form_submit_button("🔍 Calculate")
 
-if submitted and farmer_name and farmer_id:
-    st.markdown("---")
+    if submitted and farmer_name and farmer_id:
+        st.markdown("---")
 
-    germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
-    confidence_interval = 0.70
-    seeds_per_packet = 5625
-    acre_to_m2 = 4046.86
+        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
+        confidence_interval = 0.70
+        seeds_per_packet = 5625
+        acre_to_m2 = 4046.86
 
-    if spacing_unit == "cm":
-        row_spacing /= 100
-        plant_spacing /= 100
+        if spacing_unit == "cm":
+            row_spacing /= 100
+            plant_spacing /= 100
 
-    plant_area_m2 = row_spacing * plant_spacing
-    plants_per_m2 = 1 / plant_area_m2
-    field_area_m2 = land_acres * acre_to_m2
-    calculated_plants = plants_per_m2 * field_area_m2
+        plant_area_m2 = row_spacing * plant_spacing
+        plants_per_m2 = 1 / plant_area_m2
+        field_area_m2 = land_acres * acre_to_m2
+        calculated_plants = plants_per_m2 * field_area_m2
 
-    # Seed Calculation Logic
-    target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
-    
-    # Adjust for mortality rate
-    effective_germination_rate = (100 - mortality_rate) / 100
-    required_seeds = target_plants / effective_germination_rate
-    
-    required_packets = (required_seeds / seeds_per_packet)
-    
-    #Gap Calculation
-    gap_seeds = required_seeds - target_plants
+        # Seed Calculation Logic
+        target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
+        required_seeds = target_plants
+        required_packets = (required_seeds / seeds_per_packet)
 
-    st.subheader("📊 Output Summary")
-    st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
-    col7, col8, col9, col10, col11 = st.columns(5)
-    col7.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-    col8.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-    col9.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-    col10.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
-    col11.metric(" gaps seeds", f"{int(gap_seeds):,} seeds")
+        st.subheader("📊 Output Summary")
+        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
+        col6, col7, col8, col9 = st.columns(4)
+        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
+        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
+        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
+        col9.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
 
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.caption(f"ℹ️ Based on 5625 seeds per 450g packet, {confidence_interval*100}% germination confidence, and {mortality_rate}% mortality rate. Packets are rounded down to the nearest full packet.")
+        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+        st.caption("ℹ️ Based on 5625 seeds per 450g packet and 70% germination confidence. Packets are rounded down to the nearest full packet.")
 
-elif submitted:
-    st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
+    elif submitted:
+        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
 # --- Heritage Dashboard ---
 def heritage_dashboard():
@@ -586,7 +577,7 @@ def ksheersagar_dashboard():
     col1, col2, col3 = st.columns(3)
     col1.metric("🧬 Breed Diversity", "21 types")
     col2.metric("🧮 Avg Daily Milk (L)", "9.3")
-    col3.metric("🔁 Coverage (%)", "67.4")
+    col3.metric("🔁 AI Coverage (%)", "67.4")
 
     st.markdown("---")
 
