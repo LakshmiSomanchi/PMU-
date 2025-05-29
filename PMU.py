@@ -468,9 +468,60 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-    # Farmer Survey Entry
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("📥 Seed Packet Calculation Tool")
+   from math import floor, ceil
+
+st.set_page_config(page_title="Plant Population Tool", layout="wide")
+
+# Theme detection
+is_dark = st.get_option("theme.base") == "dark"
+text_color = "#f8f9fa" if is_dark else "#0A0A0A"
+bg_color = "#0A9396" if is_dark else "#e0f2f1"
+
+# Styles
+st.markdown(f"""
+<style>
+    html, body, [class*="css"]  {{
+        background-color: {bg_color};
+        font-family: 'Helvetica', sans-serif;
+    }}
+    .block-container {{
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }}
+    .stMetricValue {{
+        font-size: 1.5rem !important;
+        color: {text_color};
+    }}
+    .stMetricLabel {{
+        font-weight: bold;
+        color: {text_color};
+    }}
+    h1, h2, h3, h4, h5 {{
+        color: {text_color};
+    }}
+    h2 {{
+        font-size: 2.2rem;
+    }}
+    .stButton>button {{
+        background-color: #0A9396;
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        padding: 0.6em 1.5em;
+    }}
+    .stButton>button:hover {{
+        background-color: #007f86;
+    }}
+</style>
+""", unsafe_allow_html=True)
+
+st.title("🌿 Plant Population & Seed Requirement Tool")
+st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
+
+submitted = False
+
+with st.container():
+    st.header("📅 Farmer Survey Entry")
     st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
     with st.form("survey_form"):
@@ -485,12 +536,12 @@ def saksham_dashboard():
         plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
         land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-        mortality = st.slider("Mortality %", min_value=0.0, max_value=100.0, value=5.0)
+        mortality = st.slider("😓 Mortality %", min_value=0.0, max_value=100.0, value=5.0)
 
         submitted = st.form_submit_button("🔍 Calculate")
 
-    if submitted and farmer_name and farmer_id:
-       st.markdown("---")
+if submitted and farmer_name and farmer_id:
+    st.markdown("---")
 
     # Constants
     germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
@@ -517,10 +568,10 @@ def saksham_dashboard():
     expected_plants = total_plants * effective_germination
     gaps = total_plants - expected_plants
     gap_seeds = gaps / effective_germination
-    gap_packets = ceil(gap_seeds / seeds_per_packet)
+    gap_packets = floor(gap_seeds / seeds_per_packet)
 
     # Output
-    st.subheader("📊 Output Summary")
+    st.subheader("<span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
     col6, col7, col8, col9 = st.columns(4)
     col6.metric("🧬 Calculated Capacity", f"{int(total_plants):,} plants")
     col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
@@ -528,17 +579,16 @@ def saksham_dashboard():
     col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
 
     st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.subheader("📊 Gap Filling Summary")
+    st.subheader("<span style='font-size: 1.8rem;'>📊 Gap Filling Summary</span>", unsafe_allow_html=True)
     col10, col11, col12 = st.columns(3)
     col10.metric("❓ Gaps (missing plants)", f"{int(gaps):,}")
     col11.metric("💼 Seeds for Gaps", f"{int(gap_seeds):,} seeds")
     col12.metric("📦 Packets for Gap Filling", f"{gap_packets} packets")
 
-    st.caption("ℹ️ Based on 5625 seeds per 450g packet and accounting for mortality + germination confidence.")
+    st.caption("ℹ️ Based on 5625 seeds per 450g packet. Rounded down for field practicality. Gap seeds adjusted for mortality & germination.")
 
 elif submitted:
     st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
-
 # --- Heritage Dashboard ---
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
