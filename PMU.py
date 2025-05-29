@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+from math import floor, ceil
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -467,16 +468,7 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-    # Farmer Survey Entry
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("📥 Seed Packet Calculation Tool")
-    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
-
-    # dashboard.py
-import streamlit as st
-from math import floor, ceil
-
-st.set_page_config(page_title="Plant Population Tool", layout="wide")
+  st.set_page_config(page_title="Plant Population Tool", layout="wide")
 
 # Theme detection
 is_dark = st.get_option("theme.base") == "dark"
@@ -504,6 +496,9 @@ st.markdown(f"""
     }}
     h1, h2, h3, h4, h5 {{
         color: {text_color};
+    }}
+    h2 {{
+        font-size: 2.2rem;
     }}
     .stButton>button {{
         background-color: #0A9396;
@@ -569,10 +564,10 @@ if submitted and farmer_name and farmer_id:
     expected_plants = total_plants * effective_germination
     gaps = total_plants - expected_plants
     gap_seeds = gaps / effective_germination
-    gap_packets = ceil(gap_seeds / seeds_per_packet)
+    gap_packets = floor(gap_seeds / seeds_per_packet)
 
     # Output
-    st.subheader("📊 Output Summary")
+    st.subheader("<span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
     col6, col7, col8, col9 = st.columns(4)
     col6.metric("🧬 Calculated Capacity", f"{int(total_plants):,} plants")
     col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
@@ -580,17 +575,16 @@ if submitted and farmer_name and farmer_id:
     col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
 
     st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.subheader("📊 Gap Filling Summary")
+    st.subheader("<span style='font-size: 1.8rem;'>📊 Gap Filling Summary</span>", unsafe_allow_html=True)
     col10, col11, col12 = st.columns(3)
     col10.metric("❓ Gaps (missing plants)", f"{int(gaps):,}")
     col11.metric("💼 Seeds for Gaps", f"{int(gap_seeds):,} seeds")
     col12.metric("📦 Packets for Gap Filling", f"{gap_packets} packets")
 
-    st.caption("ℹ️ Based on 5625 seeds per 450g packet and accounting for mortality + germination confidence.")
+    st.caption("ℹ️ Based on 5625 seeds per 450g packet. Rounded down for field practicality. Gap seeds adjusted for mortality & germination.")
 
 elif submitted:
     st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
-
 # --- Heritage Dashboard ---
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
