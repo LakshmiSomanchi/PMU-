@@ -520,12 +520,12 @@ if submitted and farmer_name and farmer_id:
 
     st.subheader("📊 Output Summary")
     st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
-    col6, col7, col8, col9, col10 = st.columns(5)
-    col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-    col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-    col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-    col9.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
-    col10.metric(" gaps seeds", f"{int(gap_seeds):,} seeds")
+    col7, col8, col9, col10, col11 = st.columns(5)
+    col7.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
+    col8.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
+    col9.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
+    col10.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
+    col11.metric(" gaps seeds", f"{int(gap_seeds):,} seeds")
 
     st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
     st.caption(f"ℹ️ Based on 5625 seeds per 450g packet, {confidence_interval*100}% germination confidence, and {mortality_rate}% mortality rate. Packets are rounded down to the nearest full packet.")
@@ -588,7 +588,7 @@ def ksheersagar_dashboard():
     col1, col2, col3 = st.columns(3)
     col1.metric("🧬 Breed Diversity", "21 types")
     col2.metric("🧮 Avg Daily Milk (L)", "9.3")
-    col3.metric("🔁 AI Coverage (%)", "67.4")
+    col3.metric("🔁 Coverage (%)", "67.4")
 
     st.markdown("---")
 
