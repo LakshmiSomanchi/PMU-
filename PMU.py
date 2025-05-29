@@ -685,7 +685,6 @@ def settings():
             "project_timeline": "Weekly",
             "units": "Hours",
             "progress_metric": "% Complete",
-            "role": "Admin",
             "report_frequency": "Weekly",
             "report_format": "PDF",
             "auto_email_summary": False
@@ -693,7 +692,6 @@ def settings():
 
     # User Preferences
     st.markdown("### User Preferences")
-    theme = st.selectbox("Theme", ["Light", "Dark"], index=[""Light", "Dark"].index(st.session_state.settings["theme"]))
     notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]))
     language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=["English", "Spanish", "French"].index(st.session_state.settings["language"]))
 
@@ -702,10 +700,6 @@ def settings():
     project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]))
     units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]))
     progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]))
-
-    # Access Control
-    st.markdown("### Access Control")
-    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]))
 
     # Report Configuration
     st.markdown("### Report Configuration")
