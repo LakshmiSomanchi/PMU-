@@ -488,8 +488,7 @@ def saksham_dashboard():
         land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
         submitted = st.form_submit_button("🔍 Calculate")
-
-    if submitted and farmer_name and farmer_id:
+     if submitted and farmer_name and farmer_id:
         st.markdown("---")
 
         germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
