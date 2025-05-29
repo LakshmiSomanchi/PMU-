@@ -490,7 +490,39 @@ def heritage_dashboard():
     fig_bar = px.bar(bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation")
     st.plotly_chart(fig_bar, use_container_width=True)
 
-# --- Ksheersagar Dashboard ---
+def heritage_dashboard():
+    st.subheader("🏛️ Heritage Dashboard")
+    
+    col1, col2, col3 = st.columns(3)
+    col1.metric("🧑‍🌾 Total Farmers", "12,450")
+    col2.metric("🍼 Avg Yield (L/Cow)", "7.8")
+    col3.metric("📈 Impact Index", "84.2")
+
+    st.markdown("---")
+    
+    # Load the JSON file
+    with open("in.json", "r") as f:
+        geo_data = json.load(f)
+
+    # Prepare the DataFrame for the choropleth
+    india_data = pd.DataFrame({
+        "State": [feature["properties"]["st_nm"] for feature in geo_data["features"]],
+        "AdoptionRate": [feature["properties"]["adoption_rate"] for feature in geo_data["features"]]
+    })
+
+    fig_map = px.choropleth(
+        india_data,
+        geojson=geo_data,
+        featureidkey="properties.st_nm",  # GeoJSON field for state names
+        locations="State",
+        color="AdoptionRate",
+        color_continuous_scale="Blues",
+        title="Adoption Rate by Indian State"
+    )
+    fig_map.update_geos(fitbounds="locations", visible=False)
+    fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
+    st.plotly_chart(fig_map, use_container_width=True)
+
 def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
@@ -503,41 +535,25 @@ def ksheersagar_dashboard():
 
     # Load the JSON file for Ksheersagar
     with open("in.json", "r") as f:
-        prod_data = json.load(f)  # Assuming this JSON contains relevant data for production
+        geo_data = json.load(f)
 
-    prod_data_df = pd.DataFrame(prod_data)  # Convert JSON data to DataFrame
+    # Prepare the DataFrame for the choropleth
+    prod_data = pd.DataFrame({
+        "State": [feature["properties"]["st_nm"] for feature in geo_data["features"]],
+        "MilkProd": [feature["properties"].get("milk_prod", 0) for feature in geo_data["features"]]  # Adjust as per your JSON structure
+    })
 
     fig_map = px.choropleth(
-        prod_data_df,
-        locations="Code",
+        prod_data,
+        locations="State",
         color="MilkProd",
         hover_name="State",
         color_continuous_scale="YlGnBu",
-        locationmode='ISO-3',
         title="Milk Production by State (L/Day)"
     )
     st.plotly_chart(fig_map, use_container_width=True)
 
-    breed_data = pd.DataFrame({
-        "Breed": ["Sahiwal", "Gir", "Jersey", "HF"],
-        "Count": [3400, 2800, 1500, 900]
-    })
-    fig_breed = px.pie(breed_data, names='Breed', values='Count', hole=0.5, title="Breed Composition")
-    st.plotly_chart(fig_breed, use_container_width=True)
-
-    trend_data = pd.DataFrame({
-        "Year": list(range(2016, 2024)),
-        "AI_Usage": [40, 45, 48, 52, 56, 60, 65, 67]
-    })
-    fig_trend = px.line(trend_data, x="Year", y="AI_Usage", title="Artificial Insemination Coverage Over Time")
-    st.plotly_chart(fig_trend, use_container_width=True)
-
-    class_data = pd.DataFrame({
-        "Class": ["<5L", "5-10L", "10-15L", ">15L"],
-        "Farms": [2200, 3800, 2700, 1100]
-    })
-    fig_class = px.bar(class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output")
-    st.plotly_chart(fig_class, use_container_width=True)
+    # Continue with the rest of your Ksheersagar dashboard code...
 
 def live_dashboard():
     db = get_db()
