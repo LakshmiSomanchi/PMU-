@@ -484,12 +484,12 @@ def saksham_dashboard():
         plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
         land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-        mortality = st.slider("😓 Mortality %", min_value=0.0, max_value=100.0, value=5.0)
+        mortality = st.slider("Mortality %", min_value=0.0, max_value=100.0, value=5.0)
 
         submitted = st.form_submit_button("🔍 Calculate")
 
-if submitted and farmer_name and farmer_id:
-    st.markdown("---")
+    if submitted and farmer_name and farmer_id:
+       st.markdown("---")
 
     # Constants
     germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
