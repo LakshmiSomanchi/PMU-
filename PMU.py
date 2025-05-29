@@ -524,8 +524,8 @@ def saksham_dashboard():
         st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
 # --- Heritage Dashboard ---
-def heritage_dashboard():
-    st.subheader("🏛️ Heritage Dashboard")
+    def heritage_dashboard():
+       st.subheader("🏛️ Heritage Dashboard")
     
     col1, col2, col3 = st.columns(3)
     col1.metric("🧑‍🌾 Total Farmers", "12,450")
