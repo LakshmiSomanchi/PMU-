@@ -468,14 +468,13 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-  st.set_page_config(page_title="Plant Population Tool", layout="wide")
-
-st.title("🌿 Plant Population & Seed Requirement Tool")
-st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
+    st.set_page_config(page_title="Plant Population Tool", layout="wide")
+    st.title("🌿 Plant Population & Seed Requirement Tool")
+    st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
 
 with st.container():
-    st.header("📅 Farmer Survey Entry")
-    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
+     st.header("📅 Farmer Survey Entry")
+     st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
     with st.form("survey_form"):
         col0, col1, col2 = st.columns(3)
