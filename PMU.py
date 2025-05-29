@@ -472,8 +472,6 @@ def saksham_dashboard():
     st.header("📥 Seed Packet Calculation Tool")
     st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
-    import streamlit as st
-
 with st.form("survey_form"):
     col0, col1, col2 = st.columns(3)
     farmer_name = col0.text_input("👤 Farmer Name")
