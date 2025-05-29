@@ -488,8 +488,8 @@ def saksham_dashboard():
 
         submitted = st.form_submit_button("🔍 Calculate")
 
-if submitted and farmer_name and farmer_id:
-    st.markdown("---")
+    if submitted and farmer_name and farmer_id:
+       st.markdown("---")
 
     # Constants
     germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
