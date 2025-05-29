@@ -523,8 +523,8 @@ def saksham_dashboard():
         st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
 # --- Heritage Dashboard ---
-    def heritage_dashboard():
-       st.subheader("🏛️ Heritage Dashboard")
+def heritage_dashboard():
+    st.subheader("🏛️ Heritage Dashboard")
     
     col1, col2, col3 = st.columns(3)
     col1.metric("🧑‍🌾 Total Farmers", "12,450")
@@ -533,26 +533,20 @@ def saksham_dashboard():
 
     st.markdown("---")
     
-  with open("/mnt/data/india_states.geojson", "r") as f:
-    india_geo = json.load(f)
-
-india_data = pd.DataFrame({
-    "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
-    "AdoptionRate": [78, 65, 83, 72, 69]
-})
-
-fig_map = px.choropleth(
-    india_data,
-    geojson=india_geo,
-    featureidkey="properties.st_nm",  # GeoJSON field for state names
-    locations="State",
-    color="AdoptionRate",
-    color_continuous_scale="Blues",
-    title="Adoption Rate by Indian State"
-)
-fig_map.update_geos(fitbounds="locations", visible=False)
-fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
-st.plotly_chart(fig_map, use_container_width=True)
+    india_data = pd.DataFrame({
+        "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
+        "Code": ["UP", "MH", "BR", "RJ", "GJ"],
+        "AdoptionRate": [78, 65, 83, 72, 69]
+    })
+    fig_map = px.choropleth(
+        india_data,
+        locations="Code",
+        color="AdoptionRate",
+        hover_name="State",
+        color_continuous_scale="Blues",
+        locationmode='ISO-3',
+        title="Adoption Rate by State"
+    )
     st.plotly_chart(fig_map, use_container_width=True)
 
     pie_data = pd.DataFrame({
