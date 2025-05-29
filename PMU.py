@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+from math import floor, ceil
+
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -174,7 +176,7 @@ class Task(Base):
     deadline = Column(String)
     status = Column(String, default="Not Started")
     field_team_id = Column(Integer, ForeignKey("field_teams.id"))
-    field_team = relationship("FieldTeam", back_populates="tasks")
+    field_team = relationship("Employee", back_populates="tasks")
 
 class FarmerData(Base):
     __tablename__ = "farmer_data"
@@ -467,61 +469,80 @@ def manage_programs():
 
 def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
-    # Farmer Survey Entry
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("📥 Seed Packet Calculation Tool")
-    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
+    st.title("🌿 Plant Population & Seed Requirement Tool")
+    st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
 
-    with st.form("survey_form"):
-        col0, col1, col2 = st.columns(3)
-        farmer_name = col0.text_input("👤 Farmer Name")
-        farmer_id = col1.text_input("🆔 Farmer ID")
-        state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
+    with st.container():
+        st.header("📅 Farmer Survey Entry")
+        st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
-        spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-        col3, col4, col5 = st.columns(3)
-        row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
-        plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-        land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
+        with st.form("survey_form"):
+            col0, col1, col2 = st.columns(3)
+            farmer_name = col0.text_input("👤 Farmer Name")
+            farmer_id = col1.text_input("🆔 Farmer ID")
+            state = col2.selectbox("🗽 State", ["Maharashtra", "Gujarat"])
 
-        submitted = st.form_submit_button("🔍 Calculate")
+            spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
+            col3, col4, col5 = st.columns(3)
+            row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
+            plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
+            land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-    if submitted and farmer_name and farmer_id:
-        st.markdown("---")
+            mortality = st.slider("😓 Mortality %", min_value=0.0, max_value=100.0, value=5.0)
 
-        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
-        confidence_interval = 0.70
-        seeds_per_packet = 5625
-        acre_to_m2 = 4046.86
+            submitted = st.form_submit_button("🔍 Calculate")
 
-        if spacing_unit == "cm":
-            row_spacing /= 100
-            plant_spacing /= 100
+        if submitted and farmer_name and farmer_id:
+            st.markdown("---")
 
-        plant_area_m2 = row_spacing * plant_spacing
-        plants_per_m2 = 1 / plant_area_m2
-        field_area_m2 = land_acres * acre_to_m2
-        calculated_plants = plants_per_m2 * field_area_m2
+            # Constants
+            germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
+            confidence_interval = 0.70
+            seeds_per_packet = 5625
+            acre_to_m2 = 4046.86
 
-        # Seed Calculation Logic
-        target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
-        required_seeds = target_plants
-        required_packets = (required_seeds / seeds_per_packet)
+            # Convert spacing
+            if spacing_unit == "cm":
+                row_spacing /= 100
+                plant_spacing /= 100
 
-        st.subheader("📊 Output Summary")
-        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
-        col6, col7, col8, col9 = st.columns(4)
-        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-        col9.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
+            # Calculations
+            plant_area_m2 = row_spacing * plant_spacing
+            plants_per_m2 = 1 / plant_area_m2
+            field_area_m2 = land_acres * acre_to_m2
+            total_plants = plants_per_m2 * field_area_m2
 
-        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-        st.caption("ℹ️ Based on 5625 seeds per 450g packet and 70% germination confidence. Packets are rounded down to the nearest full packet.")
+            # Corrected Target Plants Calculation
+            target_plants = total_plants * confidence_interval  # Based on calculated total plants
 
-    elif submitted:
-        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
+            required_seeds = target_plants / confidence_interval
+            required_packets = floor(required_seeds / seeds_per_packet)
 
+            effective_germination = confidence_interval * (1 - mortality / 100)
+            expected_plants = total_plants * effective_germination
+            gaps = total_plants - expected_plants
+            gap_seeds = gaps / effective_germination
+            gap_packets = floor(gap_seeds / seeds_per_packet)
+
+            # Output
+            st.subheader("<span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
+            col6, col7, col8, col9 = st.columns(4)
+            col6.metric("🧬 Calculated Capacity", f"{int(total_plants):,} plants")
+            col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
+            col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
+            col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
+
+            st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+            st.subheader("<span style='font-size: 1.8rem;'>📊 Gap Filling Summary</span>", unsafe_allow_html=True)
+            col10, col11, col12 = st.columns(3)
+            col10.metric("❓ Gaps (missing plants)", f"{int(gaps):,}")
+            col11.metric("💼 Seeds for Gaps", f"{int(gap_seeds):,} seeds")
+            col12.metric("📦 Packets for Gap Filling", f"{gap_packets} packets")
+
+            st.caption("ℹ️ Based on 5625 seeds per 450g packet. Rounded down for field practicality. Gap seeds adjusted for mortality & germination.")
+
+        elif submitted:
+            st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 # --- Heritage Dashboard ---
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
@@ -664,7 +685,6 @@ def settings():
             "project_timeline": "Weekly",
             "units": "Hours",
             "progress_metric": "% Complete",
-            "role": "Admin",
             "report_frequency": "Weekly",
             "report_format": "PDF",
             "auto_email_summary": False
@@ -672,7 +692,6 @@ def settings():
 
     # User Preferences
     st.markdown("### User Preferences")
-    theme = st.selectbox("Theme", ["Light", "Dark"], index=["Light", "Dark"].index(st.session_state.settings["theme"]))
     notification = st.selectbox("Notification Settings", ["Email", "In-app", "None"], index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]))
     language = st.selectbox("Language Preferences", ["English", "Spanish", "French"], index=["English", "Spanish", "French"].index(st.session_state.settings["language"]))
 
@@ -681,10 +700,6 @@ def settings():
     project_timeline = st.selectbox("Default Project Timeline", ["Daily", "Weekly", "Monthly"], index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]))
     units = st.selectbox("Units of Measurement", ["Hours", "Days", "Cost Units"], index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]))
     progress_metric = st.selectbox("Default Progress Tracking Metrics", ["% Complete", "Milestones"], index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]))
-
-    # Access Control
-    st.markdown("### Access Control")
-    role = st.selectbox("Role-based Access Permissions", ["Admin", "Manager", "Viewer"], index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]))
 
     # Report Configuration
     st.markdown("### Report Configuration")
