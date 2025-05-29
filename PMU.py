@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+import json
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -533,20 +534,26 @@ def heritage_dashboard():
 
     st.markdown("---")
     
-    india_data = pd.DataFrame({
-        "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
-        "Code": ["UP", "MH", "BR", "RJ", "GJ"],
-        "AdoptionRate": [78, 65, 83, 72, 69]
-    })
-    fig_map = px.choropleth(
-        india_data,
-        locations="Code",
-        color="AdoptionRate",
-        hover_name="State",
-        color_continuous_scale="Blues",
-        locationmode='ISO-3',
-        title="Adoption Rate by State"
-    )
+  with open("/mnt/data/india_states.geojson", "r") as f:
+    india_geo = json.load(f)
+
+india_data = pd.DataFrame({
+    "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
+    "AdoptionRate": [78, 65, 83, 72, 69]
+})
+
+fig_map = px.choropleth(
+    india_data,
+    geojson=india_geo,
+    featureidkey="properties.st_nm",  # GeoJSON field for state names
+    locations="State",
+    color="AdoptionRate",
+    color_continuous_scale="Blues",
+    title="Adoption Rate by Indian State"
+)
+fig_map.update_geos(fitbounds="locations", visible=False)
+fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
+st.plotly_chart(fig_map, use_container_width=True)
     st.plotly_chart(fig_map, use_container_width=True)
 
     pie_data = pd.DataFrame({
