@@ -501,6 +501,16 @@ def saksham_dashboard():
         h1, h2, h3, h4, h5 {{
             color: {text_color};
         }}
+        .stButton>button {{
+            background-color: #0A9396;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 0.6em 1.5em;
+        }}
+        .stButton>button:hover {{
+            background-color: #007f86;
+        }}
     </style>
     """, unsafe_allow_html=True)
 
