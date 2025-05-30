@@ -11,7 +11,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from math import floor
 import json
-import requests
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -582,6 +581,7 @@ def heritage_dashboard():
 
     st.markdown("---")
 
+    import requests
     url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
     india_geo = requests.get(url).json()
 
@@ -635,6 +635,7 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
+    import requests
     url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
     india_geo = requests.get(url).json()
 
