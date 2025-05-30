@@ -14,79 +14,157 @@ import json
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# Custom CSS
+# Custom CSS for styling
 st.markdown("""
     <style>
         body {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right%20side_corner.jpg");
+            font-family: 'Poppins', sans-serif;
+        }
+        .header-banner {
+            background-image: url('https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20pink%20background%20with%20real%20green%20leaves%20in%20the%20right%20side_corner.jpg');
             background-size: cover;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
             background-position: center;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
         }
-
-        .stApp {
-            background-color: rgba(255, 255, 255, 0.1);
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 10px 0;
         }
-
+        .stat-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .stat-box {
+            flex: 1;
+            background: #003566;
+            color: white;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-box h3 {
+            margin-bottom: 5px;
+            font-size: 1.5rem;
+        }
         section[data-testid="stSidebar"] > div:first-child {
-            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/light%20green%20plain%20background.jpg");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background-color: #003566;
             color: white;
             padding: 20px;
             border-radius: 0 10px 10px 0;
         }
-
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
-        section[data-testid="stSidebar"] h3,
-        section[data-testid="stSidebar"] h4,
-        section[data-testid="stSidebar"] h5,
-        section[data-testid="stSidebar"] .stRadio label {
-            color: white !important;
+        section[data-testid="stSidebar"] h1 {
+            font-size: 1.5rem;
+            color: white;
         }
-
-        h1, h2, h3, h4 {
-            color: #003566;
-        }
-
-        .streamlit-expanderHeader {
-            background-color: #dceefb;
-            border: 1px solid #cce0ff;
-            border-radius: 10px;
-        }
-
         .stButton > button {
             background-color: #0077b6;
             color: white;
             border-radius: 8px;
             padding: 0.5em 1em;
+            font-weight: bold;
         }
         .stButton > button:hover {
             background-color: #0096c7;
         }
-
-        .stDataFrame {
-            background-color: #ffffff;
-            border: 5px solid #ccc;
-        }
-
-        .stTabs [role="tab"] {
-            background-color: #edf6ff;
-            padding: 10px;
-            border-radius: 10px 10px 0 0;
-            margin-right: 5px;
-            border: 1px solid #b6d4fe;
-        }
-
-        .stTabs [role="tab"][aria-selected="true"] {
-            background-color: #0077b6;
-            color: white;
-        }
     </style>
 """, unsafe_allow_html=True)
+
+# Header Section
+st.markdown("""
+    <div class="header-banner">
+        Welcome to the PMU Tracker
+    </div>
+""", unsafe_allow_html=True)
+
+# Sidebar Navigation
+st.sidebar.title("Navigation")
+selected_tab = st.sidebar.radio("Choose a Section", ["Dashboard", "Reports", "Settings", "About"])
+
+if selected_tab == "Dashboard":
+    # Main Section: Dashboard
+    st.markdown("""
+        <h1 style='text-align: center; color: #003566;'>📊 Dashboard</h1>
+    """, unsafe_allow_html=True)
+
+    # Dashboard stats
+    st.markdown("""
+        <div class="stat-container">
+            <div class="stat-box">
+                <h3>50+</h3>
+                <p>Rooms Available</p>
+            </div>
+            <div class="stat-box">
+                <h3>15+</h3>
+                <p>Luxury Suites</p>
+            </div>
+            <div class="stat-box">
+                <h3>8+</h3>
+                <p>Amenities Offered</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Room data visualization
+    room_data = pd.DataFrame({
+        "Category": ["Rooms", "Suites", "Amenities"],
+        "Count": [50, 15, 8]
+    })
+    fig = px.pie(room_data, names='Category', values='Count', title='Hotel Stats', hole=0.3)
+    st.plotly_chart(fig, use_container_width=True)
+
+elif selected_tab == "Reports":
+    # Reports Section
+    st.markdown("""
+        <div class="card">
+            <h2 style="color: #003566;">📋 Weekly Reports</h2>
+            <p>View and analyze the performance of various programs and workstreams over time.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Example Bar Chart
+    report_data = pd.DataFrame({
+        "Program": ["Water Program", "Education Program", "SAKSHAM"],
+        "Progress (%)": [80, 70, 65]
+    })
+    fig = px.bar(report_data, x='Program', y='Progress (%)', title='Program Progress')
+    st.plotly_chart(fig, use_container_width=True)
+
+elif selected_tab == "Settings":
+    # Settings Section
+    st.markdown("""
+        <div class="card">
+            <h2 style="color: #003566;">⚙️ Settings</h2>
+            <p>Customize your preferences and update your profile settings.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    theme = st.selectbox("Choose a theme", ["Light", "Dark"])
+    notifications = st.selectbox("Notifications", ["Enabled", "Disabled"])
+    st.button("Save Settings")
+
+elif selected_tab == "About":
+    # About Section
+    st.markdown("""
+        <div class="card">
+            <h2 style="color: #003566;">🛎️ About</h2>
+            <p>PMU Tracker is a modern platform to streamline project management, team collaboration, and reporting.</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <p style='text-align: center; font-size: 1.2rem;'>Designed with ❤️ using Streamlit</p>
+    """, unsafe_allow_html=True)
 
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
