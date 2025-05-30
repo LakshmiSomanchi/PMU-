@@ -570,7 +570,6 @@ def live_dashboard():
 
     st.subheader("📊 Farmer Data Overview")
     st.dataframe(df)
-# --- Heritage Dashboard ---
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
 
@@ -581,31 +580,11 @@ def heritage_dashboard():
 
     st.markdown("---")
 
-    url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
-    india_geo = requests.get(url).json()
-
-    state_names = [f["properties"]["st_nm"] for f in india_geo["features"]]
-
-    india_data = pd.DataFrame({
-        "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
-        "AdoptionRate": [78, 65, 83, 72, 69]
-    })
-
-    unmatched = india_data[~india_data["State"].isin(state_names)]
-    st.write("Unmatched States:", unmatched)
-
-    fig_map = px.choropleth(
-        india_data,
-        geojson=india_geo,
-        featureidkey="properties.st_nm",
-        locations="State",
-        color="AdoptionRate",
-        color_continuous_scale="Blues",
-        title="Adoption Rate by Indian State"
+    st.components.v1.iframe(
+        "https://datawrapper.dwcdn.net/WKXxl/1/",
+        height=400,
+        scrolling=False
     )
-    fig_map.update_geos(fitbounds="locations", visible=False)
-    fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
-    st.plotly_chart(fig_map, use_container_width=True)
 
     pie_data = pd.DataFrame({
         "Category": ["Small", "Medium", "Large"],
@@ -627,8 +606,6 @@ def heritage_dashboard():
     })
     fig_bar = px.bar(bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation")
     st.plotly_chart(fig_bar, use_container_width=True)
-
-# --- Ksheersagar Dashboard ---
 def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
@@ -639,31 +616,11 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-    url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
-    india_geo = requests.get(url).json()
-
-    state_names = [f["properties"]["st_nm"] for f in india_geo["features"]]
-
-    prod_data = pd.DataFrame({
-        "State": ["Punjab", "Haryana", "Madhya Pradesh", "Karnataka", "Tamil Nadu"],
-        "MilkProd": [870, 760, 580, 600, 620]
-    })
-
-    unmatched = prod_data[~prod_data["State"].isin(state_names)]
-    st.write("Unmatched States:", unmatched)
-
-    fig_map = px.choropleth(
-        prod_data,
-        geojson=india_geo,
-        featureidkey="properties.st_nm",
-        locations="State",
-        color="MilkProd",
-        color_continuous_scale="YlGnBu",
-        title="Milk Production by State (L/Day)"
+    st.components.v1.iframe(
+        "https://datawrapper.dwcdn.net/WKXxl/1/",
+        height=400,
+        scrolling=False
     )
-    fig_map.update_geos(fitbounds="locations", visible=False)
-    fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
-    st.plotly_chart(fig_map, use_container_width=True)
 
     breed_data = pd.DataFrame({
         "Breed": ["Sahiwal", "Gir", "Jersey", "HF"],
