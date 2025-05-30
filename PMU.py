@@ -581,14 +581,18 @@ def heritage_dashboard():
 
     st.markdown("---")
 
-    import requests
     url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
     india_geo = requests.get(url).json()
+
+    state_names = [f["properties"]["st_nm"] for f in india_geo["features"]]
 
     india_data = pd.DataFrame({
         "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
         "AdoptionRate": [78, 65, 83, 72, 69]
     })
+
+    unmatched = india_data[~india_data["State"].isin(state_names)]
+    st.write("Unmatched States:", unmatched)
 
     fig_map = px.choropleth(
         india_data,
@@ -635,14 +639,18 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-    import requests
     url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
     india_geo = requests.get(url).json()
 
+    state_names = [f["properties"]["st_nm"] for f in india_geo["features"]]
+
     prod_data = pd.DataFrame({
-        "State": ["Punjab", "Haryana", "MP", "Karnataka", "TN"],
+        "State": ["Punjab", "Haryana", "Madhya Pradesh", "Karnataka", "Tamil Nadu"],
         "MilkProd": [870, 760, 580, 600, 620]
     })
+
+    unmatched = prod_data[~prod_data["State"].isin(state_names)]
+    st.write("Unmatched States:", unmatched)
 
     fig_map = px.choropleth(
         prod_data,
