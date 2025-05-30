@@ -582,9 +582,10 @@ def heritage_dashboard():
 
     st.markdown("---")
 
-url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
-india_geo = requests.get(url).json()
+    import requests
 
+    url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
+    india_geo = requests.get(url).json()
 
     india_data = pd.DataFrame({
         "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
@@ -636,9 +637,10 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
-india_geo = requests.get(url).json()
+    import requests
 
+    url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
+    india_geo = requests.get(url).json()
 
     prod_data = pd.DataFrame({
         "State": ["Punjab", "Haryana", "MP", "Karnataka", "TN"],
@@ -678,6 +680,7 @@ india_geo = requests.get(url).json()
     })
     fig_class = px.bar(class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output")
     st.plotly_chart(fig_class, use_container_width=True)
+
 def settings():
     db = get_db()
     st.subheader("⚙️ Settings")
