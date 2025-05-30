@@ -501,16 +501,6 @@ def saksham_dashboard():
         h1, h2, h3, h4, h5 {{
             color: {text_color};
         }}
-        .stButton>button {{
-            background-color: #0A9396;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 0.6em 1.5em;
-        }}
-        .stButton>button:hover {{
-            background-color: #007f86;
-        }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -530,7 +520,7 @@ def saksham_dashboard():
             plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
             land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-            mortality = st.slider("😓 Mortality %", min_value=0.0, max_value=100.0, value=5.0)
+            mortality = st.slider("Mortality %", min_value=0.0, max_value=100.0, value=5.0)
 
             submitted = st.form_submit_button("🔍 Calculate")
 
