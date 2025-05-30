@@ -570,47 +570,44 @@ def live_dashboard():
 
     st.subheader("📊 Farmer Data Overview")
     st.dataframe(df)
-    # --- Heritage Dashboard ---
+# --- Heritage Dashboard ---
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
-    
+
     col1, col2, col3 = st.columns(3)
     col1.metric("🧑‍🌾 Total Farmers", "12,450")
     col2.metric("🍼 Avg Yield (L/Cow)", "7.8")
     col3.metric("📈 Impact Index", "84.2")
 
     st.markdown("---")
-    
+
+    with open("/mnt/data/in.json") as f:
+        india_geo = json.load(f)
+
     india_data = pd.DataFrame({
         "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
-        "Code": ["UP", "MH", "BR", "RJ", "GJ"],
         "AdoptionRate": [78, 65, 83, 72, 69]
     })
-# Load the GeoJSON
-with open("/mnt/data/in.json") as f:
-    india_geo = json.load(f)
 
-# Sample metric data per state
-df = pd.DataFrame({
-    "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
-    "AdoptionRate": [78, 65, 83, 72, 69]
-})
+    fig_map = px.choropleth(
+        india_data,
+        geojson=india_geo,
+        featureidkey="properties.st_nm",
+        locations="State",
+        color="AdoptionRate",
+        color_continuous_scale="Blues",
+        title="Adoption Rate by Indian State"
+    )
+    fig_map.update_geos(fitbounds="locations", visible=False)
+    fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
+    st.plotly_chart(fig_map, use_container_width=True)
 
-# Build interactive India map
-fig = px.choropleth(
-    df,
-    geojson=india_geo,
-    featureidkey="properties.st_nm",  # Update if needed based on exact GeoJSON key
-    locations="State",
-    color="AdoptionRate",
-    color_continuous_scale="Blues",
-    title="Adoption Rate by State"
-)
-fig.update_geos(fitbounds="locations", visible=False)
-fig.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
-
-st.plotly_chart(fig, use_container_width=True)
-
+    pie_data = pd.DataFrame({
+        "Category": ["Small", "Medium", "Large"],
+        "Farmers": [6000, 4000, 2450]
+    })
+    fig_pie = px.pie(pie_data, values='Farmers', names='Category', hole=0.5, title="Farmer Size Distribution")
+    st.plotly_chart(fig_pie, use_container_width=True)
 
     line_data = pd.DataFrame({
         "Year": list(range(2015, 2024)),
@@ -637,20 +634,25 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
+    with open("/mnt/data/in.json") as f:
+        india_geo = json.load(f)
+
     prod_data = pd.DataFrame({
         "State": ["Punjab", "Haryana", "MP", "Karnataka", "TN"],
-        "Code": ["PB", "HR", "MP", "KA", "TN"],
         "MilkProd": [870, 760, 580, 600, 620]
     })
+
     fig_map = px.choropleth(
         prod_data,
-        locations="Code",
+        geojson=india_geo,
+        featureidkey="properties.st_nm",
+        locations="State",
         color="MilkProd",
-        hover_name="State",
         color_continuous_scale="YlGnBu",
-        locationmode='ISO-3',
         title="Milk Production by State (L/Day)"
     )
+    fig_map.update_geos(fitbounds="locations", visible=False)
+    fig_map.update_layout(margin={"r":0, "t":50, "l":0, "b":0})
     st.plotly_chart(fig_map, use_container_width=True)
 
     breed_data = pd.DataFrame({
@@ -673,7 +675,6 @@ def ksheersagar_dashboard():
     })
     fig_class = px.bar(class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output")
     st.plotly_chart(fig_class, use_container_width=True)
-
 def settings():
     db = get_db()
     st.subheader("⚙️ Settings")
