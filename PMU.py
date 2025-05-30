@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
+from math import floor, ceil
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -193,7 +194,7 @@ preloaded_users = [
     ("Muskan", "mkaushal@tns.org", "password4"),
     ("Rupesh", "rmukherjee@tns.org", "password5"),
     ("Shifali", "shifalis@tns.org", "password6"),
-    ("Pragya Bharati", "pbharati@tns.org", "password7")
+    ("Pragya Bharati", "pbharati@tns.org", "password7"),
     ("Bhavya Kharoo", "bkharoo@tns.org", "password8")
 ]
 
@@ -307,11 +308,11 @@ def dashboard(user):
         pmu_dashboard(user)
 
     with tab3:
-        st.subheader("📊 Progress")
+        st.subheader("Heritage Dashboard")
         st.write("This is where you can display heritage progress and metrics.")
 
     with tab4:
-        st.subheader("📊 Progress")
+        st.subheader("Ksheersagar Dashboard")
         st.write("This is where you can display Ksheersagar progress and metrics.")
 
 def pmu_dashboard(user):
@@ -472,7 +473,7 @@ def saksham_dashboard():
     st.subheader("🌱 SAKSHAM Dashboard")
     # Farmer Survey Entry
     st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("📥 Seed Packet Calculation Tool")
+    st.header("Seed Packet Calculation Tool")
     st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
     with st.form("survey_form"):
@@ -488,7 +489,8 @@ def saksham_dashboard():
         land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
         submitted = st.form_submit_button("🔍 Calculate")
-     if submitted and farmer_name and farmer_id:
+
+    if submitted and farmer_name and farmer_id:
         st.markdown("---")
 
         germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
@@ -508,21 +510,21 @@ def saksham_dashboard():
         # Seed Calculation Logic
         target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
         required_seeds = target_plants
-        required_packets = (required_seeds / seeds_per_packet)
+        required_packets = required_seeds / seeds_per_packet
 
         st.subheader("📊 Output Summary")
-        st.markdown("""<div style='margin-bottom: 20px;'>Calculated results for seed packet distribution:</div>""", unsafe_allow_html=True)
+        st.markdown("""Calculated results for seed packet distribution:""", unsafe_allow_html=True)
         col6, col7, col8, col9 = st.columns(4)
-        col6.metric("🧮 Calculated Capacity", f"{int(calculated_plants):,} plants")
-        col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
-        col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
-        col9.metric("📦 Seed Packets Needed", f"{int(required_packets):,} packets")
+        col6.metric("Calculated Capacity", f"{int(calculated_plants):,} plants")
+        col7.metric("Target Plants", f"{int(target_plants):,} plants")
+        col8.metric("Required Seeds", f"{int(required_seeds):,} seeds")
+        col9.metric("Seed Packets Needed", f"{required_packets:.2f} packets")
 
         st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-        st.caption("ℹ️ Based on 7500 seeds per 450g packet and 90% germination confidence. Packets are rounded down to the nearest full packet.")
+        st.caption("Based on 7500 seeds per packet and 90% germination confidence.")
 
     elif submitted:
-        st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
+        st.error("Please enter both Farmer Name and Farmer ID to proceed.")
 
 def live_dashboard():
     db = get_db()
