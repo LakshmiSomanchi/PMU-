@@ -9,8 +9,7 @@ import os
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
-from math import floor, ceil
-
+from math import floor
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -470,16 +469,13 @@ def manage_programs():
         st.info("No programs found.")
 
 def saksham_dashboard():
-    #st.subheader("🌱 SAKSHAM Dashboard")  # Removed duplicate subheader
     st.title("🌿 Plant Population & Seed Requirement Tool")
     st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
 
-    # Theme detection
     is_dark = st.get_option("theme.base") == "dark"
     text_color = "#f8f9fa" if is_dark else "#0A0A0A"
     bg_color = "#0A9396" if is_dark else "#e0f2f1"
 
-    # Styles
     st.markdown(f"""
     <style>
         html, body, [class*="css"]  {{
@@ -515,20 +511,20 @@ def saksham_dashboard():
     """, unsafe_allow_html=True)
 
     with st.container():
-        st.header("📅 Farmer Survey Entry")
+        st.header("🗕️ Farmer Survey Entry")
         st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
         with st.form("survey_form"):
             col0, col1, col2 = st.columns(3)
             farmer_name = col0.text_input("👤 Farmer Name")
             farmer_id = col1.text_input("🆔 Farmer ID")
-            state = col2.selectbox("🗽 State", ["Maharashtra", "Gujarat"])
+            state = col2.selectbox("🏝 State", ["Maharashtra", "Gujarat"])
 
             spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
             col3, col4, col5 = st.columns(3)
             row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
             plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-            land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
+            land_acres = col5.number_input("🎾 Farm Area (acres)", min_value=0.01, step=0.1)
 
             mortality = st.slider("Mortality %", min_value=0.0, max_value=100.0, value=5.0)
 
@@ -537,27 +533,23 @@ def saksham_dashboard():
         if submitted and farmer_name and farmer_id:
             st.markdown("---")
 
-            # Constants
             germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
             confidence_interval = 0.70
             seeds_per_packet = 5625
             acre_to_m2 = 4046.86
 
-            # Convert spacing
             if spacing_unit == "cm":
                 row_spacing /= 100
                 plant_spacing /= 100
 
-            # Calculations
             plant_area_m2 = row_spacing * plant_spacing
             plants_per_m2 = 1 / plant_area_m2
             field_area_m2 = land_acres * acre_to_m2
             total_plants = plants_per_m2 * field_area_m2
 
-            # Corrected Target Plants Calculation
-            target_plants = total_plants * confidence_interval  # Based on calculated total plants
+            target_plants = total_plants * confidence_interval
 
-            required_seeds = target_plants / confidence_interval
+            required_seeds = target_plants
             required_packets = floor(required_seeds / seeds_per_packet)
 
             effective_germination = confidence_interval * (1 - mortality / 100)
@@ -566,7 +558,6 @@ def saksham_dashboard():
             gap_seeds = gaps / effective_germination
             gap_packets = floor(gap_seeds / seeds_per_packet)
 
-            # Output
             st.subheader("<span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
             col6, col7, col8, col9 = st.columns(4)
             col6.metric("🧬 Calculated Capacity", f"{int(total_plants):,} plants")
