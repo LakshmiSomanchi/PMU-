@@ -11,6 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from math import floor
 import json
+import requests
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -581,8 +582,9 @@ def heritage_dashboard():
 
     st.markdown("---")
 
-    with open("/mnt/data/in.json") as f:
-        india_geo = json.load(f)
+url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
+india_geo = requests.get(url).json()
+
 
     india_data = pd.DataFrame({
         "State": ["Uttar Pradesh", "Maharashtra", "Bihar", "Rajasthan", "Gujarat"],
@@ -634,8 +636,9 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-    with open("/mnt/data/in.json") as f:
-        india_geo = json.load(f)
+url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
+india_geo = requests.get(url).json()
+
 
     prod_data = pd.DataFrame({
         "State": ["Punjab", "Haryana", "MP", "Karnataka", "TN"],
