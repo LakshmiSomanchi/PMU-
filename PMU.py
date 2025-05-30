@@ -470,61 +470,119 @@ def manage_programs():
         st.info("No programs found.")
 
 def saksham_dashboard():
-    st.subheader("🌱 SAKSHAM Dashboard")
-    # Farmer Survey Entry
-    st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-    st.header("Seed Packet Calculation Tool")
-    st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
+    #st.subheader("🌱 SAKSHAM Dashboard")  # Removed duplicate subheader
+    st.title("🌿 Plant Population & Seed Requirement Tool")
+    st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
 
-    with st.form("survey_form"):
-        col0, col1, col2 = st.columns(3)
-        farmer_name = col0.text_input("👤 Farmer Name")
-        farmer_id = col1.text_input("🆔 Farmer ID")
-        state = col2.selectbox("🗺️ State", ["Maharashtra", "Gujarat"])
+    # Theme detection
+    is_dark = st.get_option("theme.base") == "dark"
+    text_color = "#f8f9fa" if is_dark else "#0A0A0A"
+    bg_color = "#0A9396" if is_dark else "#e0f2f1"
 
-        spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
-        col3, col4, col5 = st.columns(3)
-        row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
-        plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
-        land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
+    # Styles
+    st.markdown(f"""
+    <style>
+        html, body, [class*="css"]  {{
+            background-color: {bg_color};
+            font-family: 'Helvetica', sans-serif;
+        }}
+        .block-container {{
+            padding-top: 3rem;
+            padding-bottom: 3rem;
+        }}
+        .stMetricValue {{
+            font-size: 1.5rem !important;
+            color: {text_color};
+        }}
+        .stMetricLabel {{
+            font-weight: bold;
+            color: {text_color};
+        }}
+        h1, h2, h3, h4, h5 {{
+            color: {text_color};
+        }}
+        .stButton>button {{
+            background-color: #0A9396;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            padding: 0.6em 1.5em;
+        }}
+        .stButton>button:hover {{
+            background-color: #007f86;
+        }}
+    </style>
+    """, unsafe_allow_html=True)
 
-        submitted = st.form_submit_button("🔍 Calculate")
+    with st.container():
+        st.header("📅 Farmer Survey Entry")
+        st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
 
-    if submitted and farmer_name and farmer_id:
-        st.markdown("---")
+        with st.form("survey_form"):
+            col0, col1, col2 = st.columns(3)
+            farmer_name = col0.text_input("👤 Farmer Name")
+            farmer_id = col1.text_input("🆔 Farmer ID")
+            state = col2.selectbox("🗽 State", ["Maharashtra", "Gujarat"])
 
-        germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
-        confidence_interval = 0.90
-        seeds_per_packet = 7500
-        acre_to_m2 = 4046.86
+            spacing_unit = st.selectbox("📏 Spacing Unit", ["cm", "m"])
+            col3, col4, col5 = st.columns(3)
+            row_spacing = col3.number_input("↔️ Row Spacing (between rows)", min_value=0.01, step=0.1)
+            plant_spacing = col4.number_input("↕️ Plant Spacing (between plants)", min_value=0.01, step=0.1)
+            land_acres = col5.number_input("🌾 Farm Area (acres)", min_value=0.01, step=0.1)
 
-        if spacing_unit == "cm":
-            row_spacing /= 100
-            plant_spacing /= 100
+            mortality = st.slider("😓 Mortality %", min_value=0.0, max_value=100.0, value=5.0)
 
-        plant_area_m2 = row_spacing * plant_spacing
-        plants_per_m2 = 1 / plant_area_m2
-        field_area_m2 = land_acres * acre_to_m2
-        calculated_plants = plants_per_m2 * field_area_m2
+            submitted = st.form_submit_button("🔍 Calculate")
 
-        # Seed Calculation Logic
-        target_plants = calculated_plants * (confidence_interval if confidence_interval else 1)
-        required_seeds = target_plants
-        required_packets = required_seeds / seeds_per_packet
+        if submitted and farmer_name and farmer_id:
+            st.markdown("---")
 
-        st.subheader("📊 Output Summary")
-        st.markdown("""Calculated results for seed packet distribution:""", unsafe_allow_html=True)
-        col6, col7, col8, col9 = st.columns(4)
-        col6.metric("Calculated Capacity", f"{int(calculated_plants):,} plants")
-        col7.metric("Target Plants", f"{int(target_plants):,} plants")
-        col8.metric("Required Seeds", f"{int(required_seeds):,} seeds")
-        col9.metric("Seed Packets Needed", f"{required_packets:.2f} packets")
+            # Constants
+            germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
+            confidence_interval = 0.70
+            seeds_per_packet = 5625
+            acre_to_m2 = 4046.86
 
-        st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
-        st.caption("Based on 7500 seeds per packet and 90% germination confidence.")
+            # Convert spacing
+            if spacing_unit == "cm":
+                row_spacing /= 100
+                plant_spacing /= 100
 
-    elif submitted:
-        st.error("Please enter both Farmer Name and Farmer ID to proceed.")
+            # Calculations
+            plant_area_m2 = row_spacing * plant_spacing
+            plants_per_m2 = 1 / plant_area_m2
+            field_area_m2 = land_acres * acre_to_m2
+            total_plants = plants_per_m2 * field_area_m2
+
+            target_plants = germination_rate_per_acre[state] * land_acres
+            required_seeds = target_plants / confidence_interval
+            required_packets = floor(required_seeds / seeds_per_packet)
+
+            effective_germination = confidence_interval * (1 - mortality / 100)
+            expected_plants = total_plants * effective_germination
+            gaps = total_plants - expected_plants
+            gap_seeds = gaps / effective_germination
+            gap_packets = ceil(gap_seeds / seeds_per_packet)
+
+            # Output
+            st.subheader("📊 Output Summary")
+            col6, col7, col8, col9 = st.columns(4)
+            col6.metric("🧬 Calculated Capacity", f"{int(total_plants):,} plants")
+            col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
+            col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
+            col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
+
+            st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+            st.subheader("📊 Gap Filling Summary")
+            col10, col11, col12 = st.columns(3)
+            col10.metric("❓ Gaps (missing plants)", f"{int(gaps):,}")
+            col11.metric("💼 Seeds for Gaps", f"{int(gap_seeds):,} seeds")
+            col12.metric("📦 Packets for Gap Filling", f"{gap_packets} packets")
+
+            st.caption("ℹ️ Based on 5625 seeds per 450g packet and accounting for mortality + germination confidence.")
+
+        elif submitted:
+            st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
 def live_dashboard():
     db = get_db()
