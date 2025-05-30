@@ -582,8 +582,6 @@ def heritage_dashboard():
 
     st.markdown("---")
 
-    import requests
-
     url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
     india_geo = requests.get(url).json()
 
@@ -636,8 +634,6 @@ def ksheersagar_dashboard():
     col3.metric("🔁 AI Coverage (%)", "67.4")
 
     st.markdown("---")
-
-    import requests
 
     url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/main/in.json"
     india_geo = requests.get(url).json()
