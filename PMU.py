@@ -565,7 +565,7 @@ def saksham_dashboard():
             col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
             col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
 
-            st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+            st.markdown("### <span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
             st.subheader("<span style='font-size: 1.8rem;'>📊 Gap Filling Summary</span>", unsafe_allow_html=True)
             col10, col11, col12 = st.columns(3)
             col10.metric("❓ Gaps (missing plants)", f"{int(gaps):,}")
