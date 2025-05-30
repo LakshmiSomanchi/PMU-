@@ -472,44 +472,6 @@ def saksham_dashboard():
     st.title("🌿 Plant Population & Seed Requirement Tool")
     st.markdown("""<hr style='margin-top: -15px; margin-bottom: 25px;'>""", unsafe_allow_html=True)
 
-    is_dark = st.get_option("theme.base") == "dark"
-    text_color = "#f8f9fa" if is_dark else "#0A0A0A"
-    bg_color = "#0A9396" if is_dark else "#e0f2f1"
-
-    st.markdown(f"""
-    <style>
-        html, body, [class*="css"]  {{
-            background-color: {bg_color};
-            font-family: 'Helvetica', sans-serif;
-        }}
-        .block-container {{
-            padding-top: 3rem;
-            padding-bottom: 3rem;
-        }}
-        .stMetricValue {{
-            font-size: 1.5rem !important;
-            color: {text_color};
-        }}
-        .stMetricLabel {{
-            font-weight: bold;
-            color: {text_color};
-        }}
-        h1, h2, h3, h4, h5 {{
-            color: {text_color};
-        }}
-        .stButton>button {{
-            background-color: #0A9396;
-            color: white;
-            font-weight: bold;
-            border-radius: 5px;
-            padding: 0.6em 1.5em;
-        }}
-        .stButton>button:hover {{
-            background-color: #007f86;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
-
     with st.container():
         st.header("🗕️ Farmer Survey Entry")
         st.markdown("Fill in the details below to calculate how many seed packets are required for optimal plant population.")
@@ -558,15 +520,15 @@ def saksham_dashboard():
             gap_seeds = gaps / effective_germination
             gap_packets = floor(gap_seeds / seeds_per_packet)
 
-            st.subheader("<span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
+            st.markdown("### <span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
             col6, col7, col8, col9 = st.columns(4)
             col6.metric("🧬 Calculated Capacity", f"{int(total_plants):,} plants")
             col7.metric("🎯 Target Plants", f"{int(target_plants):,} plants")
             col8.metric("🌱 Required Seeds", f"{int(required_seeds):,} seeds")
             col9.metric("📦 Seed Packets Needed", f"{required_packets} packets")
 
-            st.markdown("### <span style='font-size: 1.8rem;'>📊 Output Summary</span>", unsafe_allow_html=True)
-            st.subheader("<span style='font-size: 1.8rem;'>📊 Gap Filling Summary</span>", unsafe_allow_html=True)
+            st.markdown("""<hr style='margin-top: 25px;'>""", unsafe_allow_html=True)
+            st.markdown("### <span style='font-size: 1.8rem;'>📊 Gap Filling Summary</span>", unsafe_allow_html=True)
             col10, col11, col12 = st.columns(3)
             col10.metric("❓ Gaps (missing plants)", f"{int(gaps):,}")
             col11.metric("💼 Seeds for Gaps", f"{int(gap_seeds):,} seeds")
@@ -576,6 +538,7 @@ def saksham_dashboard():
 
         elif submitted:
             st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
+
 
 def live_dashboard():
     db = get_db()
