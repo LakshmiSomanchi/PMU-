@@ -38,9 +38,6 @@ st.markdown("""
             padding: 20px;
             border-radius: 0 10px 10px 0;
         }
-        section[data-testid="stSidebar"] .stRadio > div > label {
-    color: white !important;
-}
 
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
@@ -48,11 +45,11 @@ st.markdown("""
         section[data-testid="stSidebar"] h4,
         section[data-testid="stSidebar"] h5,
         section[data-testid="stSidebar"] .stRadio label {
-            color: #FFFFFF;
+            color: #ffffff;
         }
 
         h1, h2, h3, h4 {
-            color: #FFFFFF;
+            color: #ffffff;
         }
 
         .streamlit-expanderHeader {
