@@ -44,7 +44,7 @@ section[data-testid="stSidebar"] > div:first-child {
 section[data-testid="stSidebar"] > div:first-child::before {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 5; left: 5; right: 5; bottom: 5;
     background: rgba(255, 255, 255, 0.7); /* Semi-transparent white */
     border-radius: 0 10px 10px 0;
     z-index: -1;
