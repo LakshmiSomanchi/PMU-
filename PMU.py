@@ -592,7 +592,13 @@ def heritage_dashboard():
     col3.metric("📈 Impact Index", "84.2")
 
     st.markdown("---")
-    <div style="min-height:400px" id="datawrapper-vis-01h0U"><script type="text/javascript" defer src="https://datawrapper.dwcdn.net/01h0U/embed.js" charset="utf-8" data-target="#datawrapper-vis-01h0U"></script><noscript><img src="https://datawrapper.dwcdn.net/01h0U/full.png" alt="" /></noscript></div>
+    
+    <div style="min-height:400px" 
+    id="datawrapper-vis-01h0U">
+    <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/01h0U/embed.js" charset="utf-8" data-target="#datawrapper-vis-01h0U">
+    </script><noscript><img src="https://datawrapper.dwcdn.net/01h0U/full.png" alt="" />
+    </noscript>
+    </div>
 
     pie_data = pd.DataFrame({
         "Category": ["Small", "Medium", "Large"],
