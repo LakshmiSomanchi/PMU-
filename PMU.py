@@ -38,6 +38,9 @@ st.markdown("""
             padding: 20px;
             border-radius: 0 10px 10px 0;
         }
+        section[data-testid="stSidebar"] .stRadio > div > label {
+    color: white !important;
+}
 
         section[data-testid="stSidebar"] h1,
         section[data-testid="stSidebar"] h2,
