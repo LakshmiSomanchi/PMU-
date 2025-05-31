@@ -619,7 +619,8 @@ def heritage_dashboard():
     })
     fig_bar = px.bar(bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation")
     st.plotly_chart(fig_bar, use_container_width=True)
-def ksheersagar_dashboard():
+    
+ def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
     col1, col2, col3 = st.columns(3)
@@ -629,7 +630,14 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-   https://datawrapper.dwcdn.net/01h0U/1/
+
+    st.markdown("""
+    <div style="min-height:400px" id="datawrapper-map">
+      <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/01h0U/embed.js" charset="utf-8"></script>
+      <noscript><img src="https://datawrapper.dwcdn.net/01h0U/full.png" alt="Datawrapper Map" /></noscript>
+    </div>
+    """, unsafe_allow_html=True)
+
     breed_data = pd.DataFrame({
         "Breed": ["Sahiwal", "Gir", "Jersey", "HF"],
         "Count": [3400, 2800, 1500, 900]
@@ -650,6 +658,7 @@ def ksheersagar_dashboard():
     })
     fig_class = px.bar(class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output")
     st.plotly_chart(fig_class, use_container_width=True)
+
 
 def settings():
     db = get_db()
