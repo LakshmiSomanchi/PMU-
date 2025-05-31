@@ -49,7 +49,7 @@ st.markdown("""
         }
 
         h1, h2, h3, h4 {
-            color: #003566;
+            color: #FFFFFF;
         }
 
         .streamlit-expanderHeader {
