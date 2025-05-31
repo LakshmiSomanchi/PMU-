@@ -619,8 +619,8 @@ def heritage_dashboard():
     })
     fig_bar = px.bar(bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation")
     st.plotly_chart(fig_bar, use_container_width=True)
-    
- def ksheersagar_dashboard():
+
+ def heritage_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
     col1, col2, col3 = st.columns(3)
