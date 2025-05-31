@@ -45,7 +45,7 @@ st.markdown("""
         section[data-testid="stSidebar"] h4,
         section[data-testid="stSidebar"] h5,
         section[data-testid="stSidebar"] .stRadio label {
-            color: white !important;
+            color: #FFFFFF;
         }
 
         h1, h2, h3, h4 {
