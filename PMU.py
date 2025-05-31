@@ -14,71 +14,80 @@ import json
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
-# Custom CSS for styling
+# Custom CSS
 st.markdown("""
     <style>
         body {
-            font-family: 'Poppins', sans-serif;
-        }
-        .header-banner {
-            background-image: url('https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/2.png');
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/2.png");
             background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             background-position: center;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2.5rem;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
         }
-        .card {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 10px 0;
+
+        .stApp {
+            background-color: rgba(255, 255, 255, 0.1);
         }
-        .stat-container {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-        }
-        .stat-box {
-            flex: 1;
-            background: #003566;
-            color: white;
-            border-radius: 10px;
-            margin: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-        .stat-box h3 {
-            margin-bottom: 5px;
-            font-size: 1.5rem;
-        }
+
         section[data-testid="stSidebar"] > div:first-child {
-            background-color: #003566;
+            background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Untitled%20design%20(1).png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
             color: white;
             padding: 20px;
             border-radius: 0 10px 10px 0;
         }
-        section[data-testid="stSidebar"] h1 {
-            font-size: 1.5rem;
-            color: white;
+
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] h4,
+        section[data-testid="stSidebar"] h5,
+        section[data-testid="stSidebar"] .stRadio label {
+            color: white !important;
         }
+
+        h1, h2, h3, h4 {
+            color: #003566;
+        }
+
+        .streamlit-expanderHeader {
+            background-color: #dceefb;
+            border: 1px solid #cce0ff;
+            border-radius: 10px;
+        }
+
         .stButton > button {
             background-color: #0077b6;
             color: white;
             border-radius: 8px;
             padding: 0.5em 1em;
-            font-weight: bold;
         }
         .stButton > button:hover {
             background-color: #0096c7;
         }
+
+        .stDataFrame {
+            background-color: #ffffff;
+            border: 5px solid #ccc;
+        }
+
+        .stTabs [role="tab"] {
+            background-color: #edf6ff;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            margin-right: 5px;
+            border: 1px solid #b6d4fe;
+        }
+
+        .stTabs [role="tab"][aria-selected="true"] {
+            background-color: #0077b6;
+            color: white;
+        }
     </style>
 """, unsafe_allow_html=True)
+
 
 # Header Section
 st.markdown("""
@@ -116,11 +125,11 @@ if selected_tab == "Dashboard":
     """, unsafe_allow_html=True)
 
     # Room data visualization
-    room_data = pd.DataFrame({
-        "Category": ["Rooms", "Suites", "Amenities"],
+    program_data = pd.DataFrame({
+        "Category": ["Heritage", "SAKSHAM", "Ksheersagar", "Water Program", "Education Program"],
         "Count": [50, 15, 8]
     })
-    fig = px.pie(room_data, names='Category', values='Count', title='Hotel Stats', hole=0.3)
+    fig = px.pie(room_data, names='Category', values='Count', title='Program Stats', hole=0.3)
     st.plotly_chart(fig, use_container_width=True)
 
 elif selected_tab == "Reports":
