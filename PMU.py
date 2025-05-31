@@ -592,6 +592,7 @@ def heritage_dashboard():
     col3.metric("📈 Impact Index", "84.2")
 
     st.markdown("---")
+    https://datawrapper.dwcdn.net/01h0U/1/
 
     pie_data = pd.DataFrame({
         "Category": ["Small", "Medium", "Large"],
@@ -623,8 +624,7 @@ def ksheersagar_dashboard():
 
     st.markdown("---")
 
-    <iframe title="" aria-label="Map" id="datawrapper-chart-01h0U" src="https://datawrapper.dwcdn.net/01h0U/1/" scrolling="no" frameborder="0" style="border: none;" width="600" height="400" data-external="1"></iframe>
-
+   https://datawrapper.dwcdn.net/01h0U/1/
     breed_data = pd.DataFrame({
         "Breed": ["Sahiwal", "Gir", "Jersey", "HF"],
         "Count": [3400, 2800, 1500, 900]
