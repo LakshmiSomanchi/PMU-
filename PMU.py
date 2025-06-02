@@ -947,6 +947,14 @@ def ksheersagar_dashboard():
         y="Number of Active Farmers",
         title="Number of Active Farmers",
     )
+    # Embed the Datawrapper map iframe
+    st.markdown("### 🌍 Geographic Dashboard")
+    components.iframe(
+        src="https://datawrapper.dwcdn.net/01h0U/1/",
+        height=600,
+        width=800,
+        scrolling=True,
+    )
     st.plotly_chart(fig_farmers, use_container_width=True)
 
     col1, col2, col3 = st.columns(3)
