@@ -1103,22 +1103,6 @@ def google_drive():
         st.write("- File 3.docx")
 
 
-# In-house Team Chat Functionality
-def team_chat():
-    st.subheader("Team Chat")
-
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
-
-    new_message = st.text_input("Enter your message:")
-    if st.button("Send"):
-        if new_message:
-            st.session_state.chat_history.append(f"{st.session_state.user.name}: {new_message}")
-
-    if st.session_state.chat_history:
-        for message in st.session_state.chat_history:
-            st.write(message)
-
 # --- Persistent Chat ---
 def get_team_chat():
     conn = sqlite3.connect(CHAT_DB)
@@ -1135,6 +1119,20 @@ def add_chat_message(user, message):
     c.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
     conn.commit()
     conn.close()
+
+
+def team_chat():
+    st.subheader("💬 Team Chat (Persistent)")
+    chats = get_team_chat()
+    for user, message in chats:
+        st.markdown(f"**{user}**: {message}")
+
+    with st.form("Send Chat Message"):
+        user = st.text_input("Your Name", value=st.session_state.user.name if "user" in st.session_state else "")
+        message = st.text_input("Message")
+        if st.form_submit_button("Send") and user and message:
+            add_chat_message(user, message)
+            st.experimental_rerun()
 
 
 
