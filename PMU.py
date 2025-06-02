@@ -832,6 +832,13 @@ def live_dashboard():
 
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
+    # Embed the Datawrapper map iframe
+    st.markdown("### 🌍 Geographic Dashboard")
+    components.iframe(
+        src="https://datawrapper.dwcdn.net/jjDlA/1/",
+        height=600,
+        width=800,
+        scrolling=True,
 
     # KPI Data
     kpi_data = {
@@ -917,6 +924,14 @@ def heritage_dashboard():
 def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
+    # Embed the Datawrapper map iframe
+    st.markdown("### 🌍 Geographic Dashboard")
+    components.iframe(
+        src="https://datawrapper.dwcdn.net/01h0U/1/",
+        height=600,
+        width=800,
+        scrolling=True,
+
     # KPI Data (Replace with actual data)
     kpi_data = {
         "Total Milk Collection (Liters)": [100000, 120000, 110000, 115000, 125000],
@@ -948,14 +963,7 @@ def ksheersagar_dashboard():
         y="Number of Active Farmers",
         title="Number of Active Farmers",
     )
-    # Embed the Datawrapper map iframe
-    st.markdown("### 🌍 Geographic Dashboard")
-    components.iframe(
-        src="https://datawrapper.dwcdn.net/01h0U/1/",
-        height=600,
-        width=800,
-        scrolling=True,
-    )
+
     st.plotly_chart(fig_farmers, use_container_width=True)
 
     col1, col2, col3 = st.columns(3)
