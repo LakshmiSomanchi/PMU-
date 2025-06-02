@@ -931,7 +931,7 @@ def ksheersagar_dashboard():
         height=600,
         width=800,
         scrolling=True,
-
+    )
     # KPI Data (Replace with actual data)
     kpi_data = {
         "Total Milk Collection (Liters)": [100000, 120000, 110000, 115000, 125000],
