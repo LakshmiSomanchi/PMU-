@@ -348,7 +348,7 @@ def dashboard(user):
     st.sidebar.success(user.name)
     if st.sidebar.button("🔓 Logout"):
         st.session_state.user = None
-        st.experimental_rerun()
+        st.rerun()
 
     # Tabs for different dashboards
     tab1, tab2, tab3, tab4 = st.tabs(
@@ -469,7 +469,7 @@ def pmu_dashboard(user):
                     db.add(new_workplan)
                     db.commit()
                     st.success("✅ Work Plan saved successfully!")
-                    st.experimental_rerun()
+                    st.rerun()
                 else:
                     st.error("Please select a workstream.")
 
@@ -490,7 +490,7 @@ def pmu_dashboard(user):
                 db.add(new_target)
                 db.commit()
                 st.success("✅ Target saved.")
-                st.experimental_rerun()
+                st.rerun()
 
     # Display Work Plans
     st.subheader("📌 Your Work Plans and Targets")
@@ -519,7 +519,7 @@ def pmu_dashboard(user):
                         plan.status = new_status
                         db.commit()
                         st.success("Progress updated!")
-                        st.experimental_rerun()
+                        st.rerun()
     else:
         st.info("No work plans found.")
 
@@ -547,7 +547,7 @@ def pmu_dashboard(user):
                         tgt.status = new_status
                         db.commit()
                         st.success("Progress updated!")
-                        st.experimental_rerun()
+                        st.rerun()
     else:
         st.info("No targets found.")
 
@@ -594,7 +594,7 @@ def display_kanban():
         status = st.selectbox("Status", ["To Do", "In Progress", "Done"])
         if st.form_submit_button("Add Task") and task:
             add_kanban_task(status, task)
-            st.experimental_rerun()
+            st.rerun()
 
 # To-Do List Functions
 def display_todo():
@@ -606,7 +606,7 @@ def display_todo():
         todo_item = st.text_input("Enter a to-do item:")
         if st.form_submit_button("Add"):
             st.session_state.todo_list.append(todo_item)
-            st.experimental_rerun()
+            st.rerun()
 
     for i, item in enumerate(st.session_state.todo_list):
         st.write(f"{i+1}. {item}")
@@ -837,8 +837,7 @@ def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("🧬 Breed Diversity", "21 types")
-    col2.metric("🧮 Avg Daily Milk (L)", "9.3")
+    col1.metric("🧬 Breed Diversity", "21 types")    col2.metric("🧮 Avg Daily Milk (L)", "9.3")
     col3.metric("🔁 AI Coverage (%)", "67.4")
 
     st.markdown("---")
@@ -1087,7 +1086,7 @@ def field_team_management():
                 db.delete(team)
                 db.commit()
                 st.success(f"Field Team '{team.name}' deleted successfully!")
-                st.experimental_rerun()
+                st.rerun()
     else:
         st.write("No field teams available.")
 
@@ -1225,7 +1224,7 @@ def team_chat():
         message = st.text_input("Message")
         if st.form_submit_button("Send") and user and message:
             add_chat_message(user, message)
-            st.experimental_rerun()
+            st.rerun()
 
 # Placeholder Gmail Functionality
 def email():
