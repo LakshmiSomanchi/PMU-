@@ -1121,27 +1121,8 @@ def google_drive():
         st.write("- File 3.docx")
 
 
-# --- Persistent Chat ---
-def get_team_chat():
-    CHAT_DB = "chat.db"
-    conn = sqlite3.connect(CHAT_DB)
-    c = conn.cursor()
-    c.execute("SELECT user, message FROM chat ORDER BY timestamp DESC LIMIT 20")
-    rows = c.fetchall()
-    conn.close()
-    return rows[::-1]
-
-
-def add_chat_message(user, message):
-    conn = sqlite3.connect(CHAT_DB)
-    c = conn.cursor()
-    c.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
-    conn.commit()
-    conn.close()
-
-
 def team_chat():
-    st.subheader("💬 Team Chat (Persistent)")
+    st.subheader("💬 Team Chat")
     chats = get_team_chat()
     for user, message in chats:
         st.markdown(f"**{user}**: {message}")
