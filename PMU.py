@@ -13,6 +13,9 @@ import plotly.graph_objects as go
 from math import floor, ceil  # Import ceil
 import json
 
+KANBAN_DB = "kanban.db"
+CHAT_DB = "chat.db"
+
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
