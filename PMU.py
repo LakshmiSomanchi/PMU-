@@ -263,8 +263,23 @@ def preload_programs():
             db.rollback()
 
 
+# Explicitly drop tables in reverse dependency order
+def drop_tables(engine):
+    Base.metadata.drop_all(engine, tables=[
+        Task.__table__,
+        FieldTeam.__table__,
+        WorkPlan.__table__,
+        WorkStream.__table__,
+        Target.__table__,
+        Schedule.__table__,
+        Program.__table__,
+        FarmerData.__table__,
+        Employee.__table__,
+    ])
+
+
 # Drop and create all tables
-Base.metadata.drop_all(engine)
+drop_tables(engine)  # Use the explicit drop function
 Base.metadata.create_all(engine)
 
 # Then preload
@@ -706,7 +721,7 @@ def saksham_dashboard():
             required_packets = floor(required_seeds / seeds_per_packet)
 
             effective_germination = confidence_interval * (1 - mortality / 100)
-            expected_plants = total_plants * effective_germination
+            expected_plants = total_plants - expected_plants
             gaps = total_plants - expected_plants
             gap_seeds = gaps / effective_germination
             gap_packets = floor(gap_seeds / seeds_per_packet)
@@ -837,7 +852,7 @@ def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("🧬 Breed Diversity", "21 types") 
+    col1.metric("🧬 Breed Diversity", "21 types")
     col2.metric("🧮 Avg Daily Milk (L)", "9.3")
     col3.metric("🔁 AI Coverage (%)", "67.4")
 
