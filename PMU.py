@@ -1119,6 +1119,24 @@ def team_chat():
         for message in st.session_state.chat_history:
             st.write(message)
 
+# --- Persistent Chat ---
+def get_team_chat():
+    conn = sqlite3.connect(CHAT_DB)
+    c = conn.cursor()
+    c.execute("SELECT user, message FROM chat ORDER BY timestamp DESC LIMIT 20")
+    rows = c.fetchall()
+    conn.close()
+    return rows[::-1]
+
+
+def add_chat_message(user, message):
+    conn = sqlite3.connect(CHAT_DB)
+    c = conn.cursor()
+    c.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
+    conn.commit()
+    conn.close()
+
+
 
 # Placeholder Gmail Functionality
 def email():
