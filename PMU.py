@@ -14,6 +14,7 @@ from math import floor, ceil  # Import ceil
 import json
 import requests  # For API calls
 import calendar
+import streamlit.components.v1 as components
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
