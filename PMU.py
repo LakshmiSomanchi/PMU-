@@ -1415,25 +1415,58 @@ def calendar_view(user):
             }
         )
 
-    # Display the calendar
-    if calendar_events:
-        # Group events by date
-        events_by_date = {}
-        for event in calendar_events:
-            date_str = event["date"].strftime("%Y-%m-%d")  # Format date to string
-            if date_str not in events_by_date:
-                events_by_date[date_str] = []
-            events_by_date[date_str].append(event)
-
-        # Display events for each date
-        for date_str, events in events_by_date.items():
-            st.write(f"**{date_str}**")
-            for event in events:
-                st.write(
-                    f"- {event['start_time']} - {event['end_time']}: {event['description']} ({event['type']})"
-                )
-    else:
-        st.info("No schedules or meetings found.")
+     # Calendar Widget with availability display
+    st.markdown("### 📅 Availability Calendar")
+    components.html("""
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <style>
+            .flatpickr-calendar {
+                font-family: 'Segoe UI', sans-serif;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            }
+            .flatpickr-day.available {
+                background-color: #2b2d42;
+                color: white;
+                border-radius: 50%;
+            }
+            .flatpickr-day.unavailable {
+                background-color: #e0e0e0;
+                color: #aaa;
+                pointer-events: none;
+            }
+            .flatpickr-day.selected {
+                background-color: #00b4d8 !important;
+                color: white;
+                border-radius: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="text" id="calendar" placeholder="Select a date" style="padding: 10px; font-size: 16px; width: 200px; border-radius: 8px; border: 1px solid #ccc;">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+            flatpickr("#calendar", {
+                inline: true,
+                defaultDate: "today",
+                disable: ["2023-07-27", "2023-08-11"], // Not available
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    let date = dayElem.dateObj.toISOString().split('T')[0];
+                    if(["2023-07-26", "2023-08-10", "2023-08-23"].includes(date)) {
+                        dayElem.classList.add("available");
+                    }
+                    if(["2023-07-27", "2023-08-11"].includes(date)) {
+                        dayElem.classList.add("unavailable");
+                    }
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    window.parent.postMessage({ type: 'SELECTED_DATE', value: dateStr }, '*');
+                }
+            });
+        </script>
+    </body>
+    """, height=400)
 
     # Add a new meeting
     with st.form("add_meeting"):
