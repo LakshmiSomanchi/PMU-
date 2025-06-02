@@ -1,11 +1,11 @@
 import streamlit as st
-from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine
+from sqlalchemy import Column, Integer, String, Text, Float, ForeignKey, create_engine, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.exc import IntegrityError
 import pandas as pd
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 import os
 from pathlib import Path
 import plotly.express as px
@@ -13,6 +13,7 @@ import plotly.graph_objects as go
 from math import floor, ceil  # Import ceil
 import json
 import requests  # For API calls
+import calendar
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -136,6 +137,7 @@ class Employee(Base):
     schedules = relationship("Schedule", back_populates="employee")
     workplans = relationship("WorkPlan", back_populates="supervisor")
     field_teams = relationship("FieldTeam", back_populates="pmu")
+    meetings = relationship("Meeting", back_populates="employee")  # Add relationship for meetings
 
 
 class WorkStream(Base):
@@ -186,7 +188,7 @@ class Schedule(Base):
     __tablename__ = "schedules"
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey("employees.id"))
-    date = Column(String)
+    date = Column(Date)  # Change to Date type
     start_time = Column(String)
     end_time = Column(String)
     employee = relationship("Employee", back_populates="schedules")
@@ -219,6 +221,17 @@ class FarmerData(Base):
     number_of_cows = Column(Integer)
     yield_per_cow = Column(Float)
     date = Column(String)
+
+
+class Meeting(Base):  # New model for meetings
+    __tablename__ = "meetings"
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    date = Column(Date)
+    start_time = Column(String)
+    end_time = Column(String)
+    description = Column(String)
+    employee = relationship("Employee", back_populates="meetings")
 
 
 # Preloaded users
@@ -272,6 +285,7 @@ def drop_tables(engine):
         WorkStream.__table__,
         Target.__table__,
         Schedule.__table__,
+        Meeting.__table__,  # Drop Meeting table
         Program.__table__,
         FarmerData.__table__,
         Employee.__table__,
@@ -347,6 +361,8 @@ def sidebar():
         "Google Drive": "google_drive",
         "Team Chat": "team_chat",
         "Email": "email",
+        "Calendar": "calendar_view",  # Add Calendar to the sidebar
+        "Monthly Meeting": "monthly_meeting",  # Add Monthly Meeting to the sidebar
         "Logout": "logout",
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
@@ -836,7 +852,7 @@ def heritage_dashboard():
     )
     fig_line = px.line(
         line_data, x="Year", y="ImpactScore", title="Yearly Impact Score"
-    )
+        )
     st.plotly_chart(fig_line, use_container_width=True)
 
     bar_data = pd.DataFrame(
@@ -1058,7 +1074,7 @@ def scheduling(user):
         if st.form_submit_button("Add Schedule"):
             new_schedule = Schedule(
                 employee_id=user.id,
-                date=str(schedule_date),
+                date=schedule_date,
                 start_time=str(start_time),
                 end_time=str(end_time),
                 gmeet_link=gmeet_link,
@@ -1256,6 +1272,163 @@ def email():
         if submitted:
             st.write(f"Simulating sending email to {recipient} with subject '{subject}'.")
 
+def calendar_view(user):
+    db = get_db()
+    st.subheader("📅 Your Calendar")
+
+    # Fetch schedules and meetings for the user
+    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+    meetings = db.query(Meeting).filter_by(employee_id=user.id).all()
+
+    # Combine schedules and meetings into a single list
+    calendar_events = []
+
+    for schedule in schedules:
+        calendar_events.append({
+            'date': schedule.date,
+            'start_time': schedule.start_time,
+            'end_time': schedule.end_time,
+            'description': 'Schedule',
+            'type': 'schedule'
+        })
+
+    for meeting in meetings:
+        calendar_events.append({
+            'date': meeting.date,
+            'start_time': meeting.start_time,
+            'end_time': meeting.end_time,
+            'description': meeting.description,
+            'type': 'meeting'
+        })
+
+    # Display the calendar
+    if calendar_events:
+        # Group events by date
+        events_by_date = {}
+        for event in calendar_events:
+            date_str = event['date'].strftime('%Y-%m-%d')  # Format date to string
+            if date_str not in events_by_date:
+                events_by_date[date_str] = []
+            events_by_date[date_str].append(event)
+
+        # Display events for each date
+        for date_str, events in events_by_date.items():
+            st.write(f"**{date_str}**")
+            for event in events:
+                st.write(f"- {event['start_time']} - {event['end_time']}: {event['description']} ({event['type']})")
+    else:
+        st.info("No schedules or meetings found.")
+
+    # Add a new meeting
+    with st.form("add_meeting"):
+        meeting_date = st.date_input("Meeting Date", date.today())
+        meeting_start_time = st.time_input("Meeting Start Time")
+        meeting_end_time = st.time_input("Meeting End Time")
+        meeting_description = st.text_input("Meeting Description")
+
+        if st.form_submit_button("Add Meeting"):
+            new_meeting = Meeting(
+                employee_id=user.id,
+                date=meeting_date,
+                start_time=str(meeting_start_time),
+                end_time=str(meeting_end_time),
+                description=meeting_description
+            )
+            db.add(new_meeting)
+            db.commit()
+            st.success("Meeting added successfully!")
+            st.rerun()
+
+def monthly_meeting(user):
+    db = get_db()
+    st.subheader("📅 Monthly Meeting Preparation")
+
+    # Get the current month and year
+    now = datetime.now()
+    current_month = now.month
+    current_year = now.year
+
+    # Display the current month and year
+    st.write(f"### Preparing for: {calendar.month_name[current_month]}, {current_year}")
+
+    # Fetch the user's work plans
+    workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+
+    # Display work plans and their progress
+    if workplans:
+        st.write("### Your Work Plans and Progress")
+        for plan in workplans:
+            st.write(f"**Title**: {plan.title}")
+            st.write(f"**Details**: {plan.details}")
+            st.write(f"**Deadline**: {plan.deadline}")
+            st.write(f"**Status**: {plan.status}")
+
+            # Add a form to update the work plan's progress
+            with st.form(key=f"workplan_progress_{plan.id}"):
+                new_status = st.selectbox(
+                    "Update Status",
+                    ["Not Started", "In Progress", "Completed"],
+                    index=["Not Started", "In Progress", "Completed"].index(plan.status),
+                )
+                progress_notes = st.text_area("Progress Notes", value="")  # Add a text area for progress notes
+                submit_progress = st.form_submit_button("Update Progress")
+
+                if submit_progress:
+                    plan.status = new_status
+                    db.commit()
+                    st.success("Progress updated!")
+                    st.rerun()
+    else:
+        st.info("No work plans found.")
+
+    # Add a section for meeting agenda items
+    st.write("### Meeting Agenda Items")
+    agenda_items = [
+        "Review of last month's goals",
+        "Progress on current work plans",
+        "Discussion of any roadblocks",
+        "Setting goals for the next month",
+    ]
+    for item in agenda_items:
+        st.write(f"- {item}")
+
+    # Add a section for additional notes
+    st.write("### Additional Notes")
+    additional_notes = st.text_area("Enter any additional notes for the meeting", value="")
+
+    # Add a button to generate a meeting summary
+    if st.button("Generate Meeting Summary"):
+        summary = f"""
+        ## Meeting Summary: {calendar.month_name[current_month]}, {current_year}
+
+        ### Employee: {user.name}
+
+        ### Work Plans and Progress:
+        """
+        if workplans:
+            for plan in workplans:
+                summary += f"""
+                - **Title**: {plan.title}
+                  - **Details**: {plan.details}
+                  - **Deadline**: {plan.deadline}
+                  - **Status**: {plan.status}
+                """
+        else:
+            summary += "No work plans found."
+
+        summary += f"""
+        ### Agenda Items:
+        """
+        for item in agenda_items:
+            summary += f"- {item}\n"
+
+        summary += f"""
+        ### Additional Notes:
+        {additional_notes}
+        """
+
+        st.write("### Meeting Summary")
+        st.write(summary)
 
 def main():
     db = get_db()
@@ -1312,6 +1485,10 @@ def main():
             team_chat()
         elif selected_tab == "email":
             email()
+        elif selected_tab == "calendar_view":
+            calendar_view(st.session_state.user)
+        elif selected_tab == "monthly_meeting":
+            monthly_meeting(st.session_state.user)
         elif selected_tab == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
