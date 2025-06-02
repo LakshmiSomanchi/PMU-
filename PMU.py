@@ -839,7 +839,7 @@ def heritage_dashboard():
         height=600,
         width=800,
         scrolling=True,
-
+    )
     # KPI Data
     kpi_data = {
         "Milk Received (Lt per day)": [33000, 45000, 15000, 5000, 5000, 5000, 7500, 7500],
