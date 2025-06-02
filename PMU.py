@@ -12,6 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from math import floor, ceil  # Import ceil
 import json
+import requests  # For API calls
 
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
@@ -362,9 +363,11 @@ def dashboard(user):
     with tab1:
         st.subheader("📊 Progress")
         st.write("This is where you can display field team progress and metrics.")
+        display_todo()  # Add To-Do list here
 
     with tab2:
         pmu_dashboard(user)
+        display_kanban()  # Add Kanban board here
 
     with tab3:
         heritage_dashboard()
@@ -548,8 +551,36 @@ def pmu_dashboard(user):
     else:
         st.info("No targets found.")
 
+# Kanban Board Functions
+KANBAN_DB = "kanban.db"
+
+def get_kanban_board():
+    conn = sqlite3.connect(KANBAN_DB)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS kanban (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            status TEXT NOT NULL,
+            task TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+
+    board = {"To Do": [], "In Progress": [], "Done": []}
+    cursor.execute("SELECT status, task FROM kanban")
+    for status, task in cursor.fetchall():
+        board[status].append(task)
+    conn.close()
+    return board
+
+def add_kanban_task(status, task):
+    conn = sqlite3.connect(KANBAN_DB)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO kanban (status, task) VALUES (?, ?)", (status, task))
+    conn.commit()
+    conn.close()
+
 def display_kanban():
-    KANBAN_DB = "kanban.db"
     st.subheader("🗂️ Kanban Board")
     board = get_kanban_board()
     cols = st.columns(len(board))
@@ -565,6 +596,20 @@ def display_kanban():
             add_kanban_task(status, task)
             st.experimental_rerun()
 
+# To-Do List Functions
+def display_todo():
+    st.subheader("📝 To-Do List")
+    if "todo_list" not in st.session_state:
+        st.session_state.todo_list = []
+
+    with st.form("Add To-Do Item"):
+        todo_item = st.text_input("Enter a to-do item:")
+        if st.form_submit_button("Add"):
+            st.session_state.todo_list.append(todo_item)
+            st.experimental_rerun()
+
+    for i, item in enumerate(st.session_state.todo_list):
+        st.write(f"{i+1}. {item}")
 
 def manage_programs():
     db = get_db()
@@ -729,6 +774,15 @@ def live_dashboard():
 
     st.subheader("📊 Farmer Data Overview")
     st.dataframe(df)
+
+    # Data Analytics Placeholder
+    st.subheader("📈 Data Analytics")
+    st.write("This section will display data analytics based on the farmer data.")
+    # In a real implementation, you would perform data analysis here
+    # and display the results using Streamlit charts or tables.
+    # Example:
+    # fig = px.scatter(df, x="Number of Cows", y="Yield per Cow (L)", title="Yield vs. Cow Count")
+    # st.plotly_chart(fig)
 
 
 def heritage_dashboard():
@@ -1037,6 +1091,20 @@ def field_team_management():
     else:
         st.write("No field teams available.")
 
+    # Field Team API Integration Placeholder
+    st.subheader("🌐 Field Team API Integration")
+    st.write("This section will integrate with a Field Team Management API.")
+    # In a real implementation, you would use the 'requests' library
+    # to make API calls to a service like Trello, Asana, or a custom API.
+    # Example:
+    # api_url = "https://api.example.com/field_teams"
+    # response = requests.get(api_url)
+    # if response.status_code == 200:
+    #     teams_data = response.json()
+    #     st.write(teams_data)
+    # else:
+    #     st.error("Failed to fetch field team data from the API.")
+
 
 def training():
     st.subheader("📚 Training Module")
@@ -1120,6 +1188,31 @@ def google_drive():
         st.write("- File 2.pdf")
         st.write("- File 3.docx")
 
+# Team Chat Functions
+CHAT_DB = "chat.db"
+
+def get_team_chat():
+    conn = sqlite3.connect(CHAT_DB)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS chat (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user TEXT NOT NULL,
+            message TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    cursor.execute("SELECT user, message FROM chat ORDER BY id DESC LIMIT 10")
+    chats = cursor.fetchall()
+    conn.close()
+    return chats[::-1]  # Reverse to show oldest first
+
+def add_chat_message(user, message):
+    conn = sqlite3.connect(CHAT_DB)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
+    conn.commit()
+    conn.close()
 
 def team_chat():
     st.subheader("💬 Team Chat")
@@ -1133,7 +1226,6 @@ def team_chat():
         if st.form_submit_button("Send") and user and message:
             add_chat_message(user, message)
             st.experimental_rerun()
-
 
 # Placeholder Gmail Functionality
 def email():
