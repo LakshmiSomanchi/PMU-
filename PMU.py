@@ -419,6 +419,59 @@ def dashboard(user):
     with tab4:
         ksheersagar_dashboard()
 
+def availability_calendar():
+    st.markdown("### 📅 Availability Calendar")
+    components.html("""
+    <head>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+        <style>
+            .flatpickr-calendar {
+                font-family: 'Segoe UI', sans-serif;
+                border-radius: 12px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            }
+            .flatpickr-day.available {
+                background-color: #2b2d42;
+                color: white;
+                border-radius: 50%;
+            }
+            .flatpickr-day.unavailable {
+                background-color: #e0e0e0;
+                color: #aaa;
+                pointer-events: none;
+            }
+            .flatpickr-day.selected {
+                background-color: #00b4d8 !important;
+                color: white;
+                border-radius: 50%;
+            }
+        </style>
+    </head>
+    <body>
+        <input type="text" id="calendar" placeholder="Select a date" style="padding: 10px; font-size: 16px; width: 200px; border-radius: 8px; border: 1px solid #ccc;">
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+            flatpickr("#calendar", {
+                inline: true,
+                defaultDate: "today",
+                disable: ["2023-07-27", "2023-08-11"],
+                onDayCreate: function(dObj, dStr, fp, dayElem) {
+                    let date = dayElem.dateObj.toISOString().split('T')[0];
+                    if(["2023-07-26", "2023-08-10", "2023-08-23"].includes(date)) {
+                        dayElem.classList.add("available");
+                    }
+                    if(["2023-07-27", "2023-08-11"].includes(date)) {
+                        dayElem.classList.add("unavailable");
+                    }
+                },
+                onChange: function(selectedDates, dateStr, instance) {
+                    window.parent.postMessage({ type: 'SELECTED_DATE', value: dateStr }, '*');
+                }
+            });
+        </script>
+    </body>
+    """, height=400)
+
 
 def pmu_dashboard(user):
     db = get_db()
