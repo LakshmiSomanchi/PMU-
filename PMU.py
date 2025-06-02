@@ -22,16 +22,20 @@ st.set_page_config(page_title="PMU Tracker", layout="wide")
 st.markdown(
     """
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+
         body {
             background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/2.png");
             background-size: cover;
             background-repeat: no-repeat;
             background-attachment: fixed;
             background-position: center;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font to the entire body */
         }
 
         .stApp {
             background-color: rgba(255, 255, 255, 0.1);
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         section[data-testid="stSidebar"] > div:first-child {
@@ -44,6 +48,7 @@ st.markdown(
             background-position: center;
             color: #FFFFFF;
             z-index: 1;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         section[data-testid="stSidebar"] > div:first-child::before {
@@ -65,6 +70,7 @@ st.markdown(
         section[data-testid="stSidebar"] h5,
         section[data-testid="stSidebar"] .stRadio label {
             color: #ffffff;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         h1,
@@ -72,12 +78,14 @@ st.markdown(
         h3,
         h4 {
             color: #ffffff;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         .streamlit-expanderHeader {
             background-color: #dceefb;
             border: 1px solid #cce0ff;
             border-radius: 10px;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         .stButton > button {
@@ -85,6 +93,7 @@ st.markdown(
             color: white;
             border-radius: 8px;
             padding: 0.5em 1em;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         .stButton > button:hover {
@@ -94,6 +103,7 @@ st.markdown(
         .stDataFrame {
             background-color: #ffffff;
             border: 5px solid #ccc;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         .stTabs [role="tab"] {
@@ -102,11 +112,13 @@ st.markdown(
             border-radius: 10px 10px 0 0;
             margin-right: 5px;
             border: 1px solid #b6d4fe;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
 
         .stTabs [role="tab"][aria-selected="true"] {
             background-color: #0077b6;
             color: white;
+            font-family: 'Newsreader', serif; /* Apply Newsreader font */
         }
     </style>
     """,
@@ -309,6 +321,7 @@ def display_notice():
                 background-color: rgba(255, 255, 255, 0.3);
                 padding: 5px;
                 border-radius: 15px;
+                font-family: 'Newsreader', serif; /* Apply Newsreader font */
             }
         </style>
         <div class="notice">
@@ -819,680 +832,654 @@ def live_dashboard():
 def heritage_dashboard():
     st.subheader("🏛️ Heritage Dashboard")
 
-    col1, col2, col3 = st.columns(3)
-    col1.metric("🧑‍🌾 Total Farmers", "12,450")
-    col2.metric("🍼 Avg Yield (L/Cow)", "7.8")
-    col3.metric("📈 Impact Index", "84.2")
+    # KPI Data
+    kpi_data = {
+        "Milk Received (Lt per day)": [33000, 45000, 15000, 5000, 5000, 5000, 7500, 7500],
+        "#MCCs": [137, 70, 67, 22, 22, 22, 34, 34], "#DFs": [3, 10, 10, 3, 3, 3, 5, 5], "#HPCs (VLCC)": [67, 134, 67, 22, 22, 22, 34, 34], "Total MCCs": [207, 214, 5, 2, 2, 2, 3, 3], "Routes": [17, 17, 4, 1.0, 1.0, 2, 2, 2], "# Heritage Pourers": [1010, 2546, 1536, 512, 512, 512, 768, 768], "# Other farmers(from MCCs)": [2268, 1050, -1218, -406, -406, -406, -609, -609], "Total Active Farmers": [3278, 3596, 3596, 1199, 1199, 1199, 1798, 1798], "Productivity (in lts per day per farmer)": [10, 13, 13, 10, 11, 12, 13, 13], "SNF (Baseline)%": [8.1, 8.1, 8.15, 8.15, 8.2, 8.25, 8.30, 8.30], "Fat (Baseline)%": [4, 4.3, 0.2, 4.10, 4.15, 4.20, 4.3, 4.3], "Compliance % (with Antibiotics and Aflatoxins)": [50, 70, 70, 23, 23, 23, 35, 35], } kpi_df = pd.DataFrame(kpi_data) kpi_df.index = ["Baseline", "Target", "Progress", "Q1", "Q2", "Q3", "Q4", "Q5"]
 
-    st.markdown("---")
-    st.markdown(
-        """
-<div style="min-height:400px">
+# Display KPIs
+st.subheader("Key Performance Indicators")
+st.dataframe(kpi_df)
+
+# Sample Chart (Milk Received)
+fig_milk = px.line(
+    kpi_df,
+    x=kpi_df.index,
+    y="Milk Received (Lt per day)",
+    title="Milk Received Over Time",
+)
+st.plotly_chart(fig_milk, use_container_width=True)
+
+# Sample Bar Chart (Total Active Farmers)
+fig_farmers = px.bar(
+    kpi_df,
+    x=kpi_df.index,
+    y="Total Active Farmers",
+    title="Total Active Farmers",
+)
+st.plotly_chart(fig_farmers, use_container_width=True)
+
+st.markdown("---")
+st.markdown(
+    """
+Ksheersagar Map
+""", unsafe_allow_html=True, )
+pie_data = pd.DataFrame(
+    {"Category": ["Small", "Medium", "Large"], "Farmers": [6000, 4000, 2450]}
+)
+fig_pie = px.pie(
+    pie_data,
+    values="Farmers",
+    names="Category",
+    hole=0.5,
+    title="Farmer Size Distribution",
+)
+st.plotly_chart(fig_pie, use_container_width=True)
+
+line_data = pd.DataFrame(
+    {"Year": list(range(2015, 2024)), "ImpactScore": [50, 55, 61, 66, 70, 74, 78, 82, 84]}
+)
+fig_line = px.line(
+    line_data, x="Year", y="ImpactScore", title="Yearly Impact Score"
+)
+st.plotly_chart(fig_line, use_container_width=True)
+
+bar_data = pd.DataFrame(
+    {"Gender": ["Female", "Male"], "Participation": [5200, 7250]}
+)
+fig_bar = px.bar(
+    bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation"
+)
+st.plotly_chart(fig_bar, use_container_width=True)
+def ksheersagar_dashboard(): st.subheader("🐄 Ksheersagar 2.0 Dashboard")
+
+# KPI Data (Replace with actual data)
+kpi_data = {
+    "Total Milk Collection (Liters)": [100000, 120000, 110000, 115000, 125000],
+    "Number of Active Farmers": [500, 550, 520, 530, 560],
+    "Average Milk Yield per Farmer (Liters)": [200, 210, 211, 217, 223],
+    "AI Coverage (%)": [60, 62, 63, 65, 67],
+    "Animal Health Checkups": [150, 160, 155, 165, 170],
+}
+kpi_df = pd.DataFrame(kpi_data)
+kpi_df.index = ["Jan", "Feb", "Mar", "Apr", "May"]
+
+# Display KPIs
+st.subheader("Key Performance Indicators")
+st.dataframe(kpi_df)
+
+# Sample Chart (Total Milk Collection)
+fig_milk = px.line(
+    kpi_df,
+    x=kpi_df.index,
+    y="Total Milk Collection (Liters)",
+    title="Total Milk Collection Over Time",
+)
+st.plotly_chart(fig_milk, use_container_width=True)
+
+# Sample Bar Chart (Number of Active Farmers)
+fig_farmers = px.bar(
+    kpi_df,
+    x=kpi_df.index,
+    y="Number of Active Farmers",
+    title="Number of Active Farmers",
+)
+st.plotly_chart(fig_farmers, use_container_width=True)
+
+col1, col2, col3 = st.columns(3)
+col1.metric("🧬 Breed Diversity", "21 types")
+col2.metric("🧮 Avg Daily Milk (L)", "9.3")
+col3.metric("🔁 AI Coverage (%)", "67.4")
+
+st.markdown("---")
+
+st.markdown(
+    """
+<div style="min-height:400px" id="datawrapper-map">
   <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/01h0U/embed.js" charset="utf-8"></script>
-  <noscript><img src="https://datawrapper.dwcdn.net/01h0U/full.png" alt="Ksheersagar Map" /></noscript>
+  <noscript><img src="https://datawrapper.dwcdn.net/01h0U/full.png" alt="Datawrapper Map" /></noscript>
 </div>
 """,
-        unsafe_allow_html=True,
-    )
+    unsafe_allow_html=True,
+)
 
-    pie_data = pd.DataFrame(
-        {"Category": ["Small", "Medium", "Large"], "Farmers": [6000, 4000, 2450]}
-    )
-    fig_pie = px.pie(
-        pie_data,
-        values="Farmers",
-        names="Category",
-        hole=0.5,
-        title="Farmer Size Distribution",
-    )
-    st.plotly_chart(fig_pie, use_container_width=True)
+breed_data = pd.DataFrame(
+    {"Breed": ["Sahiwal", "Gir", "Jersey", "HF"], "Count": [3400, 2800, 1500, 900]}
+)
+fig_breed = px.pie(
+    breed_data, names="Breed", values="Count", hole=0.5, title="Breed Composition"
+)
+st.plotly_chart(fig_breed, use_container_width=True)
 
-    line_data = pd.DataFrame(
-        {"Year": list(range(2015, 2024)), "ImpactScore": [50, 55, 61, 66, 70, 74, 78, 82, 84]}
-    )
-    fig_line = px.line(
-        line_data, x="Year", y="ImpactScore", title="Yearly Impact Score"
-        )
-    st.plotly_chart(fig_line, use_container_width=True)
+trend_data = pd.DataFrame(
+    {"Year": list(range(2016, 2024)), "AI_Usage": [40, 45, 48, 52, 56, 60, 65, 67]}
+)
+fig_trend = px.line(
+    trend_data, x="Year", y="AI_Usage", title="Artificial Insemination Coverage Over Time"
+)
+st.plotly_chart(fig_trend, use_container_width=True)
 
-    bar_data = pd.DataFrame(
-        {"Gender": ["Female", "Male"], "Participation": [5200, 7250]}
-    )
-    fig_bar = px.bar(
-        bar_data, x="Participation", y="Gender", orientation="h", title="Gender Participation"
-    )
-    st.plotly_chart(fig_bar, use_container_width=True)
+class_data = pd.DataFrame(
+    {"Class": ["<5L", "5-10L", "10-15L", ">15L"], "Farms": [2200, 3800, 2700, 1100]}
+)
+fig_class = px.bar(
+    class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output"
+)
+st.plotly_chart(fig_class, use_container_width=True)
+def settings(): db = get_db() st.subheader("⚙️ Settings")
 
-
-def ksheersagar_dashboard():
-    st.subheader("🐄 Ksheersagar 2.0 Dashboard")
-
-    col1, col2, col3 = st.columns(3)
-    col1.metric("🧬 Breed Diversity", "21 types")
-    col2.metric("🧮 Avg Daily Milk (L)", "9.3")
-    col3.metric("🔁 AI Coverage (%)", "67.4")
-
-    st.markdown("---")
-
-    st.markdown(
-        """
-    <div style="min-height:400px" id="datawrapper-map">
-      <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/01h0U/embed.js" charset="utf-8"></script>
-      <noscript><img src="https://datawrapper.dwcdn.net/01h0U/full.png" alt="Datawrapper Map" /></noscript>
-    </div>
-    """,
-        unsafe_allow_html=True,
-    )
-
-    breed_data = pd.DataFrame(
-        {"Breed": ["Sahiwal", "Gir", "Jersey", "HF"], "Count": [3400, 2800, 1500, 900]}
-    )
-    fig_breed = px.pie(
-        breed_data, names="Breed", values="Count", hole=0.5, title="Breed Composition"
-    )
-    st.plotly_chart(fig_breed, use_container_width=True)
-
-    trend_data = pd.DataFrame(
-        {"Year": list(range(2016, 2024)), "AI_Usage": [40, 45, 48, 52, 56, 60, 65, 67]}
-    )
-    fig_trend = px.line(
-        trend_data, x="Year", y="AI_Usage", title="Artificial Insemination Coverage Over Time"
-    )
-    st.plotly_chart(fig_trend, use_container_width=True)
-
-    class_data = pd.DataFrame(
-        {"Class": ["<5L", "5-10L", "10-15L", ">15L"], "Farms": [2200, 3800, 2700, 1100]}
-    )
-    fig_class = px.bar(
-        class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output"
-    )
-    st.plotly_chart(fig_class, use_container_width=True)
-
-
-def settings():
-    db = get_db()
-    st.subheader("⚙️ Settings")
-
-    # Initialize settings in session state if not already done
-    if "settings" not in st.session_state:
-        st.session_state.settings = {
-            "theme": "Light",
-            "notification": "Email",
-            "language": "English",
-            "project_timeline": "Weekly",
-            "units": "Hours",
-            "progress_metric": "% Complete",
-            "role": "Admin",
-            "report_frequency": "Weekly",
-            "report_format": "PDF",
-            "auto_email_summary": False,
-        }
-
-    # User Preferences
-    st.markdown("### User Preferences")
-    theme = st.selectbox(
-        "Theme",
-        ["Light", "Dark"],
-        index=["Light", "Dark"].index(st.session_state.settings["theme"]),
-    )
-    notification = st.selectbox(
-        "Notification Settings",
-        ["Email", "In-app", "None"],
-        index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]),    )
-    language = st.selectbox(
-        "Language Preferences",
-        ["English", "Spanish", "French"],
-        index=["English", "Spanish", "French"].index(st.session_state.settings["language"]),
-    )
-
-    # Project Preferences
-    st.markdown("### Project Preferences")
-    project_timeline = st.selectbox(
-        "Default Project Timeline",
-        ["Daily", "Weekly", "Monthly"],
-        index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]),
-    )
-    units = st.selectbox(
-        "Units of Measurement",
-        ["Hours", "Days", "Cost Units"],
-        index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]),
-    )
-    progress_metric = st.selectbox(
-        "Default Progress Tracking Metrics",
-        ["% Complete", "Milestones"],
-        index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]),
-    )
-
-    # Access Control
-    st.markdown("### Access Control")
-    role = st.selectbox(
-        "Role-based Access Permissions",
-        ["Admin", "Manager", "Viewer"],
-        index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]),
-    )
-
-    # Report Configuration
-    st.markdown("### Report Configuration")
-    report_frequency = st.selectbox(
-        "Default Report Frequency",
-        ["Weekly", "Bi-weekly", "Monthly"],
-        index=["Weekly", "Bi-weekly", "Monthly"].index(st.session_state.settings["report_frequency"]),
-    )
-    report_format = st.selectbox(
-        "Report Formats",
-        ["PDF", "Excel", "JSON"],
-        index=["PDF", "Excel", "JSON"].index(st.session_state.settings["report_format"]),
-    )
-    auto_email_summary = st.checkbox(
-        "Auto-email Summary", value=st.session_state.settings["auto_email_summary"]
-    )
-
-    # Change Password Section
-    st.markdown("### Change Password")
-    new_password = st.text_input("New Password", type="password")
-    confirm_password = st.text_input("Confirm New Password", type="password")
-    if st.button("Change Password"):
-        if new_password == confirm_password:
-            user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
-            user.password = new_password
-            db.commit()
-            st.success("Password changed successfully!")
-        else:
-            st.error("Passwords do not match.")
-
-    if st.button("Save Settings"):
-        st.session_state.settings.update(
-            {
-                "theme": theme,
-                "notification": notification,
-                "language": language,
-                "project_timeline": project_timeline,
-                "units": units,
-                "progress_metric": progress_metric,
-                "role": role,
-                "report_frequency": report_frequency,
-                "report_format": report_format,
-                "auto_email_summary": auto_email_summary,
-            }
-        )
-        st.success("Settings saved successfully!")
-
-
-def reports():
-    st.subheader("📊 Reports")
-    st.markdown("### Weekly Document Summary")
-
-    # Initialize summary filename
-    summary_filename = ""
-
-    # Generate a weekly summary document
-    if st.button("Generate Weekly Summary"):
-        summary_data = {
-            "Project": [],
-            "Progress Overview": [],
-            "Milestones Completed": [],
-            "Delays": [],
-            "Blockers": [],
-            "Action Items": [],
-        }
-
-        # Simulate data generation
-        for i in range(1, 4):
-            summary_data["Project"].append(f"Project {i}")
-            summary_data["Progress Overview"].append(f"{i * 10}%")
-            summary_data["Milestones Completed"].append(f"{i} milestones")
-            summary_data["Delays"].append(f"{i} delays")
-            summary_data["Blockers"].append(f"{i} blockers")
-            summary_data["Action Items"].append(f"Action item {i}")
-
-        summary_df = pd.DataFrame(summary_data)
-        summary_filename = f"weekly_summary_{date.today()}.csv"
-        summary_df.to_csv(summary_filename, index=False)
-        st.success(f"Weekly summary generated: {summary_filename}")
-
-    # Display the summary if it exists
-    if summary_filename and os.path.exists(summary_filename):
-        summary_df = pd.read_csv(summary_filename)
-        st.dataframe(summary_df)
-
-
-def scheduling(user):
-    db = get_db()
-    st.subheader("🗓️ Employee Scheduling")
-
-    with st.form("add_schedule"):
-        schedule_date = st.date_input("Schedule Date", date.today())
-        start_time = st.time_input("Start Time")
-        end_time = st.time_input("End Time")
-        # GMeet Placeholder
-        generate_gmeet = st.checkbox("Generate GMeet Link?")
-        gmeet_link = None
-        if generate_gmeet:
-            gmeet_link = "https://meet.google.com/placeholder"  # Placeholder link
-            st.write(f"GMeet Link (Placeholder): {gmeet_link}")
-
-        if st.form_submit_button("Add Schedule"):
-            new_schedule = Schedule(
-                employee_id=user.id,
-                date=schedule_date,
-                start_time=str(start_time),
-                end_time=str(end_time),
-                gmeet_link=gmeet_link,
-            )
-            db.add(new_schedule)
-            db.commit()
-            st.success("Schedule added successfully!")
-
-    st.subheader("Your Schedules")
-    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    for schedule in schedules:
-        st.markdown(
-            f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time} | **GMeet Link**: {schedule.gmeet_link if schedule.gmeet_link else 'N/A'}"
-        )
-
-
-def field_team_management():
-    db = get_db()
-    st.subheader("👥 Field Team Management")
-
-    # Add Field Team
-    with st.form("add_field_team"):
-        team_name = st.text_input("Field Team Name")
-        if st.form_submit_button("Add Field Team"):
-            if team_name:
-                new_team = FieldTeam(name=team_name, pmu_id=st.session_state.user.id)
-                db.add(new_team)
-                db.commit()
-                st.success(f"Field Team '{team_name}' added successfully!")
-            else:
-                st.error("Field Team Name cannot be empty.")
-
-    # Display Existing Field Teams
-    st.subheader("Existing Field Teams")
-    field_teams = db.query(FieldTeam).filter_by(pmu_id=st.session_state.user.id).all()
-    if field_teams:
-        for team in field_teams:
-            col1, col2 = st.columns([3, 1])
-            col1.markdown(f"**Team Name**: {team.name}")
-            if col2.button(f"Delete {team.name}", key=team.id):
-                db.delete(team)
-                db.commit()
-                st.success(f"Field Team '{team.name}' deleted successfully!")
-                st.rerun()
-    else:
-        st.write("No field teams available.")
-
-    # Field Team API Integration Placeholder
-    st.subheader("🌐 Field Team API Integration")
-    st.write("This section will integrate with a Field Team Management API.")
-    # In a real implementation, you would use the 'requests' library
-    # to make API calls to a service like Trello, Asana, or a custom API.
-    # Example:
-    # api_url = "https://api.example.com/field_teams"
-    # response = requests.get(api_url)
-    # if response.status_code == 200:
-    #     teams_data = response.json()
-    #     st.write(teams_data)
-    # else:
-    #     st.error("Failed to fetch field team data from the API.")
-
-
-def training():
-    st.subheader("📚 Training Module")
-    st.write("This section provides training materials and resources.")
-
-    # Upload Training Content
-    st.header("📤 Upload Training Content")
-    selected_program = st.selectbox(
-        "🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown"
-    )
-    selected_category = st.selectbox(
-        "📂 Select Category",
-        ["Presentations", "Videos", "Audios", "Quizzes"],
-        key="category_dropdown",
-    )
-    uploaded_file = st.file_uploader(
-        "Choose a file to upload",
-        type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"],
-    )
-
-    if uploaded_file:
-        if selected_program and selected_category:
-            save_dir = f"training_materials/{selected_program.lower()}/{selected_category.lower()}"
-            Path(save_dir).mkdir(parents=True, exist_ok=True)
-            file_path = os.path.join(save_dir, uploaded_file.name)
-
-            if not is_valid_file(uploaded_file.name, selected_category):
-                st.error(f"❌ Invalid file type for the **{selected_category}** category.")
-            else:
-                if st.button("Upload"):
-                    try:
-                        st.write(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
-                        st.write(f"File would be saved to: {save_dir} in Google Drive.")
-
-                        with open(file_path, "wb") as f:
-                            f.write(uploaded_file.getbuffer())
-                        st.success(
-                            f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir} (Simulated Google Drive)!"
-                        )
-                    except Exception as e:
-                        st.error(f"❌ Error uploading file: {e}")
-        else:
-            st.error("Please select a program and category before uploading.")
-
-    # Display Uploaded Training Content
-    st.header("📂 Uploaded Training Content")
-    for program in ["Cotton", "Dairy"]:
-        for category in ["Presentations", "Videos", "Audios", "Quizzes"]:
-            folder_path = Path(f"training_materials/{program.lower()}/{category.lower()}")
-            if folder_path.exists() and any(folder_path.iterdir()):
-                st.subheader(f"{program} - {category}")
-                for file in os.listdir(folder_path):
-                    st.markdown(f"- {file}")
-
-
-def is_valid_file(file_name, category):
-    valid_extensions = {
-        "Presentations": [".pptx"],
-        "Videos": [".mp4"],
-        "Audios": [".mp3"],
-        "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"],
+# Initialize settings in session state if not already done
+if "settings" not in st.session_state:
+    st.session_state.settings = {
+        "theme": "Light",
+        "notification": "Email",
+        "language": "English",
+        "project_timeline": "Weekly",
+        "units": "Hours",
+        "progress_metric": "% Complete",
+        "role": "Admin",
+        "report_frequency": "Weekly",
+        "report_format": "PDF",
+        "auto_email_summary": False,
     }
-    extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"]
-    file_extension = os.path.splitext(file_name)[1].lower()
 
-    if file_extension in extra_extensions:
-        return True
-    if category in valid_extensions and file_extension in valid_extensions[category]:
-        return True
-    return False
+# User Preferences
+st.markdown("### User Preferences")
+theme = st.selectbox(
+    "Theme",
+    ["Light", "Dark"],
+    index=["Light", "Dark"].index(st.session_state.settings["theme"]),
+)
+notification = st.selectbox(
+    "Notification Settings",
+    ["Email", "In-app", "None"],
+    index=["Email", "In-app", "None"].index(st.session_state.settings["notification"]),    )
+language = st.selectbox(
+    "Language Preferences",
+    ["English", "Spanish", "French"],
+    index=["English", "Spanish", "French"].index(st.session_state.settings["language"]),
+)
 
+# Project Preferences
+st.markdown("### Project Preferences")
+project_timeline = st.selectbox(
+    "Default Project Timeline",
+    ["Daily", "Weekly", "Monthly"],
+    index=["Daily", "Weekly", "Monthly"].index(st.session_state.settings["project_timeline"]),
+)
+units = st.selectbox(
+    "Units of Measurement",
+    ["Hours", "Days", "Cost Units"],
+    index=["Hours", "Days", "Cost Units"].index(st.session_state.settings["units"]),
+)
+progress_metric = st.selectbox(
+    "Default Progress Tracking Metrics",
+    ["% Complete", "Milestones"],
+    index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]),
+)
 
-# Placeholder Google Drive Functionality
-def google_drive():
-    st.subheader("Google Drive Integration (Placeholder)")
-    st.write("This section will eventually integrate with Google Drive.")
+# Access Control
+st.markdown("### Access Control")
+role = st.selectbox(
+    "Role-based Access Permissions",
+    ["Admin", "Manager", "Viewer"],
+    index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]),
+)
 
-    if st.button("List Files (Placeholder)"):
-        st.write("Simulating listing files from Google Drive...")
-        st.write("- File 1.txt")
-        st.write("- File 2.pdf")
-        st.write("- File 3.docx")
+# Report Configuration
+st.markdown("### Report Configuration")
+report_frequency = st.selectbox(
+    "Default Report Frequency",
+    ["Weekly", "Bi-weekly", "Monthly"],
+    index=["Weekly", "Bi-weekly", "Monthly"].index(st.session_state.settings["report_frequency"]),
+)
+report_format = st.selectbox(
+    "Report Formats",
+    ["PDF", "Excel", "JSON"],
+    index=["PDF", "Excel", "JSON"].index(st.session_state.settings["report_format"]),
+)
+auto_email_summary = st.checkbox(
+    "Auto-email Summary", value=st.session_state.settings["auto_email_summary"]
+)
 
-# Team Chat Functions
+# Change Password Section
+st.markdown("### Change Password")
+new_password = st.text_input("New Password", type="password")
+confirm_password = st.text_input("Confirm New Password", type="password")
+if st.button("Change Password"):
+    if new_password == confirm_password:
+        user = db.query(Employee).filter_by(id=st.session_state.user.id).first()
+        user.password = new_password
+        db.commit()
+        st.success("Password changed successfully!")
+    else:
+        st.error("Passwords do not match.")
+
+if st.button("Save Settings"):
+    st.session_state.settings.update(
+        {
+            "theme": theme,
+            "notification": notification,
+            "language": language,
+            "project_timeline": project_timeline,
+            "units": units,
+            "progress_metric": progress_metric,
+            "role": role,
+            "report_frequency": report_frequency,
+            "report_format": report_format,
+            "auto_email_summary": auto_email_summary,
+        }
+    )
+    st.success("Settings saved successfully!")
+def reports(): st.subheader("📊 Reports") st.markdown("### Weekly Document Summary")
+
+# Initialize summary filename
+summary_filename = ""
+
+# Generate a weekly summary document
+if st.button("Generate Weekly Summary"):
+    summary_data = {
+        "Project": [],
+        "Progress Overview": [],
+        "Milestones Completed": [],
+        "Delays": [],
+        "Blockers": [],
+        "Action Items": [],
+    }
+
+    # Simulate data generation
+    for i in range(1, 4):
+        summary_data["Project"].append(f"Project {i}")
+        summary_data["Progress Overview"].append(f"{i * 10}%")
+        summary_data["Milestones Completed"].append(f"{i} milestones")
+        summary_data["Delays"].append(f"{i} delays")
+        summary_data["Blockers"].append(f"{i} blockers")
+        summary_data["Action Items"].append(f"Action item {i}")
+
+    summary_df = pd.DataFrame(summary_data)
+    summary_filename = f"weekly_summary_{date.today()}.csv"
+    summary_df.to_csv(summary_filename, index=False)
+    st.success(f"Weekly summary generated: {summary_filename}")
+
+# Display the summary if it exists
+if summary_filename and os.path.exists(summary_filename):
+    summary_df = pd.read_csv(summary_filename)
+    st.dataframe(summary_df)
+def scheduling(user): db = get_db() st.subheader("🗓️ Employee Scheduling")
+
+with st.form("add_schedule"):
+    schedule_date = st.date_input("Schedule Date", date.today())
+    start_time = st.time_input("Start Time")
+    end_time = st.time_input("End Time")
+    # GMeet Placeholder
+    generate_gmeet = st.checkbox("Generate GMeet Link?")
+    gmeet_link = None
+    if generate_gmeet:
+        gmeet_link = "https://meet.google.com/placeholder"  # Placeholder link
+        st.write(f"GMeet Link (Placeholder): {gmeet_link}")
+
+    if st.form_submit_button("Add Schedule"):
+        new_schedule = Schedule(
+            employee_id=user.id,
+            date=schedule_date,
+            start_time=str(start_time),
+            end_time=str(end_time),
+            gmeet_link=gmeet_link,
+        )
+        db.add(new_schedule)
+        db.commit()
+        st.success("Schedule added successfully!")
+
+st.subheader("Your Schedules")
+schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+for schedule in schedules:
+    st.markdown(
+        f"**Date**: {schedule.date} | **Start**: {schedule.start_time} | **End**: {schedule.end_time} | **GMeet Link**: {schedule.gmeet_link if schedule.gmeet_link else 'N/A'}"
+    )
+def field_team_management(): db = get_db() st.subheader("👥 Field Team Management")
+
+# Add Field Team
+with st.form("add_field_team"):
+    team_name = st.text_input("Field Team Name")
+    if st.form_submit_button("Add Field Team"):
+        if team_name:
+            new_team = FieldTeam(name=team_name, pmu_id=st.session_state.user.id)
+            db.add(new_team)
+            db.commit()
+            st.success(f"Field Team '{team_name}' added successfully!")
+        else:
+            st.error("Field Team Name cannot be empty.")
+
+# Display Existing Field Teams
+st.subheader("Existing Field Teams")
+field_teams = db.query(FieldTeam).filter_by(pmu_id=st.session_state.user.id).all()
+if field_teams:
+    for team in field_teams:
+        col1, col2 = st.columns([3, 1])
+        col1.markdown(f"**Team Name**: {team.name}")
+        if col2.button(f"Delete {team.name}", key=team.id):
+            db.delete(team)
+            db.commit()
+            st.success(f"Field Team '{team.name}' deleted successfully!")
+            st.rerun()
+else:
+    st.write("No field teams available.")
+
+# Field Team API Integration Placeholder
+st.subheader("🌐 Field Team API Integration")
+st.write("This section will integrate with a Field Team Management API.")
+# In a real implementation, you would use the 'requests' library
+# to make API calls to a service like Trello, Asana, or a custom API.
+# Example:
+# api_url = "https://api.example.com/field_teams"
+# response = requests.get(api_url)
+# if response.status_code == 200:
+#     teams_data = response.json()
+#     st.write(teams_data)
+# else:
+#     st.error("Failed to fetch field team data from the API.")
+def training(): st.subheader("📚 Training Module") st.write("This section provides training materials and resources.")
+
+# Upload Training Content
+st.header("📤 Upload Training Content")
+selected_program = st.selectbox(
+    "🌟 Select Program", ["Cotton", "Dairy"], key="program_dropdown"
+)
+selected_category = st.selectbox(
+    "📂 Select Category",
+    ["Presentations", "Videos", "Audios", "Quizzes"],
+    key="category_dropdown"
+)
+uploaded_file = st.file_uploader(
+    "Choose a file to upload",
+    type=["pdf", "mp4", "mp3", "json", "pptx", "xlsx", "png", "jpg", "jpeg"],
+)
+
+if uploaded_file:
+    if selected_program and selected_category:
+        save_dir = f"training_materials/{selected_program.lower()}/{selected_category.lower()}"
+        Path(save_dir).mkdir(parents=True, exist_ok=True)
+        file_path = os.path.join(save_dir, uploaded_file.name)
+
+        if not is_valid_file(uploaded_file.name, selected_category):
+            st.error(f"❌ Invalid file type for the **{selected_category}** category.")
+        else:
+            if st.button("Upload"):
+                try:
+                    st.write(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
+                    st.write(f"File would be saved to: {save_dir} in Google Drive.")
+
+                    with open(file_path, "wb") as f:
+                        f.write(uploaded_file.getbuffer())
+                    st.success(
+                        f"✅ File '{uploaded_file.name}' uploaded successfully to {save_dir} (Simulated Google Drive)!"
+                    )
+                except Exception as e:
+                    st.error(f"❌ Error uploading file: {e}")
+    else:
+        st.error("Please select a program and category before uploading.")
+
+# Display Uploaded Training Content
+st.header("📂 Uploaded Training Content")
+for program in ["Cotton", "Dairy"]:
+    for category in ["Presentations", "Videos", "Audios", "Quizzes"]:
+        folder_path = Path(f"training_materials/{program.lower()}/{category.lower()}")
+        if folder_path.exists() and any(folder_path.iterdir()):
+            st.subheader(f"{program} - {category}")
+            for file in os.listdir(folder_path):
+                st.markdown(f"- {file}")
+def is_valid_file(file_name, category): valid_extensions = { "Presentations": [".pptx"], "Videos": [".mp4"], "Audios": [".mp3"], "Quizzes": [".xlsx", ".png", ".jpg", ".jpeg"], } extra_extensions = [".xlsx", ".png", ".jpg", ".jpeg"] file_extension = os.path.splitext(file_name)[1].lower()
+
+if file_extension in extra_extensions:
+    return True
+if category in valid_extensions and file_extension in valid_extensions[category]:
+    return True
+return False
+Placeholder Google Drive Functionality
+def google_drive(): st.subheader("Google Drive Integration (Placeholder)") st.write("This section will eventually integrate with Google Drive.")
+
+if st.button("List Files (Placeholder)"):
+    st.write("Simulating listing files from Google Drive...")
+    st.write("- File 1.txt")
+    st.write("- File 2.pdf")
+    st.write("- File 3.docx")
+Team Chat Functions
 CHAT_DB = "chat.db"
 
-def get_team_chat():
-    conn = sqlite3.connect(CHAT_DB)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS chat (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user TEXT NOT NULL,
-            message TEXT NOT NULL
+def get_team_chat(): conn = sqlite3.connect(CHAT_DB) cursor = conn.cursor() cursor.execute(""" CREATE TABLE IF NOT EXISTS chat ( id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT NOT NULL, message TEXT NOT NULL ) """) conn.commit() cursor.execute("SELECT user, message FROM chat ORDER BY id DESC LIMIT 10") chats = cursor.fetchall() conn.close() return chats[::-1] # Reverse to show oldest first
+
+def add_chat_message(user, message): conn = sqlite3.connect(CHAT_DB) cursor = conn.cursor() cursor.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message)) conn.commit() conn.close()
+
+def team_chat(): st.subheader("💬 Team Chat") chats = get_team_chat() for user, message in chats: st.markdown(f"{user}: {message}")
+
+with st.form("Send Chat Message"):
+    user = st.text_input("Your Name", value=st.session_state.user.name if "user" in st.session_state else "")
+    message = st.text_input("Message")
+    if st.form_submit_button("Send") and user and message:
+        add_chat_message(user, message)
+        st.rerun()
+Placeholder Gmail Functionality
+def email(): st.subheader("Email Integration (Placeholder)") st.write("This section will eventually integrate with Gmail.")
+
+with st.form("send_email_form"):
+    recipient = st.text_input("Recipient Email")
+    subject = st.text_input("Subject")
+    body = st.text_area("Body")
+    submitted = st.form_submit_button("Send Email (Placeholder)")
+
+    if submitted:
+        st.write(f"Simulating sending email to {recipient} with subject '{subject}'.")
+def calendar_view(user): db = get_db() st.subheader("📅 Your Calendar")
+
+# Fetch schedules and meetings for the user
+schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+meetings = db.query(Meeting).filter_by(employee_id=user.id).all()
+
+# Combine schedules and meetings into a single list
+calendar_events = []
+
+for schedule in schedules:
+    calendar_events.append({
+        'date': schedule.date,
+        'start_time': schedule.start_time,
+        'end_time': schedule.end_time,
+        'description': 'Schedule',
+        'type': 'schedule'
+    })
+
+for meeting in meetings:
+    calendar_events.append({
+        'date': meeting.date,
+        'start_time': meeting.start_time,
+        'end_time': meeting.end_time,
+        'description': meeting.description,
+        'type': 'meeting'
+    })
+
+# Display the calendar
+if calendar_events:
+    # Group events by date
+    events_by_date = {}
+    for event in calendar_events:
+        date_str = event['date'].strftime('%Y-%m-%d')  # Format date to string
+        if date_str not in events_by_date:
+            events_by_date[date_str] = []
+        events_by_date[date_str].append(event)
+
+    # Display events for each date
+    for date_str, events in events_by_date.items():
+        st.write(f"**{date_str}**")
+        for event in events:
+            st.write(f"- {event['start_time']} - {event['end_time']}: {event['description']} ({event['type']})")
+else:
+    st.info("No schedules or meetings found.")
+
+# Add a new meeting
+with st.form("add_meeting"):
+    meeting_date = st.date_input("Meeting Date", date.today())
+    meeting_start_time = st.time_input("Meeting Start Time")
+    meeting_end_time = st.time_input("Meeting End Time")
+    meeting_description = st.text_input("Meeting Description")
+
+    if st.form_submit_button("Add Meeting"):
+        new_meeting = Meeting(
+            employee_id=user.id,
+            date=meeting_date,
+            start_time=str(meeting_start_time),
+            end_time=str(meeting_end_time),
+            description=meeting_description
         )
-    """)
-    conn.commit()
-    cursor.execute("SELECT user, message FROM chat ORDER BY id DESC LIMIT 10")
-    chats = cursor.fetchall()
-    conn.close()
-    return chats[::-1]  # Reverse to show oldest first
+        db.add(new_meeting)
+        db.commit()
+        st.success("Meeting added successfully!")
+        st.rerun()
+def monthly_meeting(user): db = get_db() st.subheader("📅 Monthly Meeting Preparation")
 
-def add_chat_message(user, message):
-    conn = sqlite3.connect(CHAT_DB)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
-    conn.commit()
-    conn.close()
+# Get the current month and year
+now = datetime.now()
+current_month = now.month
+current_year = now.year
 
-def team_chat():
-    st.subheader("💬 Team Chat")
-    chats = get_team_chat()
-    for user, message in chats:
-        st.markdown(f"**{user}**: {message}")
+# Display the current month and year
+st.write(f"### Preparing for: {calendar.month_name[current_month]}, {current_year}")
 
-    with st.form("Send Chat Message"):
-        user = st.text_input("Your Name", value=st.session_state.user.name if "user" in st.session_state else "")
-        message = st.text_input("Message")
-        if st.form_submit_button("Send") and user and message:
-            add_chat_message(user, message)
-            st.rerun()
+# Fetch the user's work plans
+workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
 
-# Placeholder Gmail Functionality
-def email():
-    st.subheader("Email Integration (Placeholder)")
-    st.write("This section will eventually integrate with Gmail.")
+# Display work plans and their progress
+if workplans:
+    st.write("### Your Work Plans and Progress")
+    for plan in workplans:
+        st.write(f"**Title**: {plan.title}")
+        st.write(f"**Details**: {plan.details}")
+        st.write(f"**Deadline**: {plan.deadline}")
+        st.write(f"**Status**: {plan.status}")
 
-    with st.form("send_email_form"):
-        recipient = st.text_input("Recipient Email")
-        subject = st.text_input("Subject")
-        body = st.text_area("Body")
-        submitted = st.form_submit_button("Send Email (Placeholder)")
-
-        if submitted:
-            st.write(f"Simulating sending email to {recipient} with subject '{subject}'.")
-
-def calendar_view(user):
-    db = get_db()
-    st.subheader("📅 Your Calendar")
-
-    # Fetch schedules and meetings for the user
-    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    meetings = db.query(Meeting).filter_by(employee_id=user.id).all()
-
-    # Combine schedules and meetings into a single list
-    calendar_events = []
-
-    for schedule in schedules:
-        calendar_events.append({
-            'date': schedule.date,
-            'start_time': schedule.start_time,
-            'end_time': schedule.end_time,
-            'description': 'Schedule',
-            'type': 'schedule'
-        })
-
-    for meeting in meetings:
-        calendar_events.append({
-            'date': meeting.date,
-            'start_time': meeting.start_time,
-            'end_time': meeting.end_time,
-            'description': meeting.description,
-            'type': 'meeting'
-        })
-
-    # Display the calendar
-    if calendar_events:
-        # Group events by date
-        events_by_date = {}
-        for event in calendar_events:
-            date_str = event['date'].strftime('%Y-%m-%d')  # Format date to string
-            if date_str not in events_by_date:
-                events_by_date[date_str] = []
-            events_by_date[date_str].append(event)
-
-        # Display events for each date
-        for date_str, events in events_by_date.items():
-            st.write(f"**{date_str}**")
-            for event in events:
-                st.write(f"- {event['start_time']} - {event['end_time']}: {event['description']} ({event['type']})")
-    else:
-        st.info("No schedules or meetings found.")
-
-    # Add a new meeting
-    with st.form("add_meeting"):
-        meeting_date = st.date_input("Meeting Date", date.today())
-        meeting_start_time = st.time_input("Meeting Start Time")
-        meeting_end_time = st.time_input("Meeting End Time")
-        meeting_description = st.text_input("Meeting Description")
-
-        if st.form_submit_button("Add Meeting"):
-            new_meeting = Meeting(
-                employee_id=user.id,
-                date=meeting_date,
-                start_time=str(meeting_start_time),
-                end_time=str(meeting_end_time),
-                description=meeting_description
+        # Add a form to update the work plan's progress
+        with st.form(key=f"workplan_progress_{plan.id}"):
+            new_status = st.selectbox(
+                "Update Status",
+                ["Not Started", "In Progress", "Completed"],
+                index=["Not Started", "In Progress", "Completed"].index(plan.status),
             )
-            db.add(new_meeting)
-            db.commit()
-            st.success("Meeting added successfully!")
-            st.rerun()
+            progress_notes = st.text_area("Progress Notes", value="")  # Add a text area for progress notes
+            submit_progress = st.form_submit_button("Update Progress")
 
-def monthly_meeting(user):
-    db = get_db()
-    st.subheader("📅 Monthly Meeting Preparation")
+            if submit_progress:
+                plan.status = new_status
+                db.commit()
+                st.success("Progress updated!")
+                st.rerun()
+else:
+    st.info("No work plans found.")
 
-    # Get the current month and year
-    now = datetime.now()
-    current_month = now.month
-    current_year = now.year
+# Add a section for meeting agenda items
+st.write("### Meeting Agenda Items")
+agenda_items = [
+    "Review of last month's goals",
+    "Progress on current work plans",
+    "Discussion of any roadblocks",
+    "Setting goals for the next month",
+]
+for item in agenda_items:
+    st.write(f"- {item}")
 
-    # Display the current month and year
-    st.write(f"### Preparing for: {calendar.month_name[current_month]}, {current_year}")
+# Add a section for additional notes
+st.write("### Additional Notes")
+additional_notes = st.text_area("Enter any additional notes for the meeting", value="")
 
-    # Fetch the user's work plans
-    workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+# Add a button to generate a meeting summary
+if st.button("Generate Meeting Summary"):
+    summary = f"""
+    ## Meeting Summary: {calendar.month_name[current_month]}, {current_year}
 
-    # Display work plans and their progress
+    ### Employee: {user.name}
+
+    ### Work Plans and Progress:
+    """
     if workplans:
-        st.write("### Your Work Plans and Progress")
         for plan in workplans:
-            st.write(f"**Title**: {plan.title}")
-            st.write(f"**Details**: {plan.details}")
-            st.write(f"**Deadline**: {plan.deadline}")
-            st.write(f"**Status**: {plan.status}")
-
-            # Add a form to update the work plan's progress
-            with st.form(key=f"workplan_progress_{plan.id}"):
-                new_status = st.selectbox(
-                    "Update Status",
-                    ["Not Started", "In Progress", "Completed"],
-                    index=["Not Started", "In Progress", "Completed"].index(plan.status),
-                )
-                progress_notes = st.text_area("Progress Notes", value="")  # Add a text area for progress notes
-                submit_progress = st.form_submit_button("Update Progress")
-
-                if submit_progress:
-                    plan.status = new_status
-                    db.commit()
-                    st.success("Progress updated!")
-                    st.rerun()
+            summary += f"""
+            - **Title**: {plan.title}
+              - **Details**: {plan.details}
+              - **Deadline**: {plan.deadline}
+              - **Status**: {plan.status}
+            """
     else:
-        st.info("No work plans found.")
+        summary += "No work plans found."
 
-    # Add a section for meeting agenda items
-    st.write("### Meeting Agenda Items")
-    agenda_items = [
-        "Review of last month's goals",
-        "Progress on current work plans",
-        "Discussion of any roadblocks",
-        "Setting goals for the next month",
-    ]
+    summary += f"""
+    ### Agenda Items:
+    """
     for item in agenda_items:
-        st.write(f"- {item}")
+        summary += f"- {item}\n"
 
-    # Add a section for additional notes
-    st.write("### Additional Notes")
-    additional_notes = st.text_area("Enter any additional notes for the meeting", value="")
+    summary += f"""
+    ### Additional Notes:
+    {additional_notes}
+    """
 
-    # Add a button to generate a meeting summary
-    if st.button("Generate Meeting Summary"):
-        summary = f"""
-        ## Meeting Summary: {calendar.month_name[current_month]}, {current_year}
+    st.write("### Meeting Summary")
+    st.write(summary)
+def main(): db = get_db()
 
-        ### Employee: {user.name}
+# Initialize session state for user
+if "user" not in st.session_state:
+    st.session_state.user = None
 
-        ### Work Plans and Progress:
-        """
-        if workplans:
-            for plan in workplans:
-                summary += f"""
-                - **Title**: {plan.title}
-                  - **Details**: {plan.details}
-                  - **Deadline**: {plan.deadline}
-                  - **Status**: {plan.status}
-                """
-        else:
-            summary += "No work plans found."
+# Preload users and programs
+preload_users()
+preload_programs()
 
-        summary += f"""
-        ### Agenda Items:
-        """
-        for item in agenda_items:
-            summary += f"- {item}\n"
+# Display the login section if no user is logged in
+if st.session_state.user is None:
+    st.title("🔐 Login")
+    display_notice()
+    all_users = db.query(Employee).all()
+    emails = [u.email for u in all_users]
+    selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
 
-        summary += f"""
-        ### Additional Notes:
-        {additional_notes}
-        """
+    if selected != "Select...":
+        user = db.query(Employee).filter_by(email=selected).first()
+        password = st.text_input("Password", type="password", key="password")
+        if user and user.password == password:
+            st.session_state.user = user
+            st.success(f"Welcome, {user.name}!")
+        elif user and user.password != password:
+            st.error("Incorrect password.")
 
-        st.write("### Meeting Summary")
-        st.write(summary)
-
-def main():
-    db = get_db()
-
-    # Initialize session state for user
-    if "user" not in st.session_state:
+# Display the dashboard if a user is logged in
+if st.session_state.user is not None:
+    selected_tab = sidebar()
+    if selected_tab == "dashboard":
+        dashboard(st.session_state.user)
+    elif selected_tab == "manage_programs":
+        manage_programs()
+    elif selected_tab == "scheduling":
+        scheduling(st.session_state.user)
+    elif selected_tab == "field_team_management":
+        field_team_management()
+    elif selected_tab == "live_dashboard":
+        live_dashboard()
+    elif selected_tab == "reports":
+        reports()
+    elif selected_tab == "settings":
+        settings()
+    elif selected_tab == "saksham_dashboard":
+        saksham_dashboard()
+    elif selected_tab == "training":
+        training()
+    elif selected_tab == "google_drive":
+        google_drive()
+    elif selected_tab == "team_chat":
+        team_chat()
+    elif selected_tab == "email":
+        email()
+    elif selected_tab == "calendar_view":
+        calendar_view(st.session_state.user)
+    elif selected_tab == "monthly_meeting":
+        monthly_meeting(st.session_state.user)
+    elif selected_tab == "logout":
         st.session_state.user = None
-
-    # Preload users and programs
-    preload_users()
-    preload_programs()
-
-    # Display the login section if no user is logged in
-    if st.session_state.user is None:
-        st.title("🔐 Login")
-        display_notice()
-        all_users = db.query(Employee).all()
-        emails = [u.email for u in all_users]
-        selected = st.selectbox("Select your email", ["Select..."] + emails, index=0)
-
-        if selected != "Select...":
-            user = db.query(Employee).filter_by(email=selected).first()
-            password = st.text_input("Password", type="password", key="password")
-            if user and user.password == password:
-                st.session_state.user = user
-                st.success(f"Welcome, {user.name}!")
-            elif user and user.password != password:
-                st.error("Incorrect password.")
-
-    # Display the dashboard if a user is logged in
-    if st.session_state.user is not None:
-        selected_tab = sidebar()
-        if selected_tab == "dashboard":
-            dashboard(st.session_state.user)
-        elif selected_tab == "manage_programs":
-            manage_programs()
-        elif selected_tab == "scheduling":
-            scheduling(st.session_state.user)
-        elif selected_tab == "field_team_management":
-            field_team_management()
-        elif selected_tab == "live_dashboard":
-            live_dashboard()
-        elif selected_tab == "reports":
-            reports()
-        elif selected_tab == "settings":
-            settings()
-        elif selected_tab == "saksham_dashboard":
-            saksham_dashboard()
-        elif selected_tab == "training":
-            training()
-        elif selected_tab == "google_drive":
-            google_drive()
-        elif selected_tab == "team_chat":
-            team_chat()
-        elif selected_tab == "email":
-            email()
-        elif selected_tab == "calendar_view":
-            calendar_view(st.session_state.user)
-        elif selected_tab == "monthly_meeting":
-            monthly_meeting(st.session_state.user)
-        elif selected_tab == "logout":
-            st.session_state.user = None
-            st.success("You have been logged out.")
-
-
-if __name__ == "__main__":
-    main()
+        st.success("You have been logged out.")
+if name == "main": main()
