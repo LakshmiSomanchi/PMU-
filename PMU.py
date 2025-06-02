@@ -976,7 +976,8 @@ fig_class = px.bar(
     class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output"
 )
 st.plotly_chart(fig_class, use_container_width=True)
-def settings(): db = get_db() st.subheader("⚙️ Settings")
+def settings(): 
+db = get_db() st.subheader("⚙️ Settings")
 
 # Initialize settings in session state if not already done
 if "settings" not in st.session_state:
@@ -1492,4 +1493,5 @@ if st.session_state.user is not None:
     elif selected_tab == "logout":
         st.session_state.user = None
         st.success("You have been logged out.")
-if name == "main": main()
+if name == "main": 
+    main()
