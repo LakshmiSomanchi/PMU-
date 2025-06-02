@@ -13,9 +13,6 @@ import plotly.graph_objects as go
 from math import floor, ceil  # Import ceil
 import json
 
-KANBAN_DB = "kanban.db"
-CHAT_DB = "chat.db"
-
 # Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
@@ -265,11 +262,11 @@ def preload_programs():
             db.rollback()
 
 
-# Drop and create tables
+# Drop and create all tables
 Base.metadata.drop_all(engine)
 Base.metadata.create_all(engine)
 
-# Preload data
+# Then preload
 preload_users()
 preload_programs()
 
@@ -550,6 +547,23 @@ def pmu_dashboard(user):
                         st.experimental_rerun()
     else:
         st.info("No targets found.")
+
+def display_kanban():
+    KANBAN_DB = "kanban.db"
+    st.subheader("🗂️ Kanban Board")
+    board = get_kanban_board()
+    cols = st.columns(len(board))
+    for i, (col_name, tasks) in enumerate(board.items()):
+        with cols[i]:
+            st.markdown(f"### {col_name}")
+            for task in tasks:
+                st.success(f"✅ {task}")
+    with st.form("Add Kanban Task"):
+        task = st.text_input("Task Description")
+        status = st.selectbox("Status", ["To Do", "In Progress", "Done"])
+        if st.form_submit_button("Add Task") and task:
+            add_kanban_task(status, task)
+            st.experimental_rerun()
 
 
 def manage_programs():
