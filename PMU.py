@@ -837,7 +837,8 @@ def ksheersagar_dashboard():
     st.subheader("🐄 Ksheersagar 2.0 Dashboard")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("🧬 Breed Diversity", "21 types")    col2.metric("🧮 Avg Daily Milk (L)", "9.3")
+    col1.metric("🧬 Breed Diversity", "21 types") 
+    col2.metric("🧮 Avg Daily Milk (L)", "9.3")
     col3.metric("🔁 AI Coverage (%)", "67.4")
 
     st.markdown("---")
