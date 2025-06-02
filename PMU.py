@@ -835,7 +835,16 @@ def heritage_dashboard():
     # KPI Data
     kpi_data = {
         "Milk Received (Lt per day)": [33000, 45000, 15000, 5000, 5000, 5000, 7500, 7500],
-        "#MCCs": [137, 70, 67, 22, 22, 22, 34, 34], "#DFs": [3, 10, 10, 3, 3, 3, 5, 5], "#HPCs (VLCC)": [67, 134, 67, 22, 22, 22, 34, 34], "Total MCCs": [207, 214, 5, 2, 2, 2, 3, 3], "Routes": [17, 17, 4, 1.0, 1.0, 2, 2, 2], "# Heritage Pourers": [1010, 2546, 1536, 512, 512, 512, 768, 768], "# Other farmers(from MCCs)": [2268, 1050, -1218, -406, -406, -406, -609, -609], "Total Active Farmers": [3278, 3596, 3596, 1199, 1199, 1199, 1798, 1798], "Productivity (in lts per day per farmer)": [10, 13, 13, 10, 11, 12, 13, 13], "SNF (Baseline)%": [8.1, 8.1, 8.15, 8.15, 8.2, 8.25, 8.30, 8.30], "Fat (Baseline)%": [4, 4.3, 0.2, 4.10, 4.15, 4.20, 4.3, 4.3], "Compliance % (with Antibiotics and Aflatoxins)": [50, 70, 70, 23, 23, 23, 35, 35], } kpi_df = pd.DataFrame(kpi_data) kpi_df.index = ["Baseline", "Target", "Progress", "Q1", "Q2", "Q3", "Q4", "Q5"]
+        "#MCCs": [137, 70, 67, 22, 22, 22, 34, 34], "#DFs": [3, 10, 10, 3, 3, 3, 5, 5], 
+        "#HPCs (VLCC)": [67, 134, 67, 22, 22, 22, 34, 34], "Total MCCs": [207, 214, 5, 2, 2, 2, 3, 3], "Routes": [17, 17, 4, 1.0, 1.0, 2, 2, 2],
+        "#Heritage Pourers": [1010, 2546, 1536, 512, 512, 512, 768, 768], 
+        "# Other farmers(from MCCs)": [2268, 1050, -1218, -406, -406, -406, -609, -609], "Total Active Farmers": [3278, 3596, 3596, 1199, 1199, 1199, 1798, 1798], 
+        "Productivity (in lts per day per farmer)": [10, 13, 13, 10, 11, 12, 13, 13], 
+        "SNF (Baseline)%": [8.1, 8.1, 8.15, 8.15, 8.2, 8.25, 8.30, 8.30], 
+        "Fat (Baseline)%": [4, 4.3, 0.2, 4.10, 4.15, 4.20, 4.3, 4.3], 
+        "Compliance % (with Antibiotics and Aflatoxins)": [50, 70, 70, 23, 23, 23, 35, 35], 
+    } 
+    kpi_df = pd.DataFrame(kpi_data) kpi_df.index = ["Baseline", "Target", "Progress", "Q1", "Q2", "Q3", "Q4", "Q5"]
 
 # Display KPIs
 st.subheader("Key Performance Indicators")
