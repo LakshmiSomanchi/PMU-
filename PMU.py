@@ -1123,6 +1123,7 @@ def google_drive():
 
 # --- Persistent Chat ---
 def get_team_chat():
+    CHAT_DB = "chat.db"
     conn = sqlite3.connect(CHAT_DB)
     c = conn.cursor()
     c.execute("SELECT user, message FROM chat ORDER BY timestamp DESC LIMIT 20")
@@ -1151,7 +1152,6 @@ def team_chat():
         if st.form_submit_button("Send") and user and message:
             add_chat_message(user, message)
             st.experimental_rerun()
-
 
 
 # Placeholder Gmail Functionality
