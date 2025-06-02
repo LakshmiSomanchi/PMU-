@@ -385,7 +385,7 @@ def sidebar():
 def dashboard(user):
     db = get_db()
     st.markdown(
-        "<h1 style='text-align:center; color:#1a73e8;'>Project Management Dashboard</h1>",
+        "<h1 style='text-align:center; color:#020431;'>Project Management Dashboard</h1>",
         unsafe_allow_html=True,
     )
     st.sidebar.markdown("### Logged in as")
