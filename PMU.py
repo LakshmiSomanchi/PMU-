@@ -843,7 +843,9 @@ def heritage_dashboard():
         "SNF (Baseline)%": [8.1, 8.1, 8.15, 8.15, 8.2, 8.25, 8.30, 8.30], 
         "Fat (Baseline)%": [4, 4.3, 0.2, 4.10, 4.15, 4.20, 4.3, 4.3], 
         "Compliance % (with Antibiotics and Aflatoxins)": [50, 70, 70, 23, 23, 23, 35, 35], 
-    } kpi_df = pd.DataFrame(kpi_data) kpi_df.index = ["Baseline", "Target", "Progress", "Q1", "Q2", "Q3", "Q4", "Q5"]
+    } 
+    kpi_df = pd.DataFrame(kpi_data)
+    kpi_df.index = ["Baseline", "Target", "Progress", "Q1", "Q2", "Q3", "Q4", "Q5"]
 
 # Display KPIs
 st.subheader("Key Performance Indicators")
