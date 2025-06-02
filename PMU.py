@@ -976,8 +976,9 @@ fig_class = px.bar(
     class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output"
 )
 st.plotly_chart(fig_class, use_container_width=True)
+
 def settings(): 
-db = get_db() st.subheader("⚙️ Settings")
+   db = get_db() st.subheader("⚙️ Settings")
 
 # Initialize settings in session state if not already done
 if "settings" not in st.session_state:
