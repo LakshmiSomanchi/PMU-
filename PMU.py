@@ -12,7 +12,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from math import floor, ceil  # Import ceil
 import json
-import requests  # For API calls
+import requests
 import calendar
 import streamlit.components.v1 as components
 
@@ -134,6 +134,35 @@ SessionLocal = sessionmaker(bind=engine)
 
 def get_db():
     return SessionLocal()
+
+API_BASE_URL = "https://api.example.com"  # replace with your actual base API URL
+
+def api_get(endpoint, params=None):
+    try:
+        response = requests.get(f"{API_BASE_URL}/{endpoint}", params=params)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"GET API Error: {e}")
+        return None
+
+def api_post(endpoint, data):
+    try:
+        response = requests.post(f"{API_BASE_URL}/{endpoint}", json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"POST API Error: {e}")
+        return None
+
+def api_put(endpoint, data):
+    try:
+        response = requests.put(f"{API_BASE_URL}/{endpoint}", json=data)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        print(f"PUT API Error: {e}")
+        return None
 
 
 # Models
