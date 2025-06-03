@@ -312,9 +312,6 @@ def drop_tables(engine):
     ])
 
 
-# Drop and create all tables
-drop_tables(engine)  # Use the explicit drop function
-Base.metadata.create_all(engine)
 Base.metadata.create_all(bind=engine)
 
 # Then preload
