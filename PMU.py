@@ -1401,36 +1401,30 @@ def email():
 
 def calendar_view(user):
     db = get_db()
-    st.subheader("Tasks")
+    st.subheader("📆 Calendar Tasks")
 
-    # Fetch schedules and meetings for the user
-    schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-    meetings = db.query(Meeting).filter_by(employee_id=user.id).all()
+    selected_date = st.date_input("Select a date", date.today())
 
-    # Combine schedules and meetings into a single list
-    calendar_events = []
+    # Add a new task for the selected date
+    with st.form("add_task_form"):
+        task_desc = st.text_input("Task Description")
+        if st.form_submit_button("Add Task"):
+            if task_desc:
+                new_task = CalendarTask(employee_id=user.id, date=selected_date, task=task_desc)
+                db.add(new_task)
+                db.commit()
+                st.success("✅ Task added successfully!")
+                st.rerun()
 
-    for schedule in schedules:
-        calendar_events.append(
-            {
-                "date": schedule.date,
-                "start_time": schedule.start_time,
-                "end_time": schedule.end_time,
-                "description": "Schedule",
-                "type": "schedule",
-            }
-        )
+    # Show tasks for the selected date
+    tasks = db.query(CalendarTask).filter_by(employee_id=user.id, date=selected_date).all()
+    st.write(f"### 📝 Tasks for {selected_date.strftime('%B %d, %Y')}")
+    if tasks:
+        for t in tasks:
+            st.markdown(f"- {t.task}")
+    else:
+        st.info("No tasks for this date.")
 
-    for meeting in meetings:
-        calendar_events.append(
-            {
-                "date": meeting.date,
-                "start_time": meeting.start_time,
-                "end_time": meeting.end_time,
-                "description": meeting.description,
-                "type": "meeting",
-            }
-        )
 
      # Calendar Widget with availability display
     st.markdown("### 📅 Availability Calendar")
