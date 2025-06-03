@@ -245,6 +245,13 @@ class Meeting(Base):  # New model for meetings
     description = Column(String)
     employee = relationship("Employee", back_populates="meetings")
 
+class CalendarTask(Base):
+    __tablename__ = "calendar_tasks"
+    id = Column(Integer, primary_key=True)
+    employee_id = Column(Integer, ForeignKey("employees.id"))
+    date = Column(Date)
+    task = Column(Text)
+
 
 # Preloaded users
 preloaded_users = [
