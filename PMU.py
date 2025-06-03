@@ -252,6 +252,7 @@ class CalendarTask(Base):
     date = Column(Date)
     task = Column(Text)
 
+    employee = relationship("Employee")
 
 # Preloaded users
 preloaded_users = [
@@ -314,6 +315,7 @@ def drop_tables(engine):
 # Drop and create all tables
 drop_tables(engine)  # Use the explicit drop function
 Base.metadata.create_all(engine)
+Base.metadata.create_all(bind=engine)
 
 # Then preload
 preload_users()
@@ -1401,30 +1403,37 @@ def email():
 
 def calendar_view(user):
     db = get_db()
-    st.subheader("📆 Calendar Tasks")
+    st.subheader("📆 Calendar Task Manager")
 
     selected_date = st.date_input("Select a date", date.today())
 
-    # Add a new task for the selected date
-    with st.form("add_task_form"):
-        task_desc = st.text_input("Task Description")
+    # Add task form
+    with st.form("add_calendar_task"):
+        task_text = st.text_input("Task for selected date")
         if st.form_submit_button("Add Task"):
-            if task_desc:
-                new_task = CalendarTask(employee_id=user.id, date=selected_date, task=task_desc)
+            if task_text:
+                new_task = CalendarTask(employee_id=user.id, date=selected_date, task=task_text)
                 db.add(new_task)
                 db.commit()
-                st.success("✅ Task added successfully!")
+                st.success("Task added!")
                 st.rerun()
 
-    # Show tasks for the selected date
+    # Fetch and show tasks for selected date
+    st.markdown(f"### 📝 Tasks on {selected_date.strftime('%b %d, %Y')}")
     tasks = db.query(CalendarTask).filter_by(employee_id=user.id, date=selected_date).all()
-    st.write(f"### 📝 Tasks for {selected_date.strftime('%B %d, %Y')}")
-    if tasks:
-        for t in tasks:
-            st.markdown(f"- {t.task}")
-    else:
-        st.info("No tasks for this date.")
 
+    if not tasks:
+        st.info("No tasks for this day.")
+    else:
+        for t in tasks:
+            col1, col2 = st.columns([0.8, 0.2])
+            with col1:
+                st.write(f"- {t.task}")
+            with col2:
+                if st.button("❌", key=f"del_{t.id}"):
+                    db.delete(t)
+                    db.commit()
+                    st.experimental_rerun()
 
      # Calendar Widget with availability display
     st.markdown("### 📅 Availability Calendar")
