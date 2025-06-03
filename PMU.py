@@ -1081,14 +1081,6 @@ def settings():
         index=["% Complete", "Milestones"].index(st.session_state.settings["progress_metric"]),
     )
 
-    # Access Control
-    st.markdown("### Access Control")
-    role = st.selectbox(
-        "Role-based Access Permissions",
-        ["Admin", "Manager", "Viewer"],
-        index=["Admin", "Manager", "Viewer"].index(st.session_state.settings["role"]),
-    )
-
     # Report Configuration
     st.markdown("### Report Configuration")
     report_frequency = st.selectbox(
@@ -1402,7 +1394,7 @@ def email():
 
 def calendar_view(user):
     db = get_db()
-    st.subheader("📅 Your Calendar")
+    st.subheader("Tasks")
 
     # Fetch schedules and meetings for the user
     schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
