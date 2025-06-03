@@ -125,6 +125,76 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+def organisation_structure():
+    st.title("🏢 Organisation Structure")
+
+    # Embed Miro iframe
+    components.html("""
+        <iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVIslNr4w=/?embedMode=view_only_without_ui&moveToViewport=883,95,3803,1804&embedId=310927428479" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
+    """, height=500)
+
+    with st.expander("Abbott"): 
+        st.subheader("Sachin Wadpalliwar - Manager - Field")
+        st.markdown("- **Project**: Aditya Yuvaraj (Associate - Field) → Bhushan Sananse, Nilesh Rajkumar Dhanwate")
+        st.markdown("- **Environment**: Aniket Govekar (Assistant Manager - Field) → Subrat Ghoshal, Hrushikesh Tilekar")
+        st.markdown("- **Social**: Same as Environment")
+
+    with st.expander("Heritage"):
+        st.subheader("Dr. Ramakrishna")
+        st.markdown("- Guru Mohan Kakanuru Reddy (Assistant Manager - Field)")
+        st.markdown("- K Balaji (Senior Associate - Field)")
+
+    with st.expander("Inditex"):
+        st.subheader("Kuntal Dutta - Sr. Manager - Field")
+        st.markdown("- **Project**: Gautam Bagada, Samadhan Bangale, Prabodh Pate, Sandeep G S")
+        st.markdown("- **Environment**: Ajay Vaghela")
+        st.markdown("- **Social**: Happy Vaishnavi, Nikhita VK")
+
+    with st.expander("Project Management Unit"):
+        st.subheader("Shifali Sharma - Manager - Field")
+        st.markdown("- **Project Support**: Bhavya Kharoo, Pari Sharma, Muskan Kaushal")
+        st.markdown("- **Data Platform**: Kriti Suneha, Ranu Laddha, Ramalakshmi Somanchi")
+        st.markdown("- **Environment**: Ramalakshmi Somanchi, Aditya Yuvaraj")
+
+    st.markdown("---")
+    st.markdown("### Lead: Rupesh Mukherjee - Associate Practice Leader")
+
+def meet_the_team():
+    st.title("🤝 Meet the Team")
+    team_members = [
+        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader"},
+        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field"},
+        {"name": "Shifali Sharma", "role": "Manager - Field"},
+        {"name": "Dr. Ramakrishna", "role": "Advisor"},
+        {"name": "Sachin Wadpalliwar", "role": "Manager - Field"},
+        {"name": "Aditya Yuvaraj", "role": "Associate - Field"},
+        {"name": "Aniket Govekar", "role": "Assistant Manager - Field"},
+        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field"},
+        {"name": "Subrat Ghoshal", "role": "Senior Executive - Field"},
+        {"name": "K Balaji", "role": "Senior Associate - Field"},
+        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field"},
+        {"name": "Ajay Vaghela", "role": "Senior Associate - Field"},
+        {"name": "Happy Vaishnavi", "role": "Senior Associate - Field"},
+        {"name": "Nikhita VK", "role": "Senior Associate - Field"},
+        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field"},
+        {"name": "Kriti Suneha", "role": "Senior Associate - Field"},
+        {"name": "Ranu Laddha", "role": "Associate - Field"},
+        {"name": "Pari Sharma", "role": "Associate - Field"},
+        {"name": "Muskan Kaushal", "role": "Associate - Field"},
+        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field"},
+        {"name": "Hrushikesh Tilekar", "role": "Associate"},
+    ]
+    for member in team_members:
+        st.markdown(f"### {member['name']}")
+        st.markdown(f"*{member['role']}*")
+        st.markdown("---")
+
+# Main Navigation
+page = st.selectbox("Choose a page", ["Organisation Structure", "Meet the Team"])
+if page == "Organisation Structure":
+    organisation_structure()
+elif page == "Meet the Team":
+    meet_the_team()
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
 Base = declarative_base()
