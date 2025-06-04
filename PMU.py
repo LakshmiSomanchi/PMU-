@@ -7,6 +7,8 @@ import pandas as pd
 import sqlite3
 from datetime import date, datetime
 import os
+from PIL import Image
+from io import BytesIO
 from pathlib import Path
 import plotly.express as px
 import plotly.graph_objects as go
