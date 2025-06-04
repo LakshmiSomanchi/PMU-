@@ -166,33 +166,33 @@ def main():
 
     st.title("🤝 Meet the Team")
     team_members = [
-        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": None},
-        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": None},
-        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": None},
-        {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": None},
-        {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": None},
-        {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": None},
-        {"name": "Aniket Govekar", "role": "Assistant Manager - Field", "photo": None},
-        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": None},
-        {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": None},
-        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": None},
-        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": None},
-        {"name": "Ajay Vaghela", "role": "Senior Associate - Field", "photo": None},
-        {"name": "Happy Vaishnavi", "role": "Senior Associate - Field", "photo": None},
-        {"name": "Nikhita VK", "role": "Senior Associate - Field", "photo": None},
-        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field", "photo": None},
-        {"name": "Kriti Suneha", "role": "Senior Associate - Field", "photo": None},
-        {"name": "Ranu Laddha", "role": "Associate - Field", "photo": None},
-        {"name": "Pari Sharma", "role": "Associate - Field", "photo": None},
-        {"name": "Muskan Kaushal", "role": "Associate - Field", "photo": None},
-        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": None},
-        {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": None},
+        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://via.placeholder.com/80"},
+        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": "https://via.placeholder.com/80"},
+        {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Aniket Govekar", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Ajay Vaghela", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Happy Vaishnavi", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Nikhita VK", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Kriti Suneha", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Ranu Laddha", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Pari Sharma", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Muskan Kaushal", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": "https://via.placeholder.com/80"},
     ]
 
     for member in team_members:
         cols = st.columns([1, 5])
         with cols[0]:
-            st.image(member["photo"] or "https://via.placeholder.com/80", width=80)
+            st.image(member["photo"], width=80)
         with cols[1]:
             st.markdown(f"### {member['name']}")
             st.markdown(f"*{member['role']}*")
