@@ -174,7 +174,7 @@ def main():
         {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Aniket Govekar", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/file/d/1ofRfjXogxGL5hzK79ZBbx_AuUuZl8Iuu/view?usp=drive_link"},
-        {"name": "Nilesh Dhanwate", "role": "ASenior Executive - Field", "photo": "https://drive.google.com/file/d/1XH1iEJKsbcay5dugj2Eub_fOsqXHQhfW/view?usp=drive_link"}
+        {"name": "Nilesh Dhanwate", "role": "ASenior Executive - Field", "photo": "https://drive.google.com/file/d/1XH1iEJKsbcay5dugj2Eub_fOsqXHQhfW/view?usp=drive_link"},
         {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjXPZfpYbgTI_KAz39-pp3xKFSvpnNorikyKwfa2Bc24JuxrR9I=s272-p-k-rw-no"},
         {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/file/d/1E1-m1V6xnIhTTn69ZB9Xy4hiJmsTUTwX/view?usp=drive_link"},
