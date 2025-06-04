@@ -134,7 +134,7 @@ def organisation_structure():
     image_path = "Company Organizational Chart (4).jpg"
     try:
         image = Image.open(image_path)
-        st.image(image, caption="Organizational Chart", use_column_width=True)
+        st.image(image, caption="Organizational Chart", use_container_width=True)
     except Exception as e:
         st.error(f"Failed to load organizational chart: {e}")
 
