@@ -127,9 +127,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-def main():
-    st.title("🔐 TechnoServe - PMU")
-    show_dashboard()
 
 def show_dashboard():
     st.title("🏢 Organisation Structure")
@@ -201,9 +198,6 @@ def show_dashboard():
             st.markdown(f"### {member['name']}")
             st.markdown(f"*{member['role']}*")
         st.markdown("---")
-
-# Entry Point
-main()
     
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
