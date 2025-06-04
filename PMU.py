@@ -17,18 +17,16 @@ import json
 import requests
 import calendar
 import streamlit.components.v1 as components
-from typing import Optional, List, Dict, Any # For type hinting
+from typing import Optional, List, Dict, Any
 
 # --- Configuration and Constants ---
-# Set Streamlit page config (must be first)
 st.set_page_config(page_title="PMU Tracker", layout="wide")
 
 DATABASE_URL = "sqlite:///pmu.db"
 KANBAN_DB = "kanban.db"
 CHAT_DB = "chat.db"
-API_BASE_URL = "https://api.example.com" # replace with your actual base API URL if deployed
+API_BASE_URL = "https://api.example.com" # Replace with your actual base API URL if deployed
 
-# Define the base for declarative models
 Base = declarative_base()
 
 # --- Database Setup (SQLAlchemy) ---
@@ -44,21 +42,16 @@ def get_db():
         db.close()
 
 # --- API Integration (Placeholder) ---
-# It's good to centralize API calls and add basic error handling.
-# For production, consider robust error handling, retries, and authentication.
-
 def api_get(endpoint: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-    """Makes a GET request to the API."""
     try:
         response = requests.get(f"{API_BASE_URL}/{endpoint}", params=params)
-        response.raise_for_status() # Raises HTTPError for bad responses (4xx or 5xx)
+        response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"API GET Error on '{endpoint}': {e}")
         return None
 
 def api_post(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Makes a POST request to the API."""
     try:
         response = requests.post(f"{API_BASE_URL}/{endpoint}", json=data)
         response.raise_for_status()
@@ -68,7 +61,6 @@ def api_post(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return None
 
 def api_put(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Makes a PUT request to the API."""
     try:
         response = requests.put(f"{API_BASE_URL}/{endpoint}", json=data)
         response.raise_for_status()
@@ -83,7 +75,7 @@ class Employee(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     email = Column(String, unique=True)
-    password = Column(String) # In a real app, use hashed passwords!
+    password = Column(String)
     workstreams = relationship("WorkStream", back_populates="employee")
     targets = relationship("Target", back_populates="employee")
     programs = relationship("Program", back_populates="employee")
@@ -91,7 +83,7 @@ class Employee(Base):
     workplans = relationship("WorkPlan", back_populates="supervisor")
     field_teams = relationship("FieldTeam", back_populates="pmu")
     meetings = relationship("Meeting", back_populates="employee")
-    calendar_tasks = relationship("CalendarTask", back_populates="employee") # New relationship
+    calendar_tasks = relationship("CalendarTask", back_populates="employee")
 
 class WorkStream(Base):
     __tablename__ = "workstreams"
@@ -108,7 +100,7 @@ class WorkPlan(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String)
     details = Column(Text)
-    deadline = Column(Date) # Changed to Date type
+    deadline = Column(Date)
     status = Column(String, default="Not Started")
     workstream_id = Column(Integer, ForeignKey("workstreams.id"))
     workstream = relationship("WorkStream", back_populates="workplans")
@@ -119,7 +111,7 @@ class Target(Base):
     __tablename__ = "targets"
     id = Column(Integer, primary_key=True)
     description = Column(String)
-    deadline = Column(Date) # Changed to Date type
+    deadline = Column(Date)
     status = Column(String, default="Not Started")
     employee_id = Column(Integer, ForeignKey("employees.id"))
     employee = relationship("Employee", back_populates="targets")
@@ -138,8 +130,8 @@ class Schedule(Base):
     id = Column(Integer, primary_key=True)
     employee_id = Column(Integer, ForeignKey("employees.id"))
     date = Column(Date)
-    start_time = Column(String) # Keeping as String for flexibility with time inputs
-    end_time = Column(String)   # Keeping as String for flexibility with time inputs
+    start_time = Column(String)
+    end_time = Column(String)
     employee = relationship("Employee", back_populates="schedules")
     gmeet_link = Column(String, nullable=True)
 
@@ -155,7 +147,7 @@ class Task(Base):
     __tablename__ = "tasks"
     id = Column(Integer, primary_key=True)
     description = Column(String)
-    deadline = Column(Date) # Changed to Date type
+    deadline = Column(Date)
     status = Column(String, default="Not Started")
     field_team_id = Column(Integer, ForeignKey("field_teams.id"))
     field_team = relationship("FieldTeam", back_populates="tasks")
@@ -166,7 +158,7 @@ class FarmerData(Base):
     farmer_name = Column(String)
     number_of_cows = Column(Integer)
     yield_per_cow = Column(Float)
-    date = Column(Date) # Changed to Date type
+    date = Column(Date)
 
 class Meeting(Base):
     __tablename__ = "meetings"
@@ -201,9 +193,7 @@ preloaded_users = [
 initial_programs = ["Water Program", "Education Program", "Ksheersagar 2.0", "SAKSHAM"]
 
 def preload_data():
-    """Preloads initial users and programs into the database."""
-    with SessionLocal() as db: # Use context manager for session
-        # Preload users
+    with SessionLocal() as db:
         for name, email, password in preloaded_users:
             if not db.query(Employee).filter_by(email=email).first():
                 try:
@@ -213,7 +203,6 @@ def preload_data():
                     db.rollback()
                     st.warning(f"User {email} already exists.")
 
-        # Preload programs (associate with the first user for simplicity)
         first_employee = db.query(Employee).first()
         if first_employee:
             for program_name in initial_programs:
@@ -234,11 +223,9 @@ def preload_data():
             st.error("No employees found to associate programs with. Please add users first.")
 
 def create_and_preload_db():
-    """Ensures database tables are created and preloaded data exists."""
     Base.metadata.create_all(bind=engine)
     preload_data()
 
-# Call this once at the application start
 create_and_preload_db()
 
 # --- Custom CSS ---
@@ -254,12 +241,12 @@ def apply_custom_css():
                 background-repeat: no-repeat;
                 background-attachment: fixed;
                 background-position: center;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font to the entire body */
+                font-family: 'Newsreader', serif;
             }
 
             .stApp {
                 background-color: rgba(255, 255, 255, 0.1);
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             section[data-testid="stSidebar"] > div:first-child {
@@ -272,7 +259,7 @@ def apply_custom_css():
                 background-position: center;
                 color: #FFFFFF;
                 z-index: 1;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             section[data-testid="stSidebar"] > div:first-child::before {
@@ -282,21 +269,21 @@ def apply_custom_css():
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+                background: rgba(255, 255, 255, 0.5);
                 border-radius: 0 10px 10px 0;
                 z-index: -1;
             }
 
             h1, h2, h3, h4, h5, h6, .stRadio label {
                 color: #ffffff;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             .streamlit-expanderHeader {
                 background-color: #dceefb;
                 border: 1px solid #cce0ff;
                 border-radius: 10px;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             .stButton > button {
@@ -304,7 +291,7 @@ def apply_custom_css():
                 color: white;
                 border-radius: 8px;
                 padding: 0.5em 1em;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             .stButton > button:hover {
@@ -314,7 +301,7 @@ def apply_custom_css():
             .stDataFrame {
                 background-color: #ffffff;
                 border: 5px solid #ccc;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             .stTabs [role="tab"] {
@@ -323,13 +310,49 @@ def apply_custom_css():
                 border-radius: 10px 10px 0 0;
                 margin-right: 5px;
                 border: 1px solid #b6d4fe;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
             }
 
             .stTabs [role="tab"][aria-selected="true"] {
                 background-color: #0077b6;
                 color: white;
-                font-family: 'Newsreader', serif; /* Apply Newsreader font */
+                font-family: 'Newsreader', serif;
+            }
+
+            /* Custom CSS for the pop-up modal */
+            .popup-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+
+            .popup-content {
+                background-color: white;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                max-width: 90%;
+                max-height: 90%;
+                overflow: auto;
+                position: relative;
+            }
+
+            .popup-close-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #333;
             }
         </style>
         """,
@@ -353,11 +376,11 @@ def display_notice():
             }
             .notice h2 {
                 text-align: center;
-                color: #020431; /* Darker color for headings in notice */
+                color: #020431;
                 margin-bottom: 15px;
             }
             .notice p, .notice ul {
-                color: #333; /* Darker text for readability */
+                color: #333;
                 line-height: 1.6;
             }
             .notice ul {
@@ -402,7 +425,6 @@ def display_notice():
     )
 
 def sidebar_navigation() -> str:
-    """Displays the sidebar navigation and returns the selected page."""
     st.sidebar.title("Navigation")
     menu_options = {
         "Dashboard": "dashboard",
@@ -419,60 +441,62 @@ def sidebar_navigation() -> str:
         "Email (Placeholder)": "email",
         "Calendar": "calendar_view",
         "Monthly Meeting": "monthly_meeting",
-        "Organization Structure": "organization_structure", # Added to sidebar
         "Logout": "logout",
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
     return menu_options[selection]
 
-# --- Page Functions ---
-
-def organization_structure_page():
-    st.title("🏢 Organisation Structure")
-
+# --- Pop-up for Organizational Chart ---
+def show_org_chart_popup():
     image_url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Company%20Organizational%20Chart%20(4).jpg"
     try:
         response = requests.get(image_url)
-        image = Image.open(BytesIO(response.content))
-        st.image(image, caption="Organizational Chart", use_container_width=True)
+        response.raise_for_status()
+        img_bytes = BytesIO(response.content)
+        img = Image.open(img_bytes)
+
+        # Using st.dialog (Streamlit 1.28+) for a more native pop-up
+        if 'show_org_chart' not in st.session_state:
+            st.session_state.show_org_chart = False
+
+        if st.button("View Organizational Chart 🏢"):
+            st.session_state.show_org_chart = True
+
+        if st.session_state.show_org_chart:
+            with st.container(border=True): # Use a container to simulate a modal
+                st.subheader("Organizational Chart")
+                st.image(img, use_container_width=True)
+                if st.button("Close Chart"):
+                    st.session_state.show_org_chart = False
+                    st.rerun() # Rerun to close the pop-up
+                st.markdown("---") # Add a separator inside the container for better visual
+
     except requests.exceptions.RequestException as e:
-        st.error(f"Failed to load organizational chart image: {e}")
+        st.error(f"Failed to load organizational chart image: {e}. Please check the URL or your internet connection.")
     except Exception as e:
-        st.error(f"An unexpected error occurred while loading the image: {e}")
+        st.error(f"An unexpected error occurred: {e}")
 
-    st.subheader("Team Structures by Company/Unit:")
+# --- Dashboard UI ---
+def dashboard(user: Employee):
+    st.markdown(
+        "<h1 style='text-align:center; color:#020431;'>Project Management Dashboard</h1>",
+        unsafe_allow_html=True,
+    )
+    st.sidebar.markdown("### Logged in as")
+    st.sidebar.success(user.name)
+    if st.sidebar.button("🔓 Logout", key="logout_button_sidebar"):
+        st.session_state.user = None
+        st.rerun()
 
-    with st.expander("Abbott"):
-        st.subheader("Sachin Wadpalliwar - Manager - Field")
-        st.markdown("- **Project**: Aditya Yuvaraj (Associate - Field) → Bhushan Sananse, Nilesh Rajkumar Dhanwate")
-        st.markdown("- **Environment**: Aniket Govekar (Assistant Manager - Field) → Subrat Ghoshal, Hrushikesh Tilekar")
-        st.markdown("- **Social**: Same as Environment")
-
-    with st.expander("Heritage"):
-        st.subheader("Dr. Ramakrishna")
-        st.markdown("- Guru Mohan Kakanuru Reddy (Assistant Manager - Field)")
-        st.markdown("- K Balaji (Senior Associate - Field)")
-
-    with st.expander("Inditex"):
-        st.subheader("Kuntal Dutta - Sr. Manager - Field")
-        st.markdown("- **Project**: Gautam Bagada, Samadhan Bangale, Prabodh Pate, Sandeep G S")
-        st.markdown("- **Environment**: Ajay Vaghela")
-        st.markdown("- **Social**: Happy Vaishnavi, Nikhita VK")
-
-    with st.expander("Project Management Unit"):
-        st.subheader("Shifali Sharma - Manager - Field")
-        st.markdown("- **Project Support**: Bhavya Kharoo, Pari Sharma, Muskan Kaushal")
-        st.markdown("- **Data Platform**: Kriti Suneha, Ranu Laddha, Ramalakshmi Somanchi")
-        st.markdown("- **Environment**: Ramalakshmi Somanchi, Aditya Yuvaraj")
-
+    # Place the "Meet the Team" section directly on the Dashboard
     st.markdown("---")
-    st.markdown("### Lead: Rupesh Mukherjee - Associate Practice Leader")
-
     st.title("🤝 Meet the Team")
+    st.write("Get to know the individuals driving our success.")
+
     team_members = [
-        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://drive.google.com/uc?id=1Q-P54Qj3IaDuMIhLgXEUR0zgnQ6bcUMS"}, # Corrected Google Drive link
-        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://via.placeholder.com/80?text=KD"}, # Placeholder
-        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://via.placeholder.com/80?text=SS"}, # Placeholder
+        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://drive.google.com/uc?id=1Q-P54Qj3IaDuMIhLgXEUR0zgnQ6bcUMS"},
+        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://via.placeholder.com/80?text=KD"},
+        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://via.placeholder.com/80?text=SS"},
         {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": "https://via.placeholder.com/80?text=DR"},
         {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": "https://drive.google.com/uc?id=1JcxGANNNz-cuNiDe5CUKh9rTWZSiPhMM"},
         {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=AY"},
@@ -480,7 +504,7 @@ def organization_structure_page():
         {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/uc?id=1ofRfjXogxGL5hzK79ZBbx_AuUuZl8Iuu"},
         {"name": "Nilesh Dhanwate", "role": "Senior Executive - Field", "photo": "https://drive.google.com/uc?id=1XH1iEJKsbcay5dugj2Eub_fOsqXHQhfW"},
         {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": "https://via.placeholder.com/80?text=SG"},
-        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=KB"}, # Placeholder
+        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=KB"},
         {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/uc?id=1E1-m1V6xnIhTTn69ZB9Xy4hiJmsTUTwX"},
         {"name": "Ajay Vaghela", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=AV"},
         {"name": "Happy Vaishnavi", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=HV"},
@@ -494,45 +518,42 @@ def organization_structure_page():
         {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": "https://via.placeholder.com/80?text=HT"},
     ]
 
-    for member in team_members:
-        cols = st.columns([1, 5])
-        with cols[0]:
-            try:
-                # Direct links from Google Drive for public access are usually 'uc?id='
-                if "drive.google.com" in member["photo"] and "uc?id=" not in member["photo"]:
-                    # Attempt to convert to 'uc?id=' format if it's a 'view?usp=drive_link'
-                    photo_id = member["photo"].split('/')[-2]
-                    display_url = f"https://drive.google.com/uc?id={photo_id}"
-                else:
-                    display_url = member["photo"]
+    # Display team members in a responsive grid
+    cols_per_row = 3 # Adjust as needed for screen size
+    for i in range(0, len(team_members), cols_per_row):
+        cols = st.columns(cols_per_row)
+        for j in range(cols_per_row):
+            if i + j < len(team_members):
+                member = team_members[i + j]
+                with cols[j]:
+                    with st.container(border=True):
+                        st.markdown(f"**{member['name']}**")
+                        st.markdown(f"*{member['role']}*")
+                        try:
+                            if "drive.google.com" in member["photo"] and "uc?id=" not in member["photo"]:
+                                photo_id = member["photo"].split('/')[-2]
+                                display_url = f"https://drive.google.com/uc?id={photo_id}"
+                            else:
+                                display_url = member["photo"]
 
-                response = requests.get(display_url, stream=True)
-                response.raise_for_status()
-                image = Image.open(BytesIO(response.content))
-                st.image(image, width=80)
-            except requests.exceptions.RequestException:
-                st.warning(f"Could not load image for {member['name']}. Using placeholder.")
-                st.image("https://via.placeholder.com/80", width=80)
-            except Exception as e:
-                st.warning(f"Error processing image for {member['name']}: {e}. Using placeholder.")
-                st.image("https://via.placeholder.com/80", width=80)
+                            response = requests.get(display_url, stream=True)
+                            response.raise_for_status()
+                            image = Image.open(BytesIO(response.content))
+                            st.image(image, width=120, caption=member['name'])
+                        except requests.exceptions.RequestException:
+                            st.warning(f"Could not load image for {member['name']}. Using placeholder.")
+                            st.image("https://via.placeholder.com/120?text=No+Photo", width=120)
+                        except Exception as e:
+                            st.warning(f"Error processing image for {member['name']}: {e}. Using placeholder.")
+                            st.image("https://via.placeholder.com/120?text=Error", width=120)
+        st.markdown("---") # Separator between rows of team members
 
-        with cols[1]:
-            st.markdown(f"### {member['name']}")
-            st.markdown(f"*{member['role']}*")
-        st.markdown("---")
+    # Call the pop-up function for the organizational chart
+    show_org_chart_popup()
 
-def dashboard(user: Employee):
-    st.markdown(
-        "<h1 style='text-align:center; color:#020431;'>Project Management Dashboard</h1>",
-        unsafe_allow_html=True,
-    )
-    st.sidebar.markdown("### Logged in as")
-    st.sidebar.success(user.name)
-    if st.sidebar.button("🔓 Logout", key="logout_button_sidebar"):
-        st.session_state.user = None
-        st.rerun()
+    st.markdown("---") # Separator before the dashboard tabs
 
+    # Tabs for different dashboards
     tab1, tab2, tab3, tab4 = st.tabs(
         ["Field Team Dashboard", "PMU Dashboard", "Heritage Dashboard", "Ksheersagar Dashboard"]
     )
@@ -552,225 +573,8 @@ def dashboard(user: Employee):
     with tab4:
         ksheersagar_dashboard()
 
-def pmu_dashboard(user: Employee):
-    with SessionLocal() as db:
-        st.subheader("📋 PMU Work Plans and Targets")
-
-        workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
-        targets = db.query(Target).filter_by(employee_id=user.id).all()
-        schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
-
-        # Summary View
-        with st.expander("📌 Summary View"):
-            st.markdown("### 🧾 Progress Overview")
-
-            # Workplans Summary
-            if workplans:
-                wp_status_df = pd.DataFrame([wp.status for wp in workplans], columns=["Status"])
-                wp_counts = (
-                    wp_status_df["Status"]
-                    .value_counts()
-                    .reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
-                )
-                st.write("#### Workplans")
-                st.dataframe(
-                    wp_counts.reset_index().rename(
-                        columns={"index": "Status", "Status": "Count"}
-                    ), use_container_width=True
-                )
-            else:
-                st.info("No work plans available for summary.")
-
-            # Targets Summary
-            if targets:
-                tgt_status_df = pd.DataFrame([t.status for t in targets], columns=["Status"])
-                tgt_counts = (
-                    tgt_status_df["Status"]
-                    .value_counts()
-                    .reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
-                )
-                st.write("#### Targets")
-                st.dataframe(
-                    tgt_counts.reset_index().rename(
-                        columns={"index": "Status", "Status": "Count"}
-                    ), use_container_width=True
-                )
-            else:
-                st.info("No targets available for summary.")
-
-            # Schedules
-            st.write("#### Schedules")
-            if schedules:
-                schedule_df = pd.DataFrame(
-                    [
-                        {
-                            "Date": s.date,
-                            "Start Time": s.start_time,
-                            "End Time": s.end_time,
-                            "GMeet Link": s.gmeet_link if s.gmeet_link else "N/A",
-                        }
-                        for s in schedules
-                    ]
-                )
-                st.dataframe(schedule_df, use_container_width=True)
-            else:
-                st.info("No schedules available.")
-
-        # Add New Work Plan
-        with st.expander("➕ Add New Work Plan"):
-            with st.form("work_plan_form"):
-                title = st.text_input("Work Plan Title", max_chars=255)
-                details = st.text_area("Details")
-                deadline = st.date_input("Deadline")
-                status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
-                workstream_titles = [
-                    ws.title for ws in db.query(WorkStream).filter_by(employee_id=user.id).all()
-                ]
-                # Allow creating a new workstream if none exist or if "Add New..." is selected
-                workstream_option = st.selectbox(
-                    "Workstream", ["Select...", "Add New Workstream..."] + workstream_titles, index=0
-                )
-
-                new_workstream_title = None
-                if workstream_option == "Add New Workstream...":
-                    new_workstream_title = st.text_input("New Workstream Title")
-
-                submitted = st.form_submit_button("Save Work Plan")
-
-                if submitted:
-                    if workstream_option == "Select...":
-                        st.error("Please select an existing workstream or add a new one.")
-                    elif workstream_option == "Add New Workstream..." and not new_workstream_title:
-                        st.error("Please enter a title for the new workstream.")
-                    else:
-                        workstream_obj = None
-                        if workstream_option == "Add New Workstream...":
-                            try:
-                                new_ws = WorkStream(title=new_workstream_title, description="", category="General", employee_id=user.id)
-                                db.add(new_ws)
-                                db.commit()
-                                workstream_obj = new_ws
-                                st.success(f"New workstream '{new_workstream_title}' created!")
-                            except IntegrityError:
-                                db.rollback()
-                                st.error(f"Workstream '{new_workstream_title}' already exists. Please choose a different name.")
-                                workstream_obj = db.query(WorkStream).filter_by(title=new_workstream_title, employee_id=user.id).first()
-                        else:
-                            workstream_obj = db.query(WorkStream).filter_by(title=workstream_option, employee_id=user.id).first()
-
-                        if workstream_obj:
-                            new_workplan = WorkPlan(
-                                title=title,
-                                details=details,
-                                deadline=deadline,
-                                status=status,
-                                supervisor_id=user.id,
-                                workstream_id=workstream_obj.id,
-                            )
-                            db.add(new_workplan)
-                            db.commit()
-                            st.success("✅ Work Plan saved successfully!")
-                            st.rerun()
-                        else:
-                            st.error("Failed to link work plan to a workstream. Please try again.")
-
-        # Add New Target
-        with st.expander("➕ Add New Target"):
-            with st.form("target_form"):
-                description = st.text_area("Target Description")
-                deadline = st.date_input("Target Deadline")
-                status = st.selectbox("Target Status", ["Not Started", "In Progress", "Completed"])
-
-                if st.form_submit_button("Save Target"):
-                    if description and deadline:
-                        new_target = Target(
-                            description=description,
-                            deadline=deadline,
-                            status=status,
-                            employee_id=user.id,
-                        )
-                        db.add(new_target)
-                        db.commit()
-                        st.success("✅ Target saved.")
-                        st.rerun()
-                    else:
-                        st.error("Please fill in all target fields.")
-
-        # Display Work Plans
-        st.subheader("📌 Your Work Plans and Targets")
-
-        if workplans:
-            st.write("### Work Plans")
-            for plan in workplans:
-                with st.container(border=True): # Use container for better visual separation
-                    col1, col2 = st.columns([3, 1])
-                    with col1:
-                        st.markdown(f"**Title**: {plan.title}")
-                        st.markdown(f"**Details**: {plan.details}")
-                        st.markdown(f"**Deadline**: {plan.deadline.strftime('%Y-%m-%d')}") # Format date
-                        st.markdown(f"**Status**: {plan.status}")
-                    with col2:
-                        with st.form(key=f"workplan_progress_{plan.id}"):
-                            new_status = st.selectbox(
-                                "Update Status",
-                                ["Not Started", "In Progress", "Completed"],
-                                index=["Not Started", "In Progress", "Completed"].index(
-                                    plan.status
-                                ),
-                                key=f"wp_status_{plan.id}" # Unique key for selectbox
-                            )
-                            submit_progress = st.form_submit_button("Update Progress", key=f"wp_submit_{plan.id}")
-                            if submit_progress:
-                                plan.status = new_status
-                                db.commit()
-                                st.success("Progress updated!")
-                                st.rerun()
-                            if st.button("Delete Work Plan", key=f"delete_wp_{plan.id}"):
-                                db.delete(plan)
-                                db.commit()
-                                st.success("Work Plan deleted.")
-                                st.rerun()
-
-        else:
-            st.info("No work plans found.")
-
-        # Display Targets
-        if targets:
-            st.write("### Targets")
-            for tgt in targets:
-                with st.container(border=True):
-                    col1, col2 = st.columns([3, 1])
-                    with col1:
-                        st.markdown(f"**Target**: {tgt.description}")
-                        st.markdown(f"**Deadline**: {tgt.deadline.strftime('%Y-%m-%d')}") # Format date
-                        st.markdown(f"**Status**: {tgt.status}")
-                    with col2:
-                        with st.form(key=f"target_progress_{tgt.id}"):
-                            new_status = st.selectbox(
-                                "Update Status",
-                                ["Not Started", "In Progress", "Completed"],
-                                index=["Not Started", "In Progress", "Completed"].index(
-                                    tgt.status
-                                ),
-                                key=f"tgt_status_{tgt.id}" # Unique key for selectbox
-                            )
-                            submit_progress = st.form_submit_button("Update Progress", key=f"tgt_submit_{tgt.id}")
-                            if submit_progress:
-                                tgt.status = new_status
-                                db.commit()
-                                st.success("Progress updated!")
-                                st.rerun()
-                            if st.button("Delete Target", key=f"delete_target_{tgt.id}"):
-                                db.delete(tgt)
-                                db.commit()
-                                st.success("Target deleted.")
-                                st.rerun()
-        else:
-            st.info("No targets found.")
-
 # --- Kanban Board Functions (SQLite for simplicity) ---
 def get_kanban_board() -> Dict[str, List[str]]:
-    """Retrieves tasks from the Kanban board database."""
     conn = sqlite3.connect(KANBAN_DB)
     cursor = conn.cursor()
     cursor.execute("""
@@ -791,7 +595,6 @@ def get_kanban_board() -> Dict[str, List[str]]:
     return board
 
 def add_kanban_task(status: str, task: str):
-    """Adds a new task to the Kanban board."""
     conn = sqlite3.connect(KANBAN_DB)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO kanban (status, task) VALUES (?, ?)", (status, task))
@@ -883,7 +686,6 @@ def manage_programs():
                 st.markdown(
                     f"**Name**: {program.name} | **Description**: {program.description} | **Status**: {program.status}"
                 )
-                # Option to delete programs
                 if st.button(f"Delete {program.name}", key=f"delete_program_{program.id}"):
                     try:
                         db.delete(program)
@@ -937,13 +739,11 @@ def saksham_dashboard():
             else:
                 st.markdown("---")
 
-                # Constants
-                germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400} # This seems to be a fixed value, not really a rate for calculation
+                germination_rate_per_acre = {"Maharashtra": 14000, "Gujarat": 7400}
                 confidence_interval = 0.70
                 seeds_per_packet = 5625
                 acre_to_m2 = 4046.86
 
-                # Calculations
                 if spacing_unit == "cm":
                     row_spacing /= 100
                     plant_spacing /= 100
@@ -958,27 +758,6 @@ def saksham_dashboard():
                 total_plants = plants_per_m2 * field_area_m2
 
                 target_plants = total_plants * confidence_interval
-
-                required_seeds = target_plants
-                required_packets = floor(required_seeds / seeds_per_packet)
-
-                # Assuming mortality directly reduces the effective plants
-                effective_germination_factor = (1 - mortality / 100)
-                # The original code's `expected_plants` and `gaps` calculation seems a bit off
-                # if `effective_germination` is already `confidence_interval * (1 - mortality / 100)`.
-                # Let's simplify and make the gap calculation clearer.
-                
-                # If we consider 'confidence_interval' as the target plant population *achieved*
-                # and 'mortality' as actual losses *after* germination.
-                # A common approach for gap filling is to calculate how many more seeds are needed
-                # to compensate for the *additional* plants lost due to mortality.
-
-                # Let's re-evaluate required seeds for gap filling based on desired total plants
-                # and accounting for total losses (initial confidence + mortality)
-
-                # Total seeds needed considering confidence interval and mortality
-                # (1 - mortality/100) is the survival rate.
-                # So, required seeds = total_plants / (confidence_interval * survival_rate)
                 
                 total_seeds_needed_for_target = total_plants / (confidence_interval * (1 - mortality/100))
                 total_packets_needed = ceil(total_seeds_needed_for_target / seeds_per_packet)
@@ -997,18 +776,12 @@ def saksham_dashboard():
                     "ℹ️ Based on 5625 seeds per 450g packet. Total packets are rounded up to ensure enough seeds. Calculations consider a 70% confidence interval for germination and the specified mortality rate."
                 )
 
-                # Optional: Further details if required for gaps
-                # If you want to show 'gaps' as a separate metric, you need a baseline of expected plants after initial sowing.
-                # For simplicity, if the above calculation accounts for everything, you might not need a separate "gap filling" section
-                # unless it's for re-sowing specifically due to unexpected failures.
-
                 with SessionLocal() as db:
-                    # Save farmer data (if desired)
                     try:
                         new_farmer_data = FarmerData(
                             farmer_name=farmer_name,
-                            number_of_cows=0, # This field is not used in Saksham, consider removing or making optional
-                            yield_per_cow=0.0, # This field is not used in Saksham, consider removing or making optional
+                            number_of_cows=0,
+                            yield_per_cow=0.0,
                             date=date.today()
                         )
                         db.add(new_farmer_data)
@@ -1036,11 +809,9 @@ def live_dashboard():
             } for farmer in farmer_data
         ])
 
-        # Convert 'Date' column to datetime objects for proper sorting/analysis
         df['Date'] = pd.to_datetime(df['Date'])
         df = df.sort_values(by='Date', ascending=False)
 
-        # Aggregate data
         total_farmers = df['Farmer Name'].nunique()
         total_cows = df['Number of Cows'].sum()
         total_yield = df['Yield per Cow (L)'].sum()
@@ -1056,7 +827,6 @@ def live_dashboard():
 
         st.subheader("📈 Data Analytics")
 
-        # Example: Daily Yield Trend
         daily_yield = df.groupby('Date')['Yield per Cow (L)'].sum().reset_index()
         fig_daily_yield = px.line(
             daily_yield,
@@ -1067,7 +837,6 @@ def live_dashboard():
         )
         st.plotly_chart(fig_daily_yield, use_container_width=True)
 
-        # Example: Yield Distribution
         fig_yield_dist = px.histogram(
             df,
             x="Yield per Cow (L)",
@@ -1104,15 +873,14 @@ def heritage_dashboard():
     st.subheader("Key Performance Indicators")
     st.dataframe(kpi_df, use_container_width=True)
 
-    # Convert DataFrame to a long format for Plotly Express for easier plotting of multiple metrics
     kpi_df_T = kpi_df.T.reset_index().rename(columns={'index': 'Period'})
     numeric_cols = [col for col in kpi_df_T.columns if col not in ['Period', '# Other farmers(from MCCs)', 'SNF (Baseline)%', 'Fat (Baseline)%', 'Compliance % (with Antibiotics and Aflatoxins)']]
     kpi_df_long = kpi_df_T.melt(id_vars=['Period'], value_vars=numeric_cols, var_name='KPI', value_name='Value')
 
-    # Add interactive chart for multiple KPIs
     selected_kpi = st.selectbox(
         "Select KPI to visualize",
-        kpi_df_long['KPI'].unique()
+        kpi_df_long['KPI'].unique(),
+        key="heritage_kpi_select"
     )
 
     fig_selected_kpi = px.line(
@@ -1186,7 +954,7 @@ def ksheersagar_dashboard():
     selected_kpi = st.selectbox(
         "Select KPI to visualize",
         kpi_df_long['KPI'].unique(),
-        key="ksheersagar_kpi_select"
+        key="ksheersagar_kpi_select_2"
     )
 
     fig_selected_kpi = px.line(
@@ -1228,6 +996,213 @@ def ksheersagar_dashboard():
         class_data, x="Farms", y="Class", orientation="h", title="Farm Distribution by Milk Output"
     )
     st.plotly_chart(fig_class, use_container_width=True)
+
+def pmu_dashboard(user: Employee):
+    with SessionLocal() as db:
+        st.subheader("📋 PMU Work Plans and Targets")
+
+        workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
+        targets = db.query(Target).filter_by(employee_id=user.id).all()
+        schedules = db.query(Schedule).filter_by(employee_id=user.id).all()
+
+        with st.expander("📌 Summary View"):
+            st.markdown("### 🧾 Progress Overview")
+
+            if workplans:
+                wp_status_df = pd.DataFrame([wp.status for wp in workplans], columns=["Status"])
+                wp_counts = (
+                    wp_status_df["Status"]
+                    .value_counts()
+                    .reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
+                )
+                st.write("#### Workplans")
+                st.dataframe(
+                    wp_counts.reset_index().rename(
+                        columns={"index": "Status", "Status": "Count"}
+                    ), use_container_width=True
+                )
+            else:
+                st.info("No work plans available for summary.")
+
+            if targets:
+                tgt_status_df = pd.DataFrame([t.status for t in targets], columns=["Status"])
+                tgt_counts = (
+                    tgt_status_df["Status"]
+                    .value_counts()
+                    .reindex(["Not Started", "In Progress", "Completed"], fill_value=0)
+                )
+                st.write("#### Targets")
+                st.dataframe(
+                    tgt_counts.reset_index().rename(
+                        columns={"index": "Status", "Status": "Count"}
+                    ), use_container_width=True
+                )
+            else:
+                st.info("No targets available for summary.")
+
+            st.write("#### Schedules")
+            if schedules:
+                schedule_df = pd.DataFrame(
+                    [
+                        {
+                            "Date": s.date,
+                            "Start Time": s.start_time,
+                            "End Time": s.end_time,
+                            "GMeet Link": s.gmeet_link if s.gmeet_link else "N/A",
+                        }
+                        for s in schedules
+                    ]
+                )
+                st.dataframe(schedule_df, use_container_width=True)
+            else:
+                st.info("No schedules available.")
+
+        with st.expander("➕ Add New Work Plan"):
+            with st.form("work_plan_form_pmu"):
+                title = st.text_input("Work Plan Title", max_chars=255)
+                details = st.text_area("Details")
+                deadline = st.date_input("Deadline")
+                status = st.selectbox("Status", ["Not Started", "In Progress", "Completed"])
+                workstream_titles = [
+                    ws.title for ws in db.query(WorkStream).filter_by(employee_id=user.id).all()
+                ]
+                workstream_option = st.selectbox(
+                    "Workstream", ["Select...", "Add New Workstream..."] + workstream_titles, index=0
+                )
+
+                new_workstream_title = None
+                if workstream_option == "Add New Workstream...":
+                    new_workstream_title = st.text_input("New Workstream Title", key="new_workstream_title_input")
+
+                submitted = st.form_submit_button("Save Work Plan")
+
+                if submitted:
+                    if workstream_option == "Select...":
+                        st.error("Please select an existing workstream or add a new one.")
+                    elif workstream_option == "Add New Workstream..." and not new_workstream_title:
+                        st.error("Please enter a title for the new workstream.")
+                    else:
+                        workstream_obj = None
+                        if workstream_option == "Add New Workstream...":
+                            try:
+                                new_ws = WorkStream(title=new_workstream_title, description="", category="General", employee_id=user.id)
+                                db.add(new_ws)
+                                db.commit()
+                                workstream_obj = new_ws
+                                st.success(f"New workstream '{new_workstream_title}' created!")
+                            except IntegrityError:
+                                db.rollback()
+                                st.error(f"Workstream '{new_workstream_title}' already exists. Please choose a different name.")
+                                workstream_obj = db.query(WorkStream).filter_by(title=new_workstream_title, employee_id=user.id).first()
+                        else:
+                            workstream_obj = db.query(WorkStream).filter_by(title=workstream_option, employee_id=user.id).first()
+
+                        if workstream_obj:
+                            new_workplan = WorkPlan(
+                                title=title,
+                                details=details,
+                                deadline=deadline,
+                                status=status,
+                                supervisor_id=user.id,
+                                workstream_id=workstream_obj.id,
+                            )
+                            db.add(new_workplan)
+                            db.commit()
+                            st.success("✅ Work Plan saved successfully!")
+                            st.rerun()
+                        else:
+                            st.error("Failed to link work plan to a workstream. Please try again.")
+
+        with st.expander("➕ Add New Target"):
+            with st.form("target_form_pmu"):
+                description = st.text_area("Target Description")
+                deadline = st.date_input("Target Deadline")
+                status = st.selectbox("Target Status", ["Not Started", "In Progress", "Completed"])
+
+                if st.form_submit_button("Save Target"):
+                    if description and deadline:
+                        new_target = Target(
+                            description=description,
+                            deadline=deadline,
+                            status=status,
+                            employee_id=user.id,
+                        )
+                        db.add(new_target)
+                        db.commit()
+                        st.success("✅ Target saved.")
+                        st.rerun()
+                    else:
+                        st.error("Please fill in all target fields.")
+
+        st.subheader("📌 Your Work Plans and Targets")
+
+        if workplans:
+            st.write("### Work Plans")
+            for plan in workplans:
+                with st.container(border=True):
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.markdown(f"**Title**: {plan.title}")
+                        st.markdown(f"**Details**: {plan.details}")
+                        st.markdown(f"**Deadline**: {plan.deadline.strftime('%Y-%m-%d')}")
+                        st.markdown(f"**Status**: {plan.status}")
+                    with col2:
+                        with st.form(key=f"workplan_progress_{plan.id}"):
+                            new_status = st.selectbox(
+                                "Update Status",
+                                ["Not Started", "In Progress", "Completed"],
+                                index=["Not Started", "In Progress", "Completed"].index(
+                                    plan.status
+                                ),
+                                key=f"wp_status_{plan.id}"
+                            )
+                            submit_progress = st.form_submit_button("Update Progress", key=f"wp_submit_{plan.id}")
+                            if submit_progress:
+                                plan.status = new_status
+                                db.commit()
+                                st.success("Progress updated!")
+                                st.rerun()
+                            if st.button("Delete Work Plan", key=f"delete_wp_{plan.id}"):
+                                db.delete(plan)
+                                db.commit()
+                                st.success("Work Plan deleted.")
+                                st.rerun()
+
+        else:
+            st.info("No work plans found.")
+
+        if targets:
+            st.write("### Targets")
+            for tgt in targets:
+                with st.container(border=True):
+                    col1, col2 = st.columns([3, 1])
+                    with col1:
+                        st.markdown(f"**Target**: {tgt.description}")
+                        st.markdown(f"**Deadline**: {tgt.deadline.strftime('%Y-%m-%d')}")
+                        st.markdown(f"**Status**: {tgt.status}")
+                    with col2:
+                        with st.form(key=f"target_progress_{tgt.id}"):
+                            new_status = st.selectbox(
+                                "Update Status",
+                                ["Not Started", "In Progress", "Completed"],
+                                index=["Not Started", "In Progress", "Completed"].index(
+                                    tgt.status
+                                ),
+                                key=f"tgt_status_{tgt.id}"
+                            )
+                            submit_progress = st.form_submit_button("Update Progress", key=f"tgt_submit_{tgt.id}")
+                            if submit_progress:
+                                tgt.status = new_status
+                                db.commit()
+                                st.success("Progress updated!")
+                                st.rerun()
+                            if st.button("Delete Target", key=f"delete_target_{tgt.id}"):
+                                db.delete(tgt)
+                                db.commit()
+                                st.success("Target deleted.")
+                                st.rerun()
+        else:
+            st.info("No targets found.")
 
 def settings(user: Employee):
     with SessionLocal() as db:
@@ -1309,7 +1284,6 @@ def settings(user: Employee):
             confirm_password = st.text_input("Confirm New Password", type="password")
             if st.form_submit_button("Change Password"):
                 if new_password and new_password == confirm_password:
-                    # In a real app, hash the password before saving!
                     user_to_update = db.query(Employee).filter_by(id=user.id).first()
                     if user_to_update:
                         user_to_update.password = new_password
@@ -1345,7 +1319,6 @@ def reports():
     summary_filename = f"weekly_summary_{date.today().strftime('%Y%m%d')}.csv"
 
     if st.button("Generate Weekly Summary"):
-        # Fetch actual data from DB (example: workplans and targets)
         with SessionLocal() as db:
             all_workplans = db.query(WorkPlan).all()
             all_targets = db.query(Target).all()
@@ -1383,7 +1356,6 @@ def reports():
     if os.path.exists(summary_filename):
         summary_df = pd.read_csv(summary_filename)
         st.dataframe(summary_df, use_container_width=True)
-        # Add a download button
         with open(summary_filename, "rb") as file:
             btn = st.download_button(
                 label="Download Summary CSV",
@@ -1400,12 +1372,12 @@ def scheduling(user: Employee):
 
         with st.form("add_schedule"):
             schedule_date = st.date_input("Schedule Date", date.today())
-            start_time = st.time_input("Start Time", time(9, 0)) # Default to 9:00 AM
-            end_time = st.time_input("End Time", time(17, 0)) # Default to 5:00 PM
+            start_time = st.time_input("Start Time", time(9, 0))
+            end_time = st.time_input("End Time", time(17, 0))
             generate_gmeet = st.checkbox("Generate GMeet Link?")
             gmeet_link = None
             if generate_gmeet:
-                gmeet_link = st.text_input("GMeet Link (optional, will override auto-generated)", "https://meet.google.com/new") # User can paste or use default
+                gmeet_link = st.text_input("GMeet Link (optional, will override auto-generated)", "https://meet.google.com/new")
 
             if st.form_submit_button("Add Schedule"):
                 if start_time < end_time:
@@ -1437,7 +1409,6 @@ def scheduling(user: Employee):
             schedule_df = pd.DataFrame(schedule_data)
             st.dataframe(schedule_df, use_container_width=True)
 
-            # Option to delete schedules
             st.markdown("---")
             st.subheader("Manage Existing Schedules")
             schedule_to_delete_id = st.selectbox(
@@ -1497,7 +1468,6 @@ def field_team_management():
                     except Exception as e:
                         db.rollback()
                         st.error(f"Error deleting team: {e}")
-            # Add tasks to field teams
             st.markdown("---")
             st.subheader("Add Tasks to Field Teams")
             with st.form("add_team_task"):
@@ -1555,7 +1525,6 @@ def field_team_management():
     st.write("This section will integrate with a Field Team Management API.")
     if st.button("Simulate API Call to Fetch Field Teams"):
         st.info("Attempting to fetch field team data from API...")
-        # Example API call
         dummy_data = api_get("field_teams")
         if dummy_data:
             st.json(dummy_data)
@@ -1589,14 +1558,13 @@ def training():
             if not is_valid_file_type(uploaded_file.name, selected_category):
                 st.error(f"❌ Invalid file type for the **{selected_category}** category.")
             else:
-                if st.button("Upload File"): # Changed button text
+                if st.button("Upload File"):
                     try:
                         with open(file_path, "wb") as f:
                             f.write(uploaded_file.getbuffer())
                         st.success(
                             f"✅ File '{uploaded_file.name}' uploaded successfully to {file_path}!"
                         )
-                        # In a real app, you'd then upload to Google Drive using its API
                         st.info(f"Simulating upload of '{uploaded_file.name}' to Google Drive...")
                     except Exception as e:
                         st.error(f"❌ Error uploading file: {e}")
@@ -1615,27 +1583,21 @@ def training():
                     st.subheader(f"{program} - {category}")
                     for file in files_in_folder:
                         st.markdown(f"- {file.name}")
-                # else:
-                #     st.info(f"No files in {program} - {category}") # Optionally show this
-            # else:
-            #     st.info(f"Folder not found for {program} - {category}") # Optionally show this
 
 def is_valid_file_type(file_name: str, category: str) -> bool:
-    """Checks if the uploaded file type is valid for the selected category."""
     valid_extensions = {
-        "Presentations": [".pptx", ".pdf"], # Added PDF for presentations
-        "Videos": [".mp4", ".mov", ".avi"], # Added more video types
-        "Audios": [".mp3", ".wav"], # Added more audio types
-        "Quizzes": [".xlsx", ".csv", ".json"], # Quizzes could be structured data
+        "Presentations": [".pptx", ".pdf"],
+        "Videos": [".mp4", ".mov", ".avi"],
+        "Audios": [".mp3", ".wav"],
+        "Quizzes": [".xlsx", ".csv", ".json"],
     }
-    # Allow image types for quizzes (e.g., for visual questions)
     image_extensions = [".png", ".jpg", ".jpeg", ".gif"]
 
     file_extension = Path(file_name).suffix.lower()
 
     if category in valid_extensions and file_extension in valid_extensions[category]:
         return True
-    if category == "Quizzes" and file_extension in image_extensions: # Special case for images in quizzes
+    if category == "Quizzes" and file_extension in image_extensions:
         return True
     return False
 
@@ -1645,8 +1607,6 @@ def google_drive():
 
     if st.button("List Files (Placeholder)"):
         st.write("Simulating listing files from Google Drive...")
-        # In a real application, you would use Google Drive API here
-        # Example: service.files().list(q="mimeType='application/vnd.google-apps.folder'").execute()
         st.markdown("- Project Documents/")
         st.markdown("  - Report_Q1_2024.pdf")
         st.markdown("  - Team_Meeting_Notes.docx")
@@ -1660,11 +1620,8 @@ def google_drive():
     if uploaded_file_gd:
         st.info(f"Simulating upload of '{uploaded_file_gd.name}' to Google Drive...")
         st.success("File uploaded to Google Drive (simulated)!")
-        # Implement actual Google Drive API upload here if needed.
 
-# --- Team Chat Functions (SQLite) ---
 def get_team_chat() -> List[tuple[str, str]]:
-    """Retrieves chat messages from the database."""
     conn = sqlite3.connect(CHAT_DB)
     cursor = conn.cursor()
     cursor.execute(
@@ -1678,13 +1635,12 @@ def get_team_chat() -> List[tuple[str, str]]:
     """
     )
     conn.commit()
-    cursor.execute("SELECT user, message, timestamp FROM chat ORDER BY timestamp ASC LIMIT 50") # Show more recent messages
+    cursor.execute("SELECT user, message, timestamp FROM chat ORDER BY timestamp ASC LIMIT 50")
     chats = cursor.fetchall()
     conn.close()
     return chats
 
 def add_chat_message(user: str, message: str):
-    """Adds a new chat message to the database."""
     conn = sqlite3.connect(CHAT_DB)
     cursor = conn.cursor()
     cursor.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
@@ -1695,10 +1651,9 @@ def team_chat(user: Employee):
     st.subheader("💬 Team Chat")
     chats = get_team_chat()
 
-    chat_container = st.container(height=400, border=True) # Fixed height for chat
+    chat_container = st.container(height=400, border=True)
     for chat_user, message, timestamp in chats:
         chat_container.chat_message(chat_user).write(f"[{datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S').strftime('%H:%M')}] {message}")
-
 
     with st.form("Send Chat Message"):
         message = st.text_input("Message", key="chat_message_input")
@@ -1709,7 +1664,6 @@ def team_chat(user: Employee):
             else:
                 st.warning("Please enter a message to send.")
 
-# --- Email Functionality (Placeholder) ---
 def email():
     st.subheader("📧 Email Integration (Placeholder)")
     st.write("This section will eventually integrate with an email service (e.g., Gmail API).")
@@ -1727,15 +1681,12 @@ def email():
             else:
                 st.error("Please fill in all email fields.")
 
-# --- Calendar View and Meetings ---
 def calendar_view(user: Employee):
     with SessionLocal() as db:
         st.subheader("📆 Calendar Task Manager & Meetings")
 
-        # Select date for tasks
         selected_date_for_tasks = st.date_input("Select a date for tasks", date.today(), key="task_date_picker")
 
-        # Add task form
         with st.form("add_calendar_task"):
             task_text = st.text_input("Task for selected date", max_chars=500)
             if st.form_submit_button("Add Task"):
@@ -1748,7 +1699,6 @@ def calendar_view(user: Employee):
                 else:
                     st.error("Task description cannot be empty.")
 
-        # Fetch and show tasks for selected date
         st.markdown(f"### 📝 Tasks on {selected_date_for_tasks.strftime('%b %d, %Y')}")
         tasks = db.query(CalendarTask).filter_by(employee_id=user.id, date=selected_date_for_tasks).all()
 
@@ -1767,7 +1717,6 @@ def calendar_view(user: Employee):
 
         st.markdown("---")
 
-        # Meeting Section
         st.subheader("Create New Meeting")
         with st.form("add_meeting"):
             meeting_date = st.date_input("Meeting Date", date.today(), key="meeting_date_picker")
@@ -1794,7 +1743,6 @@ def calendar_view(user: Employee):
                     st.error("Meeting end time must be after start time.")
 
         st.subheader("Your Upcoming Meetings")
-        # Fetch and display meetings, ordered by date and then start time
         meetings = db.query(Meeting).filter_by(employee_id=user.id).order_by(Meeting.date, Meeting.start_time).all()
 
         if not meetings:
@@ -1812,9 +1760,6 @@ def calendar_view(user: Employee):
 
         st.markdown("---")
         st.markdown("### 📅 Availability Calendar (JS Widget)")
-        # This part remains mostly as is, but consider replacing the hardcoded dates
-        # with dynamic data fetched from your database if you track team availability.
-        # For now, it's a static example.
         components.html("""
         <head>
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -1848,12 +1793,8 @@ def calendar_view(user: Employee):
                 flatpickr("#calendar", {
                     inline: true,
                     defaultDate: "today",
-                    // Example dynamic dates from Python could be passed here
-                    // e.g., disable: JSON.parse(document.getElementById('disabledDates').textContent),
-                    // onDayCreate and onChange logic for availability/selection could be dynamic
                     onDayCreate: function(dObj, dStr, fp, dayElem) {
                         let date = dayElem.dateObj.toISOString().split('T')[0];
-                        // Placeholder for dynamic available/unavailable dates
                         if(["2023-07-26", "2023-08-10", "2023-08-23"].includes(date)) {
                             dayElem.classList.add("available");
                         }
@@ -1862,15 +1803,12 @@ def calendar_view(user: Employee):
                         }
                     },
                     onChange: function(selectedDates, dateStr, instance) {
-                        // This sends the selected date back to Streamlit
                         window.parent.postMessage({ type: 'SELECTED_DATE_JS', value: dateStr }, '*');
                     }
                 });
             </script>
         </body>
         """, height=400)
-        # You could capture the JS selected date using st.experimental_singleton (or similar mechanism in newer Streamlit)
-        # and update a state variable if needed.
 
 def monthly_meeting(user: Employee):
     with SessionLocal() as db:
@@ -1882,10 +1820,6 @@ def monthly_meeting(user: Employee):
 
         st.write(f"### Preparing for: {calendar.month_name[current_month]}, {current_year}")
 
-        # Fetch the user's work plans and targets for the current month/period
-        # Assuming work plans and targets have a deadline, filter for relevant ones.
-        # This is a simplified filter; in a real app, you might consider 'due this month'
-        # or 'active this month'.
         workplans = db.query(WorkPlan).filter_by(supervisor_id=user.id).all()
         targets = db.query(Target).filter_by(employee_id=user.id).all()
         meetings = db.query(Meeting).filter_by(employee_id=user.id).all()
@@ -1917,7 +1851,7 @@ def monthly_meeting(user: Employee):
                         if submit_progress:
                             plan.status = new_status
                             db.commit()
-                            st.session_state[f"wp_notes_{plan.id}"] = progress_notes # Store notes in session
+                            st.session_state[f"wp_notes_{plan.id}"] = progress_notes
                             st.success("Work Plan status and notes updated for meeting!")
                             st.rerun()
             st.markdown("---")
@@ -1968,7 +1902,7 @@ def monthly_meeting(user: Employee):
         st.write("### Additional Notes for Meeting")
         additional_notes = st.text_area(
             "Enter any additional notes for the meeting (e.g., points to discuss, questions for supervisor)",
-            value=st.session_state.get("monthly_meeting_additional_notes", "") # Persist notes
+            value=st.session_state.get("monthly_meeting_additional_notes", "")
         )
         if st.button("Save Additional Notes"):
             st.session_state["monthly_meeting_additional_notes"] = additional_notes
@@ -2042,11 +1976,9 @@ def monthly_meeting(user: Employee):
 
 # --- Main Application Logic ---
 def main():
-    # Initialize session state for user
     if "user" not in st.session_state:
         st.session_state.user = None
 
-    # Authentication flow
     if st.session_state.user is None:
         st.title("🔐 Login to PMU Tracker")
         display_notice()
@@ -2060,10 +1992,10 @@ def main():
                 if user_attempt:
                     password_input = st.text_input("Password", type="password", key="login_password_input")
                     if st.button("Login"):
-                        if user_attempt.password == password_input: # In a real app, compare hashed passwords!
+                        if user_attempt.password == password_input:
                             st.session_state.user = user_attempt
                             st.success(f"Welcome back, {user_attempt.name}!")
-                            st.rerun() # Rerun to switch to dashboard
+                            st.rerun()
                         else:
                             st.error("Incorrect password.")
                 else:
@@ -2071,7 +2003,6 @@ def main():
             else:
                 st.info("Please select your email and enter your password to log in.")
 
-    # Main application content once logged in
     if st.session_state.user is not None:
         selected_page = sidebar_navigation()
 
@@ -2088,7 +2019,7 @@ def main():
         elif selected_page == "reports":
             reports()
         elif selected_page == "settings":
-            settings(st.session_state.user) # Pass user object
+            settings(st.session_state.user)
         elif selected_page == "saksham_dashboard":
             saksham_dashboard()
         elif selected_page == "training":
@@ -2096,19 +2027,17 @@ def main():
         elif selected_page == "google_drive":
             google_drive()
         elif selected_page == "team_chat":
-            team_chat(st.session_state.user) # Pass user object
+            team_chat(st.session_state.user)
         elif selected_page == "email":
             email()
         elif selected_page == "calendar_view":
-            calendar_view(st.session_state.user) # Pass user object
+            calendar_view(st.session_state.user)
         elif selected_page == "monthly_meeting":
-            monthly_meeting(st.session_state.user) # Pass user object
-        elif selected_page == "organization_structure": # New page
-            organization_structure_page()
+            monthly_meeting(st.session_state.user)
         elif selected_page == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
-            st.rerun() # Rerun to show login page
+            st.rerun()
 
 if __name__ == "__main__":
     main()
