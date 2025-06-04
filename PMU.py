@@ -128,10 +128,9 @@ st.markdown(
 def organisation_structure():
     st.title("🏢 Organisation Structure")
 
-    # Embed Miro iframe
-    components.html("""
-        <iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVIslNr4w=/?embedMode=view_only_without_ui&moveToViewport=883,95,3803,1804&embedId=310927428479" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
-    """, height=500)
+    # Load image
+    image = Image.open("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Company%20Organizational%20Chart%20(4).jpg")
+    st.image(image, caption="Organizational Chart", use_column_width=True)
 
     with st.expander("Abbott"): 
         st.subheader("Sachin Wadpalliwar - Manager - Field")
