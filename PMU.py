@@ -127,7 +127,7 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
+show_dashboard()
 def show_dashboard():
     st.title("🏢 Organisation Structure")
 
