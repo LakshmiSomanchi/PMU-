@@ -128,8 +128,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 def main():
- show_dashboard()
-def show_dashboard():
     st.title("🏢 Organisation Structure")
 
     image_url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Company%20Organizational%20Chart%20(4).jpg"
@@ -199,7 +197,10 @@ def show_dashboard():
             st.markdown(f"### {member['name']}")
             st.markdown(f"*{member['role']}*")
         st.markdown("---")
-    main()
+
+# Entry Point
+main()
+    
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
 Base = declarative_base()
