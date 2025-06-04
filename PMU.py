@@ -494,7 +494,7 @@ def dashboard(user: Employee):
     st.write("Get to know the individuals driving our success.")
 
     team_members = [
-        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://drive.google.com/uc?id=1Q-P54Qj3IaDuMIhLgXEUR0zgnQ6bcUMS"},
+        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://drive.google.com/file/d/1HDqOqs5rnFDcPXr0dy0p2NBpw7jgxt-I/view?usp=drive_link"},
         {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://via.placeholder.com/80?text=KD"},
         {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://via.placeholder.com/80?text=SS"},
         {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": "https://via.placeholder.com/80?text=DR"},
