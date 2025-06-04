@@ -128,11 +128,10 @@ st.markdown(
 def organisation_structure():
     st.title("🏢 Organisation Structure")
 
-    # Load image from GitHub URL
-    image_url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Company%20Organizational%20Chart%20(4).jpg"
+    # Load image from uploaded file
+    image_path = "/mnt/data/7958ed50-1056-42d4-b9b2-9b5174948d4d.png"
     try:
-        response = requests.get(image_url)
-        image = Image.open(BytesIO(response.content))
+        image = Image.open(image_path)
         st.image(image, caption="Organizational Chart", use_column_width=True)
     except Exception as e:
         st.error(f"Failed to load organizational chart: {e}")
@@ -199,7 +198,7 @@ if page == "Organisation Structure":
     organisation_structure()
 elif page == "Meet the Team":
     meet_the_team()
-
+    
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
 Base = declarative_base()
