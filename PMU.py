@@ -880,7 +880,7 @@ def saksham_dashboard():
             required_packets = floor(required_seeds / seeds_per_packet)
 
             effective_germination = confidence_interval * (1 - mortality / 100)
-            expected_plants = total_plants - expected_plants
+            expected_plants = total_plants * effective_germination
             gaps = total_plants - expected_plants
             gap_seeds = gaps / effective_germination
             gap_packets = floor(gap_seeds / seeds_per_packet)
