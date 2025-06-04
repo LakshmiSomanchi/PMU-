@@ -790,7 +790,7 @@ def saksham_dashboard():
         elif submitted:
             st.error("⚠️ Please enter both Farmer Name and Farmer ID to proceed.")
 
-                with SessionLocal() as db:
+        with SessionLocal() as db:
                     try:
                         new_farmer_data = FarmerData(
                             farmer_name=farmer_name,
