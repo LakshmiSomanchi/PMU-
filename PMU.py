@@ -131,7 +131,7 @@ def organisation_structure():
     st.title("🏢 Organisation Structure")
 
     # Load image from uploaded file
-    image_path = "/mnt/data/7958ed50-1056-42d4-b9b2-9b5174948d4d.png"
+    image_path = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Company%20Organizational%20Chart%20(4).jpg"
     try:
         image = Image.open(image_path)
         st.image(image, caption="Organizational Chart", use_column_width=True)
