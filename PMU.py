@@ -128,15 +128,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 def main():
-    st.title("🔐 Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-
-    if st.button("Login"):
-        if username and password:
-            show_dashboard()
-        else:
-            st.warning("Please enter both username and password.")
+    st.title("🔐 TechnoServe - PMU")
 
 def show_dashboard():
     st.title("🏢 Organisation Structure")
