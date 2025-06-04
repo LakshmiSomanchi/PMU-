@@ -127,13 +127,24 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-def organisation_structure():
+def main():
+    st.title("🔐 Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        if username and password:
+            show_dashboard()
+        else:
+            st.warning("Please enter both username and password.")
+
+def show_dashboard():
     st.title("🏢 Organisation Structure")
 
-    # Load image from uploaded file
-    image_path = "Company Organizational Chart (4).jpg"
+    image_url = "https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/Company%20Organizational%20Chart%20(4).jpg"
     try:
-        image = Image.open(image_path)
+        response = requests.get(image_url)
+        image = Image.open(BytesIO(response.content))
         st.image(image, caption="Organizational Chart", use_container_width=True)
     except Exception as e:
         st.error(f"Failed to load organizational chart: {e}")
@@ -164,42 +175,42 @@ def organisation_structure():
     st.markdown("---")
     st.markdown("### Lead: Rupesh Mukherjee - Associate Practice Leader")
 
-def meet_the_team():
     st.title("🤝 Meet the Team")
     team_members = [
-        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader"},
-        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field"},
-        {"name": "Shifali Sharma", "role": "Manager - Field"},
-        {"name": "Dr. Ramakrishna", "role": "Advisor"},
-        {"name": "Sachin Wadpalliwar", "role": "Manager - Field"},
-        {"name": "Aditya Yuvaraj", "role": "Associate - Field"},
-        {"name": "Aniket Govekar", "role": "Assistant Manager - Field"},
-        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field"},
-        {"name": "Subrat Ghoshal", "role": "Senior Executive - Field"},
-        {"name": "K Balaji", "role": "Senior Associate - Field"},
-        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field"},
-        {"name": "Ajay Vaghela", "role": "Senior Associate - Field"},
-        {"name": "Happy Vaishnavi", "role": "Senior Associate - Field"},
-        {"name": "Nikhita VK", "role": "Senior Associate - Field"},
-        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field"},
-        {"name": "Kriti Suneha", "role": "Senior Associate - Field"},
-        {"name": "Ranu Laddha", "role": "Associate - Field"},
-        {"name": "Pari Sharma", "role": "Associate - Field"},
-        {"name": "Muskan Kaushal", "role": "Associate - Field"},
-        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field"},
-        {"name": "Hrushikesh Tilekar", "role": "Associate"},
+        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": None},
+        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": None},
+        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": None},
+        {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": None},
+        {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": None},
+        {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": None},
+        {"name": "Aniket Govekar", "role": "Assistant Manager - Field", "photo": None},
+        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": None},
+        {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": None},
+        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": None},
+        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": None},
+        {"name": "Ajay Vaghela", "role": "Senior Associate - Field", "photo": None},
+        {"name": "Happy Vaishnavi", "role": "Senior Associate - Field", "photo": None},
+        {"name": "Nikhita VK", "role": "Senior Associate - Field", "photo": None},
+        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field", "photo": None},
+        {"name": "Kriti Suneha", "role": "Senior Associate - Field", "photo": None},
+        {"name": "Ranu Laddha", "role": "Associate - Field", "photo": None},
+        {"name": "Pari Sharma", "role": "Associate - Field", "photo": None},
+        {"name": "Muskan Kaushal", "role": "Associate - Field", "photo": None},
+        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": None},
+        {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": None},
     ]
+
     for member in team_members:
-        st.markdown(f"### {member['name']}")
-        st.markdown(f"*{member['role']}*")
+        cols = st.columns([1, 5])
+        with cols[0]:
+            st.image(member["photo"] or "https://via.placeholder.com/80", width=80)
+        with cols[1]:
+            st.markdown(f"### {member['name']}")
+            st.markdown(f"*{member['role']}*")
         st.markdown("---")
 
-# Main Navigation
-page = st.selectbox("Choose a page", ["Organisation Structure", "Meet the Team"])
-if page == "Organisation Structure":
-    organisation_structure()
-elif page == "Meet the Team":
-    meet_the_team()
+# Entry Point
+main()
     
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
