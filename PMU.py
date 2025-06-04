@@ -495,8 +495,8 @@ def dashboard(user: Employee):
 
     team_members = [
         {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://drive.google.com/file/d/1HDqOqs5rnFDcPXr0dy0p2NBpw7jgxt-I/view?usp=drive_link"},
-        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://via.placeholder.com/80?text=KD"},
-        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://via.placeholder.com/80?text=SS"},
+        {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://drive.google.com/file/d/1msWObOwQjuZfa-LBV9cCfI9Y096Y7RWQ/view?usp=drive_link"},
+        {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://drive.google.com/file/d/1oV23e3yA3J9AYWd-_hLqZaDi8iMczzzV/view?usp=drive_link"},
         {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": "https://via.placeholder.com/80?text=DR"},
         {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": "https://drive.google.com/uc?id=1JcxGANNNz-cuNiDe5CUKh9rTWZSiPhMM"},
         {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=AY"},
@@ -504,7 +504,7 @@ def dashboard(user: Employee):
         {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/uc?id=1ofRfjXogxGL5hzK79ZBbx_AuUuZl8Iuu"},
         {"name": "Nilesh Dhanwate", "role": "Senior Executive - Field", "photo": "https://drive.google.com/uc?id=1XH1iEJKsbcay5dugj2Eub_fOsqXHQhfW"},
         {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": "https://via.placeholder.com/80?text=SG"},
-        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=KB"},
+        {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://drive.google.com/file/d/1pxOvDZQk4gY2hO-kfuwIEfGMg0iQzMFK/view?usp=drive_link"},
         {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/uc?id=1E1-m1V6xnIhTTn69ZB9Xy4hiJmsTUTwX"},
         {"name": "Ajay Vaghela", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=AV"},
         {"name": "Happy Vaishnavi", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80?text=HV"},
@@ -514,7 +514,7 @@ def dashboard(user: Employee):
         {"name": "Ranu Laddha", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=RL"},
         {"name": "Pari Sharma", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=PS"},
         {"name": "Muskan Kaushal", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=MK"},
-        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=RS"},
+        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": "https://drive.google.com/file/d/1kwsZSKYcHdwonnZpoBI1gMCRCMjqaFbO/view?usp=drive_link"},
         {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": "https://via.placeholder.com/80?text=HT"},
     ]
 
