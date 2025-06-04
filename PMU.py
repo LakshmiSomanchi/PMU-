@@ -166,21 +166,22 @@ def main():
 
     st.title("🤝 Meet the Team")
     team_members = [
-        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://via.placeholder.com/80"},
+        {"name": "Rupesh Mukherjee", "role": "Associate Practice Leader", "photo": "https://drive.google.com/file/d/1HDqOqs5rnFDcPXr0dy0p2NBpw7jgxt-I/view?usp=drive_link"},
         {"name": "Kuntal Dutta", "role": "Sr. Manager - Field", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjUM8ZsIQuisZZiC3cgBzrrRhwQtGB7Ii7tacDc4ZkP625fXUaUPwwAlF4TdGgVNQxEHj_x5TDHZLuSK9AcPAbZTWjuh1h4pkN4Jb2ImY7tmr3lO_ngbg7XF3Rj0GHAdsElcIVL59q3MuWELF4cbpJHkiwLMT4lGunhsda52r4K5vuIDRuIr8rjkpFGtxOlvKcHqYu6U7Zwflys0qzcXDJvcN5K4a-x7lPo961yZgqe_UVcdMEtKU08oaQ1JHzI98vwfY1oe5WeJ8A1QODpnR6MC2P3KdVMukf6LxfDzqE6Bpd5vWBvAf1VP7L9CNrPf_IPnCemekORg7u_WJVzditvdvJJa_FyuVyqf_hjCyMZJEj13CjY7e7q_UxrvJOjWCU2HSpRyRcapWsvvzJCZ7XrTtHVTeeuQJjIzrf3gys6gXi0_JmQrJneojlqWiXSEUnNgq0cf1F89uOKQsW8YYWzSi3HukW1pK3vtqNZv57aGMJuCNt_vlV16CNjv_OK2mSZa2mIRaePGuOq23bbaA_fz3GNmoVZF8f03RLPHFmtl_IhxblkkQe_0rKr10XDqm9jkNTHfh48FmzlNu3J0wCYmrKtQIgr_xIpWZAIC9-d5KXad5e9Bj4pl_nfohhjfA-CErBy8A46GZt_11QRiu8jwOlpi9GHFHwramR7ei6lPtFD7plxaPb9tEQvc4UkYnhP8H5LmTGKi_eiBbIzQMgpnxCIEQ42yieMCcIeiyQLC0qR10k-i1rEg_2exMmm7jY43joqitGk-ydELZmhULOxamRR3gAsMtMLgwVdYH1_ke34SEaCEiUWXTWCwhwX5lP13sDUEB5LNqDCXSLC78XtuNtpQToMv49aFeQM9Oa8CpVXr39JTUAyxnAPQMuFW5N-3eue9KzFy26CDpIspBgJ87b5RVdKRWRA62qYc3icZk122Gvq7oHJgh62CwvAAzftcTGdcy5A0rtnCk7nR-sqECjYic4s7=s272-p-k-rw-no"},
         {"name": "Shifali Sharma", "role": "Manager - Field", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjVncga1Owmj4rlD8c7JOlteXs4CKepLtyxKvS33Tj3vYFfQr0c=s272-p-k-rw-no"},
         {"name": "Dr. Ramakrishna", "role": "Advisor", "photo": "https://via.placeholder.com/80"},
-        {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Sachin Wadpalliwar", "role": "Manager - Field", "photo": "https://drive.google.com/file/d/1JcxGANNNz-cuNiDe5CUKh9rTWZSiPhMM/view?usp=drive_link"},
         {"name": "Aditya Yuvaraj", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Aniket Govekar", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
-        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Bhushan Sananse", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/file/d/1ofRfjXogxGL5hzK79ZBbx_AuUuZl8Iuu/view?usp=drive_link"},
+        {"name": "Nilesh Dhanwate", "role": "ASenior Executive - Field", "photo": "https://drive.google.com/file/d/1XH1iEJKsbcay5dugj2Eub_fOsqXHQhfW/view?usp=drive_link"}
         {"name": "Subrat Ghoshal", "role": "Senior Executive - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "K Balaji", "role": "Senior Associate - Field", "photo": "https://lh3.googleusercontent.com/a-/ALV-UjXPZfpYbgTI_KAz39-pp3xKFSvpnNorikyKwfa2Bc24JuxrR9I=s272-p-k-rw-no"},
-        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Guru Mohan Kakanuru Reddy", "role": "Assistant Manager - Field", "photo": "https://drive.google.com/file/d/1E1-m1V6xnIhTTn69ZB9Xy4hiJmsTUTwX/view?usp=drive_link"},
         {"name": "Ajay Vaghela", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Happy Vaishnavi", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Nikhita VK", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
-        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Bhavya Kharoo", "role": "Senior Associate - Field", "photo": "https://drive.google.com/file/d/19gP4zdJMW6SMnrt0IZRcXw2LwUMeaxEn/view?usp=drive_link"},
         {"name": "Kriti Suneha", "role": "Senior Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Ranu Laddha", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Pari Sharma", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
