@@ -185,7 +185,7 @@ def main():
         {"name": "Ranu Laddha", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Pari Sharma", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
         {"name": "Muskan Kaushal", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
-        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": "https://via.placeholder.com/80"},
+        {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": "https://lh3.googleusercontent.com/a/ACg8ocLjpv_D2a-76pA8cKWU61fDWfYDwRzStF9PxufT0nGXDqy-0pw=s288-c-no"},
         {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": "https://via.placeholder.com/80"},
     ]
 
