@@ -127,7 +127,8 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-show_dashboard()
+def main():
+ show_dashboard()
 def show_dashboard():
     st.title("🏢 Organisation Structure")
 
@@ -198,7 +199,7 @@ def show_dashboard():
             st.markdown(f"### {member['name']}")
             st.markdown(f"*{member['role']}*")
         st.markdown("---")
-    
+    main()
 # SQLite + SQLAlchemy setup
 DATABASE_URL = "sqlite:///pmu.db"
 Base = declarative_base()
