@@ -129,6 +129,8 @@ st.markdown(
 )
 def main():
     st.title("🔐 TechnoServe - PMU")
+    show_dashboard()
+
 def show_dashboard():
     st.title("🏢 Organisation Structure")
 
