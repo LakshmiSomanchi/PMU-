@@ -437,6 +437,7 @@ def sidebar_navigation() -> str:
         "Field Team Management": "field_team_management",
         "Live Dashboard": "live_dashboard",
         "SAKSHAM Dashboard": "saksham_dashboard",
+        "FoodSign": "foodsign_dashboard", # New FoodSign tab
         "Training": "training",
         "Settings": "settings",
         "Google Drive (Placeholder)": "google_drive",
@@ -551,7 +552,7 @@ def dashboard(user: Employee):
                         except Exception as e:
                             st.warning(f"Error processing image for {member['name']}: {e}. Using placeholder.")
                             st.image("https://via.placeholder.com/120?text=Error", width=120)
-        st.markdown("---") # Separator between rows of team members
+    st.markdown("---") # Separator between rows of team members
 
     # Call the pop-up function for the organizational chart
     show_org_chart_popup()
@@ -1993,6 +1994,77 @@ def monthly_meeting(user: Employee):
                 mime="text/markdown"
             )
 
+# --- NEW: FoodSign Dashboard Section ---
+def foodsign_dashboard():
+    st.title("🍽️ FoodSign Dashboards and Applications")
+    st.markdown("---")
+
+    st.header("FoodSign Webpage Application")
+    st.write("Explore various functionalities of the FoodSign Webpage Application.")
+
+    tab_web_dashboard, tab_web_geolocation, tab_web_farmer, tab_web_bmc, tab_web_collecting, tab_web_activity = st.tabs(
+        ["Dashboard", "Geolocation", "Farmer Information", "BMC Information", "Collecting Village", "Activity Report"]
+    )
+
+    with tab_web_dashboard:
+        st.subheader("FoodSign Webpage Application: Dashboard")
+        st.write("This section displays the main dashboard overview for the FoodSign webpage application.")
+        st.info("Placeholder for FoodSign Webpage Application Dashboard content (e.g., KPIs, charts).")
+        # You can add interactive elements or display dataframes here.
+
+    with tab_web_geolocation:
+        st.subheader("FoodSign Webpage Application: Geolocation")
+        st.write("View geolocation data and maps related to FoodSign operations.")
+        st.info("Placeholder for FoodSign Webpage Application Geolocation data (e.g., interactive maps, location lists).")
+        # Example of embedding a map (requires actual map data or an iframe)
+        # st.markdown("Embed a live map here (e.g., Folium, Datawrapper iframe).")
+        # components.iframe("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.253018260714!2d-73.98785958459464!3d40.75800057932608!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c258525b6a3b7b%3A0x1d5f6e8c7c7f7e9a!2sTimes%20Square%2C%20New%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sin!4v1678912345678!5m2!1sen!2sin", height=400)
+
+
+    with tab_web_farmer:
+        st.subheader("FoodSign Webpage Application: Farmer Information")
+        st.write("Access and manage detailed information about farmers.")
+        st.info("Placeholder for Farmer Information details (e.g., farmer profiles, contact info, farm details).")
+        # Example: display a dummy farmer data table
+        dummy_farmer_data = pd.DataFrame({
+            "Farmer ID": ["F001", "F002", "F003"],
+            "Name": ["Rajesh Kumar", "Priya Sharma", "Amit Singh"],
+            "Village": ["Anandpur", "Bharatgaon", "Chandini"],
+            "Crops": ["Wheat", "Rice", "Maize"],
+            "Contact": ["9876543210", "9988776655", "9123456789"]
+        })
+        st.dataframe(dummy_farmer_data, use_container_width=True)
+
+    with tab_web_bmc:
+        st.subheader("FoodSign Webpage Application: BMC Information")
+        st.write("Details regarding Bulk Milk Coolers (BMC).")
+        st.info("Placeholder for BMC Information (e.g., BMC locations, capacity, operational status).")
+
+    with tab_web_collecting:
+        st.subheader("FoodSign Webpage Application: Collecting Village")
+        st.write("Information on milk collection points and villages.")
+        st.info("Placeholder for Collecting Village data and related metrics.")
+
+    with tab_web_activity:
+        st.subheader("FoodSign Webpage Application: Activity Report")
+        st.write("Detailed reports on various activities recorded in the system.")
+        st.info("Placeholder for Activity Reports (e.g., daily collection reports, quality checks).")
+        st.markdown("---")
+        st.subheader("WATER ACTIVITY")
+        st.info("Placeholder for water activity specific reports within the activity report section.")
+
+    st.markdown("---")
+    st.header("FoodSign Mobile Application")
+    st.write("Information and insights related to the FoodSign Mobile Application.")
+    st.info("This section would detail features, usage statistics, or data collected via the mobile app.")
+    # You can add further sub-tabs or sections if specific functionalities of the mobile app are detailed.
+
+    st.markdown("---")
+    st.header("INDITEX ACTIVITY")
+    st.write("Specific activities related to Inditex integration or operations.")
+    st.info("Placeholder for INDITEX ACTIVITY details.")
+
+
 # --- Main Application Logic ---
 def main():
     if "user" not in st.session_state:
@@ -2041,6 +2113,8 @@ def main():
             settings(st.session_state.user)
         elif selected_page == "saksham_dashboard":
             saksham_dashboard()
+        elif selected_page == "foodsign_dashboard": # New condition for FoodSign
+            foodsign_dashboard()
         elif selected_page == "training":
             training()
         elif selected_page == "google_drive":
