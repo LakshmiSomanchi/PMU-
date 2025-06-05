@@ -519,6 +519,7 @@ def dashboard(user: Employee):
         {"name": "Pari Sharma", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=PS"},
         {"name": "Muskan Kaushal", "role": "Associate - Field", "photo": "https://via.placeholder.com/80?text=MK"},
         {"name": "Ramalakshmi Somanchi", "role": "Associate - Field", "photo": "https://drive.google.com/file/d/1kwsZSKYcHdwonnZpoBI1gMCRCMjqaFbO/view?usp=drive_link"},
+        {"name": "Sandeep GS", "role": "Senior Associate - Field", "photo": "https://drive.google.com/file/d/1-9boy9pSfz2hwLIxKncJ_g4hYo8raMuD/view?usp=drive_link"},
         {"name": "Hrushikesh Tilekar", "role": "Associate", "photo": "https://via.placeholder.com/80?text=HT"},
     ]
 
