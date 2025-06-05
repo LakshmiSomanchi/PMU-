@@ -1778,7 +1778,7 @@ def calendar_view(user: Employee):
                         st.rerun()
 
         st.markdown("---")
-        st.markdown("### 📅 Availability Calendar (JS Widget)")
+        st.markdown("### 📅 Availability Calendar")
         components.html("""
         <head>
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
