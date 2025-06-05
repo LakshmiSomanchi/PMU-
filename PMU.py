@@ -437,7 +437,7 @@ def sidebar_navigation() -> str:
         "Field Team Management": "field_team_management",
         "Live Dashboard": "live_dashboard",
         "SAKSHAM Dashboard": "saksham_dashboard",
-        "FoodSign": "foodsign_dashboard", # New FoodSign tab
+        "Farmer Management (Tracer)": "farmer_management_tracer", # Renamed tab
         "Training": "training",
         "Settings": "settings",
         "Google Drive (Placeholder)": "google_drive",
@@ -1994,75 +1994,127 @@ def monthly_meeting(user: Employee):
                 mime="text/markdown"
             )
 
-# --- NEW: FoodSign Dashboard Section ---
-def foodsign_dashboard():
-    st.title("🍽️ FoodSign Dashboards and Applications")
+# --- NEW: Farmer Management (Tracer) Section ---
+def farmer_management_tracer():
+    st.title("👨‍🌾 Farmer Management (Tracer) & Activity Monitoring")
     st.markdown("---")
 
-    st.header("FoodSign Webpage Application")
-    st.write("Explore various functionalities of the FoodSign Webpage Application.")
+    st.header("Webpage Application Features")
+    st.write("Overview of data and functionalities available through the web application.")
 
     tab_web_dashboard, tab_web_geolocation, tab_web_farmer, tab_web_bmc, tab_web_collecting, tab_web_activity = st.tabs(
         ["Dashboard", "Geolocation", "Farmer Information", "BMC Information", "Collecting Village", "Activity Report"]
     )
 
     with tab_web_dashboard:
-        st.subheader("FoodSign Webpage Application: Dashboard")
-        st.write("This section displays the main dashboard overview for the FoodSign webpage application.")
-        st.info("Placeholder for FoodSign Webpage Application Dashboard content (e.g., KPIs, charts).")
-        # You can add interactive elements or display dataframes here.
+        st.subheader("Webpage Application: Dashboard Overview")
+        st.write("This section displays key metrics and progress from the FoodSign Webpage Application Dashboard.")
+        st.write(f"Welcome back Dr!") [cite: 1]
+        st.markdown(f"**Collecting Village**: 16") [cite: 1]
+        st.markdown(f"**BMC**: 20") [cite: 1]
+        st.markdown(f"**Farmer**: 4083") [cite: 1]
+        st.markdown(f"**No. of Crops**: 0") [cite: 1]
+        st.markdown(f"**No. of Plots**: 972") [cite: 1]
+        st.markdown(f"**Mapped Plots**: 972") [cite: 1]
+        st.markdown(f"**Conventional**: 34.10 ac") [cite: 1]
+
+        st.markdown("---")
+        st.markdown("#### Activity Progress")
+        st.markdown("- Overdue") [cite: 1]
+        st.markdown("- Completed") [cite: 1]
+        st.markdown("- Planned") [cite: 1]
+        st.markdown("- Cancelled") [cite: 1]
+        st.info("Chart data for activity progress would be displayed here.") [cite: 1]
+
+        st.markdown("#### Practices Deviation")
+        st.markdown("- Deviation") [cite: 1]
+        st.markdown("- On Schedule") [cite: 1]
+        st.info("Chart data for practices deviation would be displayed here.") [cite: 1]
+
+        st.markdown("#### Total Crops (%)")
+        st.info("Chart data for total crops percentage would be displayed here.") [cite: 1]
+
 
     with tab_web_geolocation:
-        st.subheader("FoodSign Webpage Application: Geolocation")
-        st.write("View geolocation data and maps related to FoodSign operations.")
-        st.info("Placeholder for FoodSign Webpage Application Geolocation data (e.g., interactive maps, location lists).")
-        # Example of embedding a map (requires actual map data or an iframe)
-        # st.markdown("Embed a live map here (e.g., Folium, Datawrapper iframe).")
-        # components.iframe("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.253018260714!2d-73.98785958459464!3d40.75800057932608!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c258525b6a3b7b%3A0x1d5f6e8c7c7f7e9a!2sTimes%20Square%2C%20New%20York%2C%20NY%2C%20USA!5e0!3m2!1sen!2sin!4v1678912345678!5m2!1sen!2sin", height=400)
+        st.subheader("Webpage Application: Geolocation Data")
+        st.write("View geolocation data and maps related to farmer locations and operations.")
+        st.write("Total Dairy Farm Showing: 972 / 972") [cite: 2]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Geolocation%202.jpg", caption="FoodSign Webpage Application Geolocation Map", use_container_width=True) [cite: 2]
+        st.info("The map above displays locations of dairy farms.") [cite: 2]
 
 
     with tab_web_farmer:
-        st.subheader("FoodSign Webpage Application: Farmer Information")
-        st.write("Access and manage detailed information about farmers.")
-        st.info("Placeholder for Farmer Information details (e.g., farmer profiles, contact info, farm details).")
-        # Example: display a dummy farmer data table
-        dummy_farmer_data = pd.DataFrame({
-            "Farmer ID": ["F001", "F002", "F003"],
-            "Name": ["Rajesh Kumar", "Priya Sharma", "Amit Singh"],
-            "Village": ["Anandpur", "Bharatgaon", "Chandini"],
-            "Crops": ["Wheat", "Rice", "Maize"],
-            "Contact": ["9876543210", "9988776655", "9123456789"]
-        })
-        st.dataframe(dummy_farmer_data, use_container_width=True)
+        st.subheader("Webpage Application: Farmer Information")
+        st.write("Access and manage detailed information about individual farmers.")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Farmer%20Information%201.jpg", caption="Farmer List Overview", use_container_width=True) [cite: 3]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Farmer%20Information%202.jpg", caption="Detailed Farmer Information", use_container_width=True) [cite: 4]
+        st.info("The images above show a list of farmers and detailed view of a selected farmer, including dairy farm map, produce, certification, input inventory, and statements.") [cite: 3, 4]
 
     with tab_web_bmc:
-        st.subheader("FoodSign Webpage Application: BMC Information")
-        st.write("Details regarding Bulk Milk Coolers (BMC).")
-        st.info("Placeholder for BMC Information (e.g., BMC locations, capacity, operational status).")
+        st.subheader("Webpage Application: BMC Information")
+        st.write("Details regarding Bulk Milk Coolers (BMC) and associated farmers.")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20BMC%20Information%201.jpg", caption="BMC List Overview", use_container_width=True) [cite: 5]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20BMC%20Information%202.jpg", caption="Detailed BMC Information", use_container_width=True) [cite: 6]
+        st.info("The images above present a list of BMCs and a detailed view of a specific BMC, including total land holdings, plots, and associated farmers.") [cite: 5, 6]
 
     with tab_web_collecting:
-        st.subheader("FoodSign Webpage Application: Collecting Village")
-        st.write("Information on milk collection points and villages.")
-        st.info("Placeholder for Collecting Village data and related metrics.")
+        st.subheader("Webpage Application: Collecting Village Information")
+        st.write("Information on milk collection points and villages, including farmer and BMC counts.")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Collecting%20Village.jpg", caption="Collecting Village Overview", use_container_width=True) [cite: 7]
+        st.info("The image shows a list of collecting villages with details like farmer count, BMC count, and mapped area.") [cite: 7]
 
     with tab_web_activity:
-        st.subheader("FoodSign Webpage Application: Activity Report")
-        st.write("Detailed reports on various activities recorded in the system.")
-        st.info("Placeholder for Activity Reports (e.g., daily collection reports, quality checks).")
-        st.markdown("---")
-        st.subheader("WATER ACTIVITY")
-        st.info("Placeholder for water activity specific reports within the activity report section.")
+        st.subheader("Webpage Application: Activity Reports")
+        st.write("Detailed reports on various activities recorded in the system, including a water activity section.")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Activity%20Report%201.jpg", caption="Activity Report Menu", use_container_width=True) [cite: 8]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Activity%20Report%202.jpg", caption="Daily Activity Report", use_container_width=True) [cite: 9]
+        st.info("The images display the activity report menu and a daily activity report, which can filter by date and activity type.") [cite: 8, 9]
+        st.subheader("Water Activity Details")
+        st.info("This section would provide specific details and reports related to water activities.") [cite: 9] # The slide mentions "WATER ACTIVITY" as a sub-topic of activity reports.
 
     st.markdown("---")
-    st.header("FoodSign Mobile Application")
-    st.write("Information and insights related to the FoodSign Mobile Application.")
-    st.info("This section would detail features, usage statistics, or data collected via the mobile app.")
-    # You can add further sub-tabs or sections if specific functionalities of the mobile app are detailed.
+    st.header("Mobile Application: Activity & Data Entry")
+    st.write("Insights into the mobile application's dashboard and activity logging forms.")
 
-    st.markdown("---")
-    st.header("INDITEX ACTIVITY")
-    st.write("Specific activities related to Inditex integration or operations.")
-    st.info("Placeholder for INDITEX ACTIVITY details.")
+    tab_mobile_dashboard, tab_mobile_activities, tab_mobile_profile, tab_mobile_add_activity, tab_mobile_inditex, tab_mobile_water_activity = st.tabs(
+        ["Mobile Dashboard", "Activities List", "Profile", "Add New Activity", "INDITEX Activity Form", "TNS-Water Activity Form"]
+    )
+
+    with tab_mobile_dashboard:
+        st.subheader("Mobile Application: Dashboard")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%201.jpg", caption="Mobile Dashboard", use_container_width=True) [cite: 16]
+        st.write("The mobile dashboard shows farmer verification status and activity progress.") [cite: 16]
+
+    with tab_mobile_activities:
+        st.subheader("Mobile Application: Activities List")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%202.jpg", caption="Mobile Activities List", use_container_width=True) [cite: 16]
+        st.info("This screen lists various activities such as INDITEX_Activity, SS-BMC Activity, and TNS-BMC Activity with their status.") [cite: 16]
+
+    with tab_mobile_profile:
+        st.subheader("Mobile Application: Profile/Settings")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%203.jpg", caption="Mobile App Profile Menu", use_container_width=True) [cite: 10]
+        st.info("The profile section offers options like Activity Board, My Locations, Notifications, and data download functionalities.") [cite: 10]
+
+    with tab_mobile_add_activity:
+        st.subheader("Mobile Application: Add New Activity Options")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%204.jpg", caption="Add New Activity Options", use_container_width=True) [cite: 17]
+        st.info("Users can select from various activity types to add, including TNS-BMC, SS-BMC, TNS-WATER, and INDITEX_ACTIVITY.") [cite: 17]
+
+    with tab_mobile_inditex:
+        st.subheader("Mobile Application: INDITEX Activity Form")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/INDITEX%20ACTIVITY.jpg", caption="INDITEX Activity Form 1", use_container_width=True) [cite: 15]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%206.jpg", caption="INDITEX Activity Form 2", use_container_width=True) [cite: 18]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%207.jpg", caption="INDITEX Activity Form 3", use_container_width=True) [cite: 19]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%208.jpg", caption="INDITEX Activity Form 4", use_container_width=True) [cite: 20]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%209.jpg", caption="INDITEX Activity Form 5", use_container_width=True) [cite: 21]
+        st.info("These forms capture detailed information for INDITEX activities, including farmer details, land and crop information, and financial data.") [cite: 15, 18, 19, 20, 21]
+
+    with tab_mobile_water_activity:
+        st.subheader("Mobile Application: TNS-Water Activity Form")
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%205.jpg", caption="TNS-Water Activity Form 1", use_container_width=True) [cite: 12]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%2010.jpg", caption="TNS-Water Activity Form 2", use_container_width=True) [cite: 13]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%2011.jpg", caption="TNS-Water Activity Form 3", use_container_width=True) [cite: 14]
+        st.info("These forms are used to record data related to water activities, including water quality, usage, and cost at the farm level.") [cite: 12, 13, 14]
 
 
 # --- Main Application Logic ---
@@ -2113,8 +2165,8 @@ def main():
             settings(st.session_state.user)
         elif selected_page == "saksham_dashboard":
             saksham_dashboard()
-        elif selected_page == "foodsign_dashboard": # New condition for FoodSign
-            foodsign_dashboard()
+        elif selected_page == "farmer_management_tracer": # Updated condition for Farmer Management (Tracer)
+            farmer_management_tracer()
         elif selected_page == "training":
             training()
         elif selected_page == "google_drive":
