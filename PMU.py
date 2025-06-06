@@ -1995,6 +1995,7 @@ def monthly_meeting(user: Employee):
             )
 
 # --- NEW: Farmer Management (Tracer) Section ---
+# FIX STARTS HERE
 def farmer_management_tracer():
     st.title("👨‍🌾 Farmer Management (Tracer) & Activity Monitoring")
     st.markdown("---")
@@ -2009,32 +2010,31 @@ def farmer_management_tracer():
     with tab_web_dashboard:
         st.subheader("Webpage Application: Dashboard Overview")
         st.write("This section displays key metrics and progress from the FoodSign Webpage Application Dashboard.")
-        st.write(f"Welcome back Dr!") [cite: 1]
-        st.markdown(f"**Collecting Village**: 16") [cite: 1]
-        st.markdown(f"**BMC**: 20") [cite: 1]
-        st.markdown(f"**Farmer**: 4083") [cite: 1]
-        st.markdown(f"**No. of Crops**: 0") [cite: 1]
-        st.markdown(f"**No. of Plots**: 972") [cite: 1]
-        st.markdown(f"**Mapped Plots**: 972") [cite: 1]
-        st.markdown(f"**Conventional**: 34.10 ac") [cite: 1]
+        st.write(f"Welcome back Dr!") # Removed
+        st.markdown(f"**Collecting Village**: 16") # Removed
+        st.markdown(f"**BMC**: 20") # Removed
+        st.markdown(f"**Farmer**: 4083") # Removed
+        st.markdown(f"**No. of Crops**: 0") # Removed
+        st.markdown(f"**No. of Plots**: 972") # Removed
+        st.markdown(f"**Mapped Plots**: 972") # Removed
+        st.markdown(f"**Conventional**: 34.10 ac") # Removed
 
         st.markdown("---")
         st.markdown("#### Activity Progress")
-        st.markdown("- Overdue") [cite: 1]
-        st.markdown("- Completed") [cite: 1]
-        st.markdown("- Planned") [cite: 1]
-        st.markdown("- Cancelled") [cite: 1]
-        st.info("Chart data for activity progress would be displayed here.") [cite: 1]
+        st.markdown("- Overdue") # Removed
+        st.markdown("- Completed") # Removed
+        st.markdown("- Planned") # Removed
+        st.markdown("- Cancelled") # Removed
+        st.info("Chart data for activity progress would be displayed here.") # Removed
 
         st.markdown("#### Practices Deviation")
-        st.markdown("- Deviation") [cite: 1]
-        st.markdown("- On Schedule") [cite: 1]
-        st.info("Chart data for practices deviation would be displayed here.") [cite: 1]
+        st.markdown("- Deviation") # Removed
+        st.markdown("- On Schedule") # Removed
+        st.info("Chart data for practices deviation would be displayed here.") # Removed
 
         st.markdown("#### Total Crops (%)")
-        st.info("Chart data for total crops percentage would be displayed here.") [cite: 1]
-
-
+        st.info("Chart data for total crops percentage would be displayed here.") # Removed
+        
     with tab_web_geolocation:
         st.subheader("Webpage Application: Geolocation Data")
         st.write("View geolocation data and maps related to farmer locations and operations.")
