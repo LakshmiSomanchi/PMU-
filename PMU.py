@@ -2035,13 +2035,13 @@ def farmer_management_tracer():
         st.markdown("#### Total Crops (%)")
         st.info("Chart data for total crops percentage would be displayed here.") # Removed
         
+   
     with tab_web_geolocation:
         st.subheader("Webpage Application: Geolocation Data")
         st.write("View geolocation data and maps related to farmer locations and operations.")
-        st.write("Total Dairy Farm Showing: 972 / 972") [cite: 2]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Geolocation%202.jpg", caption="FoodSign Webpage Application Geolocation Map", use_container_width=True) [cite: 2]
-        st.info("The map above displays locations of dairy farms.") [cite: 2]
-
+        st.write("Total Dairy Farm Showing: 972 / 972") # Removed
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Geolocation%202.jpg", caption="FoodSign Webpage Application Geolocation Map", use_container_width=True) # Removed
+        st.info("The map above displays locations of dairy farms.") # Removed
 
     with tab_web_farmer:
         st.subheader("Webpage Application: Farmer Information")
