@@ -16,6 +16,7 @@ from math import floor, ceil
 import json
 import requests
 import calendar
+import http.client
 import streamlit.components.v1 as components
 from typing import Optional, List, Dict, Any
 
@@ -41,33 +42,70 @@ def get_db():
     finally:
         db.close()
 
-# --- API Integration (Placeholder) ---
-def api_get(endpoint: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
-    try:
-        response = requests.get(f"{API_BASE_URL}/{endpoint}", params=params)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"API GET Error on '{endpoint}': {e}")
-        return None
+def upload_image_from_url(image_url: str) -> str:
+    conn = http.client.HTTPSConnection("photo-upload-api.p.rapidapi.com")
+    payload = json.dumps({"image_url": image_url})
+    headers = {
+        'x-rapidapi-host': "photo-upload-api.p.rapidapi.com",
+        'Content-Type': "application/json"
+    }
+    conn.request("POST", "/image_url", payload, headers)
+    res = conn.getresponse()
+    data = res.read()
+    return data.decode("utf-8")
 
-def api_post(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    try:
-        response = requests.post(f"{API_BASE_URL}/{endpoint}", json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"API POST Error on '{endpoint}': {e}")
-        return None
+def get_google_drive_comments() -> str:
+    conn = http.client.HTTPSConnection("googledrivemikilior1v1.p.rapidapi.com")
+    headers = {
+        'x-rapidapi-host': "GoogleDrivemikilior1V1.p.rapidapi.com",
+        'Content-Type': "application/x-www-form-urlencoded"
+    }
+    conn.request("POST", "/getFileComments", "", headers)
+    res = conn.getresponse()
+    data = res.read()
+    return data.decode("utf-8")
 
-def api_put(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    try:
-        response = requests.put(f"{API_BASE_URL}/{endpoint}", json=data)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        st.error(f"API PUT Error on '{endpoint}': {e}")
-        return None
+def add_dropbox_file_members() -> str:
+    conn = http.client.HTTPSConnection("dropboxstefan-skliarovv1.p.rapidapi.com")
+    headers = {
+        'x-rapidapi-host': "Dropboxstefan-skliarovV1.p.rapidapi.com",
+        'Content-Type': "application/x-www-form-urlencoded"
+    }
+    conn.request("POST", "/addFileMembers", "", headers)
+    res = conn.getresponse()
+    data = res.read()
+    return data.decode("utf-8")
+
+def generate_ai_presentation(query: str, system_knowledge: str) -> str:
+    conn = http.client.HTTPSConnection("ai-presentation-generator1.p.rapidapi.com")
+    payload = json.dumps({
+        "jsonBody": {
+            "function_name": "ppt_generator",
+            "type": "ppt",
+            "query": query,
+            "system_knowledge": system_knowledge,
+            "output_type": "pptx"
+        }
+    })
+    headers = {
+        'x-rapidapi-host': "ai-presentation-generator1.p.rapidapi.com",
+        'Content-Type': "application/json"
+    }
+    conn.request("POST", "/", payload, headers)
+    res = conn.getresponse()
+    data = res.read()
+    return data.decode("utf-8")
+
+def translate_text(text: str, langpair: str = "en|it") -> str:
+    conn = http.client.HTTPSConnection("translated-mymemory---translation-memory.p.rapidapi.com")
+    endpoint = f"/get?langpair={langpair}&q={text}&mt=1&onlyprivate=0&de=a%40b.c"
+    headers = {
+        'x-rapidapi-host': "translated-mymemory---translation-memory.p.rapidapi.com"
+    }
+    conn.request("GET", endpoint, headers=headers)
+    res = conn.getresponse()
+    data = res.read()
+    return data.decode("utf-8")
 
 # --- SQLAlchemy Models ---
 class Employee(Base):
