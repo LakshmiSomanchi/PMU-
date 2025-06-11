@@ -16,7 +16,6 @@ from math import floor, ceil
 import json
 import requests
 import calendar
-import http.client
 import streamlit.components.v1 as components
 from typing import Optional, List, Dict, Any
 
@@ -26,7 +25,7 @@ st.set_page_config(page_title="PMU Tracker", layout="wide")
 DATABASE_URL = "sqlite:///pmu.db"
 KANBAN_DB = "kanban.db"
 CHAT_DB = "chat.db"
-API_BASE_URL = "https://api.example.com" # Replace with your actual base API URL if deployed
+# Removed API_BASE_URL as we are using a mock API for demonstration
 
 Base = declarative_base()
 
@@ -42,70 +41,128 @@ def get_db():
     finally:
         db.close()
 
-def upload_image_from_url(image_url: str) -> str:
-    conn = http.client.HTTPSConnection("photo-upload-api.p.rapidapi.com")
-    payload = json.dumps({"image_url": image_url})
-    headers = {
-        'x-rapidapi-host': "photo-upload-api.p.rapidapi.com",
-        'Content-Type': "application/json"
+# --- MOCK API Integration (for demonstration) ---
+# This dictionary will act as our "backend database" for the mock API
+if 'mock_api_data' not in st.session_state:
+    st.session_state.mock_api_data = {
+        "employees": [
+            {"id": 1, "name": "Somanchi", "email": "rsomanchi@tns.org", "password": "password1"},
+            {"id": 2, "name": "Ranu", "email": "rladdha@tns.org", "password": "password2"},
+        ],
+        "field_teams": [
+            {"id": 101, "name": "Dairy Team North", "pmu_id": 1},
+            {"id": 102, "name": "Cotton Team South", "pmu_id": 2},
+        ],
+        "workplans": [
+            {"id": 1, "title": "Implement new dairy strategy", "details": "Roll out new feed guidelines across all farms.", "deadline": "2025-12-31", "status": "In Progress", "workstream_id": 1, "supervisor_id": 1},
+            {"id": 2, "title": "Train new field agents", "details": "Conduct a 2-day training session for 10 new agents.", "deadline": "2025-07-15", "status": "Not Started", "workstream_id": 2, "supervisor_id": 1},
+        ],
+        "targets": [
+            {"id": 1, "description": "Achieve 10% increase in milk yield", "deadline": "2025-09-30", "status": "Not Started", "employee_id": 1},
+        ]
     }
-    conn.request("POST", "/image_url", payload, headers)
-    res = conn.getresponse()
-    data = res.read()
-    return data.decode("utf-8")
+    st.session_state.next_field_team_id = 103
+    st.session_state.next_workplan_id = 3
+    st.session_state.next_target_id = 2
 
-def get_google_drive_comments() -> str:
-    conn = http.client.HTTPSConnection("googledrivemikilior1v1.p.rapidapi.com")
-    headers = {
-        'x-rapidapi-host': "GoogleDrivemikilior1V1.p.rapidapi.com",
-        'Content-Type': "application/x-www-form-urlencoded"
-    }
-    conn.request("POST", "/getFileComments", "", headers)
-    res = conn.getresponse()
-    data = res.read()
-    return data.decode("utf-8")
 
-def add_dropbox_file_members() -> str:
-    conn = http.client.HTTPSConnection("dropboxstefan-skliarovv1.p.rapidapi.com")
-    headers = {
-        'x-rapidapi-host': "Dropboxstefan-skliarovV1.p.rapidapi.com",
-        'Content-Type': "application/x-www-form-urlencoded"
-    }
-    conn.request("POST", "/addFileMembers", "", headers)
-    res = conn.getresponse()
-    data = res.read()
-    return data.decode("utf-8")
+def api_get(endpoint: str, params: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+    st.info(f"MOCK API: GET request to /{endpoint} with params: {params}")
+    try:
+        if endpoint in st.session_state.mock_api_data:
+            data = st.session_state.mock_api_data[endpoint]
+            # Simple filtering for demonstration
+            if params:
+                filtered_data = [
+                    item for item in data
+                    if all(str(item.get(k)) == str(v) for k, v in params.items())
+                ]
+                return {"status": "success", "data": filtered_data}
+            return {"status": "success", "data": data}
+        else:
+            st.error(f"MOCK API Error: Endpoint '{endpoint}' not found.")
+            return None
+    except Exception as e:
+        st.error(f"MOCK API GET Error on '{endpoint}': {e}")
+        return None
 
-def generate_ai_presentation(query: str, system_knowledge: str) -> str:
-    conn = http.client.HTTPSConnection("ai-presentation-generator1.p.rapidapi.com")
-    payload = json.dumps({
-        "jsonBody": {
-            "function_name": "ppt_generator",
-            "type": "ppt",
-            "query": query,
-            "system_knowledge": system_knowledge,
-            "output_type": "pptx"
-        }
-    })
-    headers = {
-        'x-rapidapi-host': "ai-presentation-generator1.p.rapidapi.com",
-        'Content-Type': "application/json"
-    }
-    conn.request("POST", "/", payload, headers)
-    res = conn.getresponse()
-    data = res.read()
-    return data.decode("utf-8")
+def api_post(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    st.info(f"MOCK API: POST request to /{endpoint} with data: {data}")
+    try:
+        if endpoint == "field_teams":
+            new_id = st.session_state.next_field_team_id
+            new_team = {"id": new_id, **data}
+            st.session_state.mock_api_data["field_teams"].append(new_team)
+            st.session_state.next_field_team_id += 1
+            st.success(f"MOCK API: Field team '{new_team['name']}' added (ID: {new_id}).")
+            return {"status": "success", "data": new_team}
+        elif endpoint == "workplans":
+            new_id = st.session_state.next_workplan_id
+            new_workplan = {"id": new_id, **data}
+            st.session_state.mock_api_data["workplans"].append(new_workplan)
+            st.session_state.next_workplan_id += 1
+            st.success(f"MOCK API: Workplan '{new_workplan['title']}' added (ID: {new_id}).")
+            return {"status": "success", "data": new_workplan}
+        elif endpoint == "targets":
+            new_id = st.session_state.next_target_id
+            new_target = {"id": new_id, **data}
+            st.session_state.mock_api_data["targets"].append(new_target)
+            st.session_state.next_target_id += 1
+            st.success(f"MOCK API: Target '{new_target['description']}' added (ID: {new_id}).")
+            return {"status": "success", "data": new_target}
+        else:
+            st.error(f"MOCK API Error: POST to unknown endpoint '{endpoint}'.")
+            return None
+    except Exception as e:
+        st.error(f"MOCK API POST Error on '{endpoint}': {e}")
+        return None
 
-def translate_text(text: str, langpair: str = "en|it") -> str:
-    conn = http.client.HTTPSConnection("translated-mymemory---translation-memory.p.rapidapi.com")
-    endpoint = f"/get?langpair={langpair}&q={text}&mt=1&onlyprivate=0&de=a%40b.c"
-    headers = {
-        'x-rapidapi-host': "translated-mymemory---translation-memory.p.rapidapi.com"
-    }
-    conn.request("GET", endpoint, headers=headers)
-    res = conn.getresponse()
-    data = res.read()
-    return data.decode("utf-8")
+def api_put(endpoint: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    st.info(f"MOCK API: PUT request to /{endpoint} with data: {data}")
+    try:
+        if "id" not in data:
+            st.error("MOCK API Error: PUT request requires 'id' in data.")
+            return None
+
+        item_id = data["id"]
+        if endpoint in st.session_state.mock_api_data:
+            found = False
+            for i, item in enumerate(st.session_state.mock_api_data[endpoint]):
+                if item["id"] == item_id:
+                    st.session_state.mock_api_data[endpoint][i].update(data)
+                    st.success(f"MOCK API: Item ID {item_id} in '{endpoint}' updated.")
+                    found = True
+                    return {"status": "success", "data": st.session_state.mock_api_data[endpoint][i]}
+            if not found:
+                st.error(f"MOCK API Error: Item ID {item_id} not found in '{endpoint}'.")
+                return None
+        else:
+            st.error(f"MOCK API Error: Endpoint '{endpoint}' not found for PUT.")
+            return None
+    except Exception as e:
+        st.error(f"MOCK API PUT Error on '{endpoint}': {e}")
+        return None
+
+def api_delete(endpoint: str, item_id: int) -> Optional[Dict[str, Any]]:
+    st.info(f"MOCK API: DELETE request to /{endpoint}/{item_id}")
+    try:
+        if endpoint in st.session_state.mock_api_data:
+            initial_len = len(st.session_state.mock_api_data[endpoint])
+            st.session_state.mock_api_data[endpoint] = [
+                item for item in st.session_state.mock_api_data[endpoint] if item["id"] != item_id
+            ]
+            if len(st.session_state.mock_api_data[endpoint]) < initial_len:
+                st.success(f"MOCK API: Item ID {item_id} deleted from '{endpoint}'.")
+                return {"status": "success", "message": f"Item {item_id} deleted."}
+            else:
+                st.error(f"MOCK API Error: Item ID {item_id} not found in '{endpoint}'.")
+                return None
+        else:
+            st.error(f"MOCK API Error: Endpoint '{endpoint}' not found for DELETE.")
+            return None
+    except Exception as e:
+        st.error(f"MOCK API DELETE Error on '{endpoint}': {e}")
+        return None
 
 # --- SQLAlchemy Models ---
 class Employee(Base):
@@ -274,7 +331,7 @@ def apply_custom_css():
     st.markdown(
         """
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;0,600;1,700;1,800&display=swap');
 
             body {
                 background-image: url("https://raw.githubusercontent.com/LakshmiSomanchi/PMU-/refs/heads/main/2.png");
@@ -483,6 +540,7 @@ def sidebar_navigation() -> str:
         "Email (Placeholder)": "email",
         "Calendar": "calendar_view",
         "Monthly Meeting": "monthly_meeting",
+        "API Test Ground": "api_test_ground", # Added new page for API testing
         "Logout": "logout",
     }
     selection = st.sidebar.radio("Go to", list(menu_options.keys()))
@@ -1579,15 +1637,85 @@ def field_team_management():
         else:
             st.info("No field teams available. Please add a team first.")
 
-    st.subheader("🌐 Field Team API Integration (Placeholder)")
-    st.write("This section will integrate with a Field Team Management API.")
-    if st.button("Simulate API Call to Fetch Field Teams"):
-        st.info("Attempting to fetch field team data from API...")
-        dummy_data = api_get("field_teams")
-        if dummy_data:
-            st.json(dummy_data)
+    st.subheader("🌐 Field Team API Integration (Demonstration)")
+    st.write("This section demonstrates interactions with the *mock* Field Team Management API.")
+    
+    # Simulate API Call to Fetch Field Teams
+    if st.button("Simulate GET Field Teams (via API)"):
+        st.info("Attempting to fetch field team data from MOCK API...")
+        fetched_data = api_get("field_teams")
+        if fetched_data and fetched_data["status"] == "success":
+            st.success("Data fetched successfully:")
+            st.json(fetched_data["data"])
         else:
             st.warning("No data returned from API or API error occurred.")
+
+    # Simulate API Call to Add a Field Team
+    st.markdown("#### Simulate Adding a Field Team")
+    with st.form("simulate_add_field_team_api"):
+        new_team_name_api = st.text_input("New Field Team Name (for API)", key="new_team_name_api")
+        if st.form_submit_button("Simulate POST Field Team (via API)"):
+            if new_team_name_api:
+                data_to_post = {"name": new_team_name_api, "pmu_id": st.session_state.user.id}
+                post_result = api_post("field_teams", data_to_post)
+                if post_result and post_result["status"] == "success":
+                    st.success(f"MOCK API: Successfully added team: {post_result['data']['name']}")
+                else:
+                    st.error("MOCK API: Failed to add team.")
+                st.rerun()
+            else:
+                st.warning("Please enter a name for the new team.")
+
+    # Simulate API Call to Update a Field Team
+    st.markdown("#### Simulate Updating a Field Team")
+    mock_teams = st.session_state.mock_api_data.get("field_teams", [])
+    if mock_teams:
+        team_options = {f"{team['name']} (ID: {team['id']})": team['id'] for team in mock_teams}
+        selected_team_update_id = st.selectbox(
+            "Select Team to Update",
+            options=list(team_options.keys()),
+            format_func=lambda x: x,
+            index=0 if team_options else None,
+            key="selected_team_update_id"
+        )
+        if selected_team_update_id:
+            team_id_to_update = team_options[selected_team_update_id]
+            current_team_name = next((t['name'] for t in mock_teams if t['id'] == team_id_to_update), "")
+            updated_team_name_api = st.text_input(f"New Name for Team ID {team_id_to_update}", value=current_team_name, key="updated_team_name_api")
+            if st.button("Simulate PUT Field Team (via API)"):
+                data_to_put = {"id": team_id_to_update, "name": updated_team_name_api, "pmu_id": st.session_state.user.id}
+                put_result = api_put("field_teams", data_to_put)
+                if put_result and put_result["status"] == "success":
+                    st.success(f"MOCK API: Successfully updated team ID {team_id_to_update} to {put_result['data']['name']}.")
+                else:
+                    st.error("MOCK API: Failed to update team.")
+                st.rerun()
+    else:
+        st.info("No mock field teams to update.")
+
+    # Simulate API Call to Delete a Field Team
+    st.markdown("#### Simulate Deleting a Field Team")
+    if mock_teams:
+        team_options_delete = {f"{team['name']} (ID: {team['id']})": team['id'] for team in mock_teams}
+        selected_team_delete_id = st.selectbox(
+            "Select Team to Delete",
+            options=list(team_options_delete.keys()),
+            format_func=lambda x: x,
+            index=0 if team_options_delete else None,
+            key="selected_team_delete_id"
+        )
+        if selected_team_delete_id:
+            team_id_to_delete = team_options_delete[selected_team_delete_id]
+            if st.button("Simulate DELETE Field Team (via API)"):
+                delete_result = api_delete("field_teams", team_id_to_delete)
+                if delete_result and delete_result["status"] == "success":
+                    st.success(f"MOCK API: Successfully deleted team ID {team_id_to_delete}.")
+                else:
+                    st.error("MOCK API: Failed to delete team.")
+                st.rerun()
+    else:
+        st.info("No mock field teams to delete.")
+
 
 def training():
     st.subheader("📚 Training Module")
@@ -2048,32 +2176,49 @@ def farmer_management_tracer():
     with tab_web_dashboard:
         st.subheader("Webpage Application: Dashboard Overview")
         st.write("This section displays key metrics and progress from the FoodSign Webpage Application Dashboard.")
-        st.write(f"Welcome back Dr!") # Removed
-        st.markdown(f"**Collecting Village**: 16") # Removed
-        st.markdown(f"**BMC**: 20") # Removed
-        st.markdown(f"**Farmer**: 4083") # Removed
-        st.markdown(f"**No. of Crops**: 0") # Removed
-        st.markdown(f"**No. of Plots**: 972") # Removed
-        st.markdown(f"**Mapped Plots**: 972") # Removed
-        st.markdown(f"**Conventional**: 34.10 ac") # Removed
+        # Simulating data from a potential GET API call for dashboard metrics
+        dashboard_data = api_get("dashboard_metrics")
+        if dashboard_data and dashboard_data["status"] == "success":
+            metrics = dashboard_data["data"]
+            st.markdown(f"**Collecting Village**: {metrics.get('collecting_village', 'N/A')}")
+            st.markdown(f"**BMC**: {metrics.get('bmc_count', 'N/A')}")
+            st.markdown(f"**Farmer**: {metrics.get('farmer_count', 'N/A')}")
+            st.markdown(f"**No. of Crops**: {metrics.get('crop_count', 'N/A')}")
+            st.markdown(f"**No. of Plots**: {metrics.get('plot_count', 'N/A')}")
+            st.markdown(f"**Mapped Plots**: {metrics.get('mapped_plots', 'N/A')}")
+            st.markdown(f"**Conventional**: {metrics.get('conventional_area', 'N/A')} ac")
+        else:
+            st.info("Could not fetch dashboard metrics from API. Displaying dummy data.")
+            st.markdown(f"**Collecting Village**: 16")
+            st.markdown(f"**BMC**: 20")
+            st.markdown(f"**Farmer**: 4083")
+            st.markdown(f"**No. of Crops**: 0")
+            st.markdown(f"**No. of Plots**: 972")
+            st.markdown(f"**Mapped Plots**: 972")
+            st.markdown(f"**Conventional**: 34.10 ac")
 
         st.markdown("---")
         st.markdown("#### Activity Progress")
-        st.markdown("- Overdue") # Removed
-        st.markdown("- Completed") # Removed
-        st.markdown("- Planned") # Removed
-        st.markdown("- Cancelled") # Removed
-        st.info("Chart data for activity progress would be displayed here.") # Removed
+        activity_progress = api_get("activity_progress")
+        if activity_progress and activity_progress["status"] == "success":
+            st.json(activity_progress["data"]) # Display raw JSON for demonstration
+        else:
+            st.info("Chart data for activity progress would be displayed here (API not providing data).")
 
         st.markdown("#### Practices Deviation")
-        st.markdown("- Deviation") # Removed
-        st.markdown("- On Schedule") # Removed
-        st.info("Chart data for practices deviation would be displayed here.") # Removed
+        practices_deviation = api_get("practices_deviation")
+        if practices_deviation and practices_deviation["status"] == "success":
+            st.json(practices_deviation["data"]) # Display raw JSON for demonstration
+        else:
+            st.info("Chart data for practices deviation would be displayed here (API not providing data).")
 
         st.markdown("#### Total Crops (%)")
-        st.info("Chart data for total crops percentage would be displayed here.") # Removed
-        
-   
+        total_crops = api_get("total_crops_percentage")
+        if total_crops and total_crops["status"] == "success":
+            st.json(total_crops["data"]) # Display raw JSON for demonstration
+        else:
+            st.info("Chart data for total crops percentage would be displayed here (API not providing data).")
+           
     with tab_web_geolocation:
         st.subheader("Webpage Application: Geolocation Data")
         st.write("View geolocation data and maps related to farmer locations and operations.")
@@ -2084,31 +2229,31 @@ def farmer_management_tracer():
     with tab_web_farmer:
         st.subheader("Webpage Application: Farmer Information")
         st.write("Access and manage detailed information about individual farmers.")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Farmer%20Information%201.jpg", caption="Farmer List Overview", use_container_width=True) [cite: 3]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Farmer%20Information%202.jpg", caption="Detailed Farmer Information", use_container_width=True) [cite: 4]
-        st.info("The images above show a list of farmers and detailed view of a selected farmer, including dairy farm map, produce, certification, input inventory, and statements.") [cite: 3, 4]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Farmer%20Information%201.jpg", caption="Farmer List Overview", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Farmer%20Information%202.jpg", caption="Detailed Farmer Information", use_container_width=True)
+        st.info("The images above show a list of farmers and detailed view of a selected farmer, including dairy farm map, produce, certification, input inventory, and statements.")
 
     with tab_web_bmc:
         st.subheader("Webpage Application: BMC Information")
         st.write("Details regarding Bulk Milk Coolers (BMC) and associated farmers.")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20BMC%20Information%201.jpg", caption="BMC List Overview", use_container_width=True) [cite: 5]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20BMC%20Information%202.jpg", caption="Detailed BMC Information", use_container_width=True) [cite: 6]
-        st.info("The images above present a list of BMCs and a detailed view of a specific BMC, including total land holdings, plots, and associated farmers.") [cite: 5, 6]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20BMC%20Information%201.jpg", caption="BMC List Overview", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20BMC%20Information%202.jpg", caption="Detailed BMC Information", use_container_width=True)
+        st.info("The images above present a list of BMCs and a detailed view of a specific BMC, including total land holdings, plots, and associated farmers.")
 
     with tab_web_collecting:
         st.subheader("Webpage Application: Collecting Village Information")
         st.write("Information on milk collection points and villages, including farmer and BMC counts.")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Collecting%20Village.jpg", caption="Collecting Village Overview", use_container_width=True) [cite: 7]
-        st.info("The image shows a list of collecting villages with details like farmer count, BMC count, and mapped area.") [cite: 7]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Collecting%20Village.jpg", caption="Collecting Village Overview", use_container_width=True)
+        st.info("The image shows a list of collecting villages with details like farmer count, BMC count, and mapped area.")
 
     with tab_web_activity:
         st.subheader("Webpage Application: Activity Reports")
         st.write("Detailed reports on various activities recorded in the system, including a water activity section.")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Activity%20Report%201.jpg", caption="Activity Report Menu", use_container_width=True) [cite: 8]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Activity%20Report%202.jpg", caption="Daily Activity Report", use_container_width=True) [cite: 9]
-        st.info("The images display the activity report menu and a daily activity report, which can filter by date and activity type.") [cite: 8, 9]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Activity%20Report%201.jpg", caption="Activity Report Menu", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Webpage%20%20Application%20Activity%20Report%202.jpg", caption="Daily Activity Report", use_container_width=True)
+        st.info("The images display the activity report menu and a daily activity report, which can filter by date and activity type.")
         st.subheader("Water Activity Details")
-        st.info("This section would provide specific details and reports related to water activities.") [cite: 9] # The slide mentions "WATER ACTIVITY" as a sub-topic of activity reports.
+        st.info("This section would provide specific details and reports related to water activities.")
 
     st.markdown("---")
     st.header("Mobile Application: Activity & Data Entry")
@@ -2120,39 +2265,182 @@ def farmer_management_tracer():
 
     with tab_mobile_dashboard:
         st.subheader("Mobile Application: Dashboard")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%201.jpg", caption="Mobile Dashboard", use_container_width=True) [cite: 16]
-        st.write("The mobile dashboard shows farmer verification status and activity progress.") [cite: 16]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%201.jpg", caption="Mobile Dashboard", use_container_width=True)
+        st.write("The mobile dashboard shows farmer verification status and activity progress.")
 
     with tab_mobile_activities:
         st.subheader("Mobile Application: Activities List")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%202.jpg", caption="Mobile Activities List", use_container_width=True) [cite: 16]
-        st.info("This screen lists various activities such as INDITEX_Activity, SS-BMC Activity, and TNS-BMC Activity with their status.") [cite: 16]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%202.jpg", caption="Mobile Activities List", use_container_width=True)
+        st.info("This screen lists various activities such as INDITEX_Activity, SS-BMC Activity, and TNS-BMC Activity with their status.")
 
     with tab_mobile_profile:
         st.subheader("Mobile Application: Profile/Settings")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%203.jpg", caption="Mobile App Profile Menu", use_container_width=True) [cite: 10]
-        st.info("The profile section offers options like Activity Board, My Locations, Notifications, and data download functionalities.") [cite: 10]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%203.jpg", caption="Mobile App Profile Menu", use_container_width=True)
+        st.info("The profile section offers options like Activity Board, My Locations, Notifications, and data download functionalities.")
 
     with tab_mobile_add_activity:
         st.subheader("Mobile Application: Add New Activity Options")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%204.jpg", caption="Add New Activity Options", use_container_width=True) [cite: 17]
-        st.info("Users can select from various activity types to add, including TNS-BMC, SS-BMC, TNS-WATER, and INDITEX_ACTIVITY.") [cite: 17]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%204.jpg", caption="Add New Activity Options", use_container_width=True)
+        st.info("Users can select from various activity types to add, including TNS-BMC, SS-BMC, TNS-WATER, and INDITEX_ACTIVITY.")
 
     with tab_mobile_inditex:
         st.subheader("Mobile Application: INDITEX Activity Form")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/INDITEX%20ACTIVITY.jpg", caption="INDITEX Activity Form 1", use_container_width=True) [cite: 15]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%206.jpg", caption="INDITEX Activity Form 2", use_container_width=True) [cite: 18]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%207.jpg", caption="INDITEX Activity Form 3", use_container_width=True) [cite: 19]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%208.jpg", caption="INDITEX Activity Form 4", use_container_width=True) [cite: 20]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%209.jpg", caption="INDITEX Activity Form 5", use_container_width=True) [cite: 21]
-        st.info("These forms capture detailed information for INDITEX activities, including farmer details, land and crop information, and financial data.") [cite: 15, 18, 19, 20, 21]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/INDITEX%20ACTIVITY.jpg", caption="INDITEX Activity Form 1", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%206.jpg", caption="INDITEX Activity Form 2", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%207.jpg", caption="INDITEX Activity Form 3", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%208.jpg", caption="INDITEX Activity Form 4", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%209.jpg", caption="INDITEX Activity Form 5", use_container_width=True)
+        st.info("These forms capture detailed information for INDITEX activities, including farmer details, land and crop information, and financial data.")
 
     with tab_mobile_water_activity:
         st.subheader("Mobile Application: TNS-Water Activity Form")
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%205.jpg", caption="TNS-Water Activity Form 1", use_container_width=True) [cite: 12]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%2010.jpg", caption="TNS-Water Activity Form 2", use_container_width=True) [cite: 13]
-        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%2011.jpg", caption="TNS-Water Activity Form 3", use_container_width=True) [cite: 14]
-        st.info("These forms are used to record data related to water activities, including water quality, usage, and cost at the farm level.") [cite: 12, 13, 14]
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%205.jpg", caption="TNS-Water Activity Form 1", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%2010.jpg", caption="TNS-Water Activity Form 2", use_container_width=True)
+        st.image("https://raw.githubusercontent.com/multi-modal-gen/TRACEX/main/TRACEX%20(1).pptx/FoodSign%20Mobile%20Application%2011.jpg", caption="TNS-Water Activity Form 3", use_container_width=True)
+        st.info("These forms are used to record data related to water activities, including water quality, usage, and cost at the farm level.")
+
+# --- NEW: API Test Ground ---
+def api_test_ground():
+    st.subheader("🧪 API Test Ground")
+    st.write("Use this section to interact directly with the mock API and observe its behavior.")
+
+    st.markdown("### Get All Employees (GET)")
+    if st.button("Get All Employees"):
+        employees = api_get("employees")
+        if employees and employees["status"] == "success":
+            st.json(employees["data"])
+        else:
+            st.error("Failed to fetch employees.")
+
+    st.markdown("### Get Field Teams (GET)")
+    if st.button("Get All Field Teams"):
+        field_teams = api_get("field_teams")
+        if field_teams and field_teams["status"] == "success":
+            st.json(field_teams["data"])
+        else:
+            st.error("Failed to fetch field teams.")
+            
+    st.markdown("### Get Work Plans (GET)")
+    if st.button("Get All Work Plans"):
+        workplans = api_get("workplans")
+        if workplans and workplans["status"] == "success":
+            st.json(workplans["data"])
+        else:
+            st.error("Failed to fetch work plans.")
+            
+    st.markdown("### Get Targets (GET)")
+    if st.button("Get All Targets"):
+        targets = api_get("targets")
+        if targets and targets["status"] == "success":
+            st.json(targets["data"])
+        else:
+            st.error("Failed to fetch targets.")
+
+    st.markdown("---")
+    st.markdown("### Add New Field Team (POST)")
+    with st.form("add_team_api_test"):
+        new_team_name = st.text_input("New Field Team Name")
+        if st.form_submit_button("Add Team via API"):
+            if new_team_name:
+                data_to_send = {"name": new_team_name, "pmu_id": st.session_state.user.id} # Assuming pmu_id from logged-in user
+                response = api_post("field_teams", data_to_send)
+                if response:
+                    st.success("Team added successfully via API (mock)! Check 'Get Field Teams' above.")
+                else:
+                    st.error("Failed to add team via API (mock).")
+                st.rerun()
+            else:
+                st.warning("Please enter a team name.")
+                
+    st.markdown("### Add New Work Plan (POST)")
+    with st.form("add_workplan_api_test"):
+        new_workplan_title = st.text_input("New Work Plan Title")
+        new_workplan_details = st.text_area("Work Plan Details")
+        new_workplan_deadline = st.date_input("Work Plan Deadline", date.today())
+        new_workplan_status = st.selectbox("Work Plan Status", ["Not Started", "In Progress", "Completed"], key="test_workplan_status")
+        
+        # Get existing workstreams for selection
+        existing_workstreams = st.session_state.mock_api_data.get("workstreams", [])
+        ws_options = {f"{ws['title']} (ID: {ws['id']})": ws['id'] for ws in existing_workstreams}
+        selected_ws_id = st.selectbox("Select Workstream", options=list(ws_options.keys()), format_func=lambda x: x, index=0 if ws_options else None, key="test_workplan_ws_select")
+        
+        if st.form_submit_button("Add Work Plan via API"):
+            if new_workplan_title and new_workplan_details and selected_ws_id:
+                workstream_id_val = ws_options[selected_ws_id]
+                data_to_send = {
+                    "title": new_workplan_title,
+                    "details": new_workplan_details,
+                    "deadline": str(new_workplan_deadline),
+                    "status": new_workplan_status,
+                    "workstream_id": workstream_id_val,
+                    "supervisor_id": st.session_state.user.id
+                }
+                response = api_post("workplans", data_to_send)
+                if response:
+                    st.success("Work Plan added successfully via API (mock)! Check 'Get Work Plans' above.")
+                else:
+                    st.error("Failed to add work plan via API (mock).")
+                st.rerun()
+            else:
+                st.warning("Please fill all required fields for the work plan.")
+
+    st.markdown("---")
+    st.markdown("### Update Work Plan Status (PUT)")
+    mock_workplans = st.session_state.mock_api_data.get("workplans", [])
+    if mock_workplans:
+        wp_options = {f"{wp['title']} (ID: {wp['id']})": wp['id'] for wp in mock_workplans}
+        selected_wp_id = st.selectbox(
+            "Select Work Plan to Update",
+            options=list(wp_options.keys()),
+            format_func=lambda x: x,
+            index=0 if wp_options else None,
+            key="selected_wp_update_id"
+        )
+        if selected_wp_id:
+            wp_id_to_update = wp_options[selected_wp_id]
+            current_wp = next((wp for wp in mock_workplans if wp['id'] == wp_id_to_update), None)
+            if current_wp:
+                updated_status = st.selectbox(
+                    f"New Status for Work Plan ID {wp_id_to_update}",
+                    ["Not Started", "In Progress", "Completed"],
+                    index=["Not Started", "In Progress", "Completed"].index(current_wp['status']),
+                    key=f"update_wp_status_{wp_id_to_update}"
+                )
+                if st.button("Update Work Plan Status via API"):
+                    data_to_put = {"id": wp_id_to_update, "status": updated_status}
+                    response = api_put("workplans", data_to_put)
+                    if response:
+                        st.success("Work Plan status updated successfully via API (mock)!")
+                    else:
+                        st.error("Failed to update work plan status via API (mock).")
+                    st.rerun()
+            else:
+                st.warning("Work plan not found.")
+    else:
+        st.info("No mock work plans to update.")
+
+    st.markdown("---")
+    st.markdown("### Delete Work Plan (DELETE)")
+    if mock_workplans:
+        wp_delete_options = {f"{wp['title']} (ID: {wp['id']})": wp['id'] for wp in mock_workplans}
+        selected_wp_delete_id = st.selectbox(
+            "Select Work Plan to Delete",
+            options=list(wp_delete_options.keys()),
+            format_func=lambda x: x,
+            index=0 if wp_delete_options else None,
+            key="selected_wp_delete_id"
+        )
+        if selected_wp_delete_id:
+            wp_id_to_delete = wp_delete_options[selected_wp_delete_id]
+            if st.button("Delete Work Plan via API"):
+                response = api_delete("workplans", wp_id_to_delete)
+                if response:
+                    st.success("Work Plan deleted successfully via API (mock)!")
+                else:
+                    st.error("Failed to delete work plan via API (mock).")
+                st.rerun()
+    else:
+        st.info("No mock work plans to delete.")
 
 
 # --- Main Application Logic ---
@@ -2217,6 +2505,8 @@ def main():
             calendar_view(st.session_state.user)
         elif selected_page == "monthly_meeting":
             monthly_meeting(st.session_state.user)
+        elif selected_page == "api_test_ground": # New page
+            api_test_ground()
         elif selected_page == "logout":
             st.session_state.user = None
             st.success("You have been logged out.")
